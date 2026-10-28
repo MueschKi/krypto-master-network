@@ -1,0 +1,12 @@
+coin,entry_signal_day,entry_fill_day,exit_signal_day,exit_fill_day,bars_held,open,entry_price_eur,exit_price_eur,net_realized_eur,exit_reason,mfe_pct_intraday_excl_fill_days,mae_pct_intraday_excl_fill_days
+BTC/EUR,2025-08-13,2025-08-14,2025-08-19,2025-08-20,6,False,105083.75385007,96794.18607285,-10.555531,7%-Tagesschluss-Stopp (keine garantierte Ausführung),0.0,-7.8414
+SOL/EUR,2025-08-28,2025-08-29,2025-09-01,2025-09-02,4,False,183.93145521,168.15533884,-11.205008,7%-Tagesschluss-Stopp (keine garantierte Ausführung),0.0,-9.749
+NEAR/EUR,2025-09-18,2025-09-19,2025-09-22,2025-09-23,4,False,2.71875153,2.51159889,-10.06688,7%-Tagesschluss-Stopp (keine garantierte Ausführung),3.393,-13.5265
+SOL/EUR,2025-09-10,2025-09-11,2025-09-25,2025-09-26,15,False,191.76514607,165.17056909,-17.241084,7%-Tagesschluss-Stopp (keine garantierte Ausführung),12.1163,-14.4161
+ETH/EUR,2025-08-08,2025-08-09,2025-11-03,2025-11-04,87,False,3445.92240493,3120.79138969,-12.188245,7%-Tagesschluss-Stopp (keine garantierte Ausführung),22.0283,-13.8712
+NEAR/EUR,2026-05-20,2026-05-21,2026-08-18,2026-08-19,90,False,1.46556135,1.36760353,-8.367056,Master: schwacher Markt,81.3912,-9.127
+SOL/EUR,2026-08-27,2026-08-28,2026-09-01,2026-09-02,5,False,93.92415032,86.08914468,-10.128657,7%-Tagesschluss-Stopp (keine garantierte Ausführung),0.0,-9.6399
+ETH/EUR,2026-09-21,2026-09-22,2026-10-08,2026-10-09,17,False,2425.40886338,2202.68020991,-1.54666,7%-Tagesschluss-Stopp (keine garantierte Ausführung),1.6839,-11.5271
+SOL/EUR,2026-09-18,2026-09-19,2026-10-25,2026-10-26,37,False,98.21164353,90.07216517,-10.617019,7%-Tagesschluss-Stopp (keine garantierte Ausführung),11.9012,-10.3365
+NEAR/EUR,2026-09-06,2026-09-07,,2026-10-27,50,True,2.10457815,,,Offene Position,154.2077,-8.2286
+BTC/EUR,2026-09-21,2026-09-22,,2026-10-27,35,True,75667.34307633,,,Offene Position,2.4496,-6.6505
