@@ -2,7 +2,7 @@
 
 **Dieser Bericht enthält nur Analysen. Virtuelle Master-Orders stehen separat in `TRADING_STATUS.md`. Echtgeldhandel ist gesperrt.**
 
-Erstellt (UTC): 2026-10-28T20:54:47+00:00  
+Erstellt (UTC): 2026-10-28T21:54:20+00:00  
 Datenquelle: Nur abgeschlossene Kraken-Tageskerzen (optional separater Live-Orderbuch-Snapshot)  
 Die Master-Einstufungen sind heuristische Beobachtungssignale, keine statistischen Wahrscheinlichkeiten.
 
@@ -21,7 +21,21 @@ Die Master-Einstufungen sind heuristische Beobachtungssignale, keine statistisch
 
 **Letzter Kurstag:** 2026-10-27
 
-**Master-Begründung:** Nicht alle technischen Kriterien für einen Kaufkandidaten erfüllt; Orderbuch/Spread nicht geprüft (historische Tagesanalyse)
+**Master-Begründung:** Kaufprüfung: 2 von 9 Bedingungen nicht erfüllt; Fehlt: Momentum positiv; Fehlt: Einstiegsszenario akzeptabel; Orderbuch/Spread nicht geprüft (historische Tagesanalyse)
+
+**Prüfung aller Kaufbedingungen:**
+
+| Bedingung | Ergebnis |
+|:--|:--|
+| Trend positiv | OK |
+| Momentum positiv | FEHLT |
+| Struktur mindestens neutral | OK |
+| Volumensignal mindestens neutral | OK |
+| Relatives Tagesvolumen mindestens 0,8 | OK |
+| OBV steigend | OK |
+| Einstiegsszenario akzeptabel | FEHLT |
+| Nicht knapp unter Widerstand | OK |
+| Risiko-Bot: freigegeben | OK |
 
 | Spezialist | Signal | Fakten |
 |:--|:--|:--|
@@ -55,7 +69,21 @@ Die Master-Einstufungen sind heuristische Beobachtungssignale, keine statistisch
 
 **Letzter Kurstag:** 2026-10-27
 
-**Master-Begründung:** Nicht alle technischen Kriterien für einen Kaufkandidaten erfüllt; Orderbuch/Spread nicht geprüft (historische Tagesanalyse)
+**Master-Begründung:** Kaufprüfung: 4 von 9 Bedingungen nicht erfüllt; Fehlt: Trend positiv; Fehlt: Momentum positiv; Fehlt: Struktur mindestens neutral; Fehlt: Relatives Tagesvolumen mindestens 0,8; Orderbuch/Spread nicht geprüft (historische Tagesanalyse)
+
+**Prüfung aller Kaufbedingungen:**
+
+| Bedingung | Ergebnis |
+|:--|:--|
+| Trend positiv | FEHLT |
+| Momentum positiv | FEHLT |
+| Struktur mindestens neutral | FEHLT |
+| Volumensignal mindestens neutral | OK |
+| Relatives Tagesvolumen mindestens 0,8 | FEHLT |
+| OBV steigend | OK |
+| Einstiegsszenario akzeptabel | OK |
+| Nicht knapp unter Widerstand | OK |
+| Risiko-Bot: freigegeben | OK |
 
 | Spezialist | Signal | Fakten |
 |:--|:--|:--|
@@ -89,7 +117,21 @@ Die Master-Einstufungen sind heuristische Beobachtungssignale, keine statistisch
 
 **Letzter Kurstag:** 2026-10-27
 
-**Master-Begründung:** Nicht alle technischen Kriterien für einen Kaufkandidaten erfüllt; Orderbuch/Spread nicht geprüft (historische Tagesanalyse)
+**Master-Begründung:** Kaufprüfung: 3 von 9 Bedingungen nicht erfüllt; Fehlt: Trend positiv; Fehlt: Momentum positiv; Fehlt: Relatives Tagesvolumen mindestens 0,8; Orderbuch/Spread nicht geprüft (historische Tagesanalyse)
+
+**Prüfung aller Kaufbedingungen:**
+
+| Bedingung | Ergebnis |
+|:--|:--|
+| Trend positiv | FEHLT |
+| Momentum positiv | FEHLT |
+| Struktur mindestens neutral | OK |
+| Volumensignal mindestens neutral | OK |
+| Relatives Tagesvolumen mindestens 0,8 | FEHLT |
+| OBV steigend | OK |
+| Einstiegsszenario akzeptabel | OK |
+| Nicht knapp unter Widerstand | OK |
+| Risiko-Bot: freigegeben | OK |
 
 | Spezialist | Signal | Fakten |
 |:--|:--|:--|
@@ -123,7 +165,21 @@ Die Master-Einstufungen sind heuristische Beobachtungssignale, keine statistisch
 
 **Letzter Kurstag:** 2026-10-27
 
-**Master-Begründung:** Nicht alle technischen Kriterien für einen Kaufkandidaten erfüllt; Orderbuch/Spread nicht geprüft (historische Tagesanalyse)
+**Master-Begründung:** Kaufprüfung: 3 von 9 Bedingungen nicht erfüllt; Fehlt: Momentum positiv; Fehlt: Relatives Tagesvolumen mindestens 0,8; Fehlt: Einstiegsszenario akzeptabel; Orderbuch/Spread nicht geprüft (historische Tagesanalyse)
+
+**Prüfung aller Kaufbedingungen:**
+
+| Bedingung | Ergebnis |
+|:--|:--|
+| Trend positiv | OK |
+| Momentum positiv | FEHLT |
+| Struktur mindestens neutral | OK |
+| Volumensignal mindestens neutral | OK |
+| Relatives Tagesvolumen mindestens 0,8 | FEHLT |
+| OBV steigend | OK |
+| Einstiegsszenario akzeptabel | FEHLT |
+| Nicht knapp unter Widerstand | OK |
+| Risiko-Bot: freigegeben | OK |
 
 | Spezialist | Signal | Fakten |
 |:--|:--|:--|

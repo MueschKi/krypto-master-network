@@ -1,6 +1,6 @@
 {
-  "network_version": "1.0",
-  "created_utc": "2026-10-28T20:54:47+00:00",
+  "network_version": "1.2",
+  "created_utc": "2026-10-28T21:54:20+00:00",
   "basis": "Nur abgeschlossene Kraken-Tageskerzen (optional separater Live-Orderbuch-Snapshot)",
   "mode": "RESEARCH_ONLY_NO_TRADES",
   "assets": [
@@ -8,10 +8,27 @@
       "symbol": "BTC/EUR",
       "action": "ABWARTEN",
       "reasons": [
-        "Nicht alle technischen Kriterien für einen Kaufkandidaten erfüllt",
+        "Kaufprüfung: 2 von 9 Bedingungen nicht erfüllt",
+        "Fehlt: Momentum positiv",
+        "Fehlt: Einstiegsszenario akzeptabel",
         "Orderbuch/Spread nicht geprüft (historische Tagesanalyse)"
       ],
       "date": "2026-10-27",
+      "gates": {
+        "Trend positiv": true,
+        "Momentum positiv": false,
+        "Struktur mindestens neutral": true,
+        "Volumensignal mindestens neutral": true,
+        "Relatives Tagesvolumen mindestens 0,8": true,
+        "OBV steigend": true,
+        "Einstiegsszenario akzeptabel": false,
+        "Nicht knapp unter Widerstand": true,
+        "Risiko-Bot: freigegeben": true
+      },
+      "failed_gates": [
+        "Momentum positiv",
+        "Einstiegsszenario akzeptabel"
+      ],
       "agents": {
         "daten": {
           "agent": "Datenqualität",
@@ -213,10 +230,31 @@
       "symbol": "ETH/EUR",
       "action": "ABWARTEN",
       "reasons": [
-        "Nicht alle technischen Kriterien für einen Kaufkandidaten erfüllt",
+        "Kaufprüfung: 4 von 9 Bedingungen nicht erfüllt",
+        "Fehlt: Trend positiv",
+        "Fehlt: Momentum positiv",
+        "Fehlt: Struktur mindestens neutral",
+        "Fehlt: Relatives Tagesvolumen mindestens 0,8",
         "Orderbuch/Spread nicht geprüft (historische Tagesanalyse)"
       ],
       "date": "2026-10-27",
+      "gates": {
+        "Trend positiv": false,
+        "Momentum positiv": false,
+        "Struktur mindestens neutral": false,
+        "Volumensignal mindestens neutral": true,
+        "Relatives Tagesvolumen mindestens 0,8": false,
+        "OBV steigend": true,
+        "Einstiegsszenario akzeptabel": true,
+        "Nicht knapp unter Widerstand": true,
+        "Risiko-Bot: freigegeben": true
+      },
+      "failed_gates": [
+        "Trend positiv",
+        "Momentum positiv",
+        "Struktur mindestens neutral",
+        "Relatives Tagesvolumen mindestens 0,8"
+      ],
       "agents": {
         "daten": {
           "agent": "Datenqualität",
@@ -418,10 +456,29 @@
       "symbol": "SOL/EUR",
       "action": "ABWARTEN",
       "reasons": [
-        "Nicht alle technischen Kriterien für einen Kaufkandidaten erfüllt",
+        "Kaufprüfung: 3 von 9 Bedingungen nicht erfüllt",
+        "Fehlt: Trend positiv",
+        "Fehlt: Momentum positiv",
+        "Fehlt: Relatives Tagesvolumen mindestens 0,8",
         "Orderbuch/Spread nicht geprüft (historische Tagesanalyse)"
       ],
       "date": "2026-10-27",
+      "gates": {
+        "Trend positiv": false,
+        "Momentum positiv": false,
+        "Struktur mindestens neutral": true,
+        "Volumensignal mindestens neutral": true,
+        "Relatives Tagesvolumen mindestens 0,8": false,
+        "OBV steigend": true,
+        "Einstiegsszenario akzeptabel": true,
+        "Nicht knapp unter Widerstand": true,
+        "Risiko-Bot: freigegeben": true
+      },
+      "failed_gates": [
+        "Trend positiv",
+        "Momentum positiv",
+        "Relatives Tagesvolumen mindestens 0,8"
+      ],
       "agents": {
         "daten": {
           "agent": "Datenqualität",
@@ -623,10 +680,29 @@
       "symbol": "NEAR/EUR",
       "action": "ABWARTEN",
       "reasons": [
-        "Nicht alle technischen Kriterien für einen Kaufkandidaten erfüllt",
+        "Kaufprüfung: 3 von 9 Bedingungen nicht erfüllt",
+        "Fehlt: Momentum positiv",
+        "Fehlt: Relatives Tagesvolumen mindestens 0,8",
+        "Fehlt: Einstiegsszenario akzeptabel",
         "Orderbuch/Spread nicht geprüft (historische Tagesanalyse)"
       ],
       "date": "2026-10-27",
+      "gates": {
+        "Trend positiv": true,
+        "Momentum positiv": false,
+        "Struktur mindestens neutral": true,
+        "Volumensignal mindestens neutral": true,
+        "Relatives Tagesvolumen mindestens 0,8": false,
+        "OBV steigend": true,
+        "Einstiegsszenario akzeptabel": false,
+        "Nicht knapp unter Widerstand": true,
+        "Risiko-Bot: freigegeben": true
+      },
+      "failed_gates": [
+        "Momentum positiv",
+        "Relatives Tagesvolumen mindestens 0,8",
+        "Einstiegsszenario akzeptabel"
+      ],
       "agents": {
         "daten": {
           "agent": "Datenqualität",
