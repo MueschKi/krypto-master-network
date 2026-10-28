@@ -1,13 +1,13 @@
-name: Krypto Master Network – Analyse und Paper Trading
+name: Krypto Master Network – Analyse, Paper Trading und Master-Backtest
 
 on:
   schedule:
-    # Once per day after UTC daily candle close, delayed starts possible.
+    # Automated daily paper trading only; backtests are manual.
     - cron: '43 3 * * *'
   workflow_dispatch:
     inputs:
       modus:
-        description: 'Startmodus (kein Echtgeldhandel möglich)'
+        description: 'Startmodus (echte Orders technisch gesperrt)'
         required: true
         type: choice
         default: demo
@@ -15,6 +15,8 @@ on:
           - demo
           - analyse
           - paper
+          - backtest-demo
+          - backtest
 
 permissions:
   contents: write
@@ -26,45 +28,62 @@ concurrency:
 jobs:
   run:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
     steps:
-      - uses: actions/checkout@v4
+      - name: Repository holen
+        uses: actions/checkout@v4
         with:
           persist-credentials: true
-      - uses: actions/setup-python@v5
+      - name: Python einrichten
+        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-          cache: 'pip'
-      - name: Python-Pakete
+          cache: pip
+      - name: Bibliotheken installieren
         run: python -m pip install -r requirements.txt
-      - name: Sicherheit und Fachtests
-        run: python -m unittest -q test_netzwerk test_trading
-      - name: Master und Trading Engine
+      - name: Softwaretests inklusive Backtest-Guards
+        run: python -m unittest -q test_netzwerk test_trading test_master_backtest
+      - name: Gewählten Modus ausführen
         shell: bash
         env:
           MODUS: ${{ github.event.inputs.modus || 'paper' }}
         run: |
           set -euo pipefail
-          python trading.py "$MODUS" | tee laufbericht.txt
+          case "$MODUS" in
+            demo|analyse|paper) python trading.py "$MODUS" | tee laufbericht.txt ;;
+            backtest-demo) python backtest_master.py demo | tee laufbericht.txt ;;
+            backtest) python backtest_master.py historisch | tee laufbericht.txt ;;
+            *) echo 'Ungültiger Modus' >&2; exit 1 ;;
+          esac
           {
             echo "## Master Network: $MODUS"
             echo '```text'
             cat laufbericht.txt
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
-      - name: Analyse und Demokonto speichern
-        if: ${{ success() && (github.event_name == 'schedule' || inputs.modus == 'paper' || inputs.modus == 'analyse') }}
+      - name: Nur Ergebnisse des angeforderten Modus speichern
+        if: ${{ success() }}
         shell: bash
+        env:
+          MODUS: ${{ github.event.inputs.modus || 'paper' }}
         run: |
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          for path in TRADING_STATUS.md NETZWERK.md daten/master_paper_state.json daten/netzwerk_analysen.json; do
-            if [ -f "$path" ]; then git add -- "$path"; fi
-          done
+          if [ "$MODUS" = 'backtest' ]; then
+            for p in BACKTEST_MASTER.md daten/master_backtest_kurve.csv daten/master_backtest_trades.csv; do
+              if [ -f "$p" ]; then git add -- "$p"; fi
+            done
+          elif [ "$MODUS" = 'paper' ] || [ "$MODUS" = 'analyse' ]; then
+            for p in TRADING_STATUS.md NETZWERK.md daten/master_paper_state.json daten/netzwerk_analysen.json; do
+              if [ -f "$p" ]; then git add -- "$p"; fi
+            done
+          else
+            echo 'Nur Testmodus, keine Ergebnisspeicherung.'
+          fi
           if ! git diff --cached --quiet; then
-            git commit -m 'Paper Trading: Aktualisierung des Demokontos'
+            git commit -m "Master Network v1.2: $MODUS aktualisiert"
             git push origin "HEAD:${{ github.ref_name }}"
           else
-            echo 'Keine Änderungen nötig.'
+            echo 'Keine Änderungen an GitHub nötig.'
           fi
