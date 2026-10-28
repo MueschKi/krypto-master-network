@@ -48,8 +48,21 @@ def review(symbol, df, data, ex=None, orderbook=False, reference_day=None):
     # Invalid setup geometry can block a watchlist candidate, except explicit breakouts.
     setup_ok = setup['bewertung'] in ('THEORETISCH_GUENSTIG','THEORETISCH_AKZEPTABEL',
                                      'AUSBRUCH/KEIN_ZIEL_AUS_HISTORISCHEM_WIDERSTAND')
-    confluence = (trend >= 1 and momentum >= 1 and structure >= 0 and vol_confirmed
-                  and setup_ok and not near_resistance)
+    # Transparent diagnostic gates: EXACTLY the same criteria as the v1.1 confluence.
+    # These are observations, NOT calibrated probabilities. Risk is a hard veto.
+    gates = {
+        'Trend positiv': trend >= 1,
+        'Momentum positiv': momentum >= 1,
+        'Struktur mindestens neutral': structure >= 0,
+        'Volumensignal mindestens neutral': volume >= 0,
+        'Relatives Tagesvolumen mindestens 0,8': facts['volumen'].facts['volumen_faktor_20'] >= 0.8,
+        'OBV steigend': bool(facts['volumen'].facts['obv_10_tage_steigend']),
+        'Einstiegsszenario akzeptabel': setup_ok,
+        'Nicht knapp unter Widerstand': not near_resistance,
+        'Risiko-Bot: freigegeben': risk_clear,
+    }
+    failed = [name for name, ok in gates.items() if not ok]
+    confluence = not failed
     if not risk_clear:
         action = 'RISIKOSPERRE'
         reasons += facts['risiko'].reasons
@@ -62,7 +75,8 @@ def review(symbol, df, data, ex=None, orderbook=False, reference_day=None):
         reasons += ['Trend und Momentum negativ; keine Kaufsuche']
     else:
         action = 'ABWARTEN'
-        reasons += ['Nicht alle technischen Kriterien für einen Kaufkandidaten erfüllt']
+        reasons += [f'Kaufprüfung: {len(failed)} von {len(gates)} Bedingungen nicht erfüllt']
+        reasons += [f'Fehlt: {name}' for name in failed]
     if facts['liquiditaet'].signal == 'NICHT_GEMESSEN':
         reasons += ['Orderbuch/Spread nicht geprüft (historische Tagesanalyse)']
     if trend > 0 and momentum < 0:
@@ -71,6 +85,7 @@ def review(symbol, df, data, ex=None, orderbook=False, reference_day=None):
         reasons += ['Widerspruch: Trend negativ, Momentum positiv']
     return {'symbol': symbol, 'action':action, 'reasons':reasons,
             'date':df.index[-1].date().isoformat(),
+            'gates':gates, 'failed_gates':failed,
             'agents':{k:v.to_dict() for k,v in facts.items()},
             'scores':{x:facts[x].score for x in ('trend','struktur','momentum','volumen','niveaus','relativ')}}
 
@@ -81,7 +96,7 @@ def run_all(data, ex=None, orderbook=False, reference_day=None):
     reports = [review(sym, data[sym], data, ex=ex,
                       orderbook=orderbook, reference_day=reference_day)
                for sym in SYMBOLS]
-    return {'network_version':'1.0', 'created_utc':datetime.now(timezone.utc).isoformat(timespec='seconds'),
+    return {'network_version':'1.2', 'created_utc':datetime.now(timezone.utc).isoformat(timespec='seconds'),
             'basis':'Nur abgeschlossene Kraken-Tageskerzen (optional separater Live-Orderbuch-Snapshot)',
             'mode':'RESEARCH_ONLY_NO_TRADES', 'assets':reports}
 
@@ -117,6 +132,13 @@ def generate_markdown(report:dict):
         lines += [f'### {asset["symbol"]} · {asset["action"]}', '',
                   f'**Letzter Kurstag:** {asset["date"]}', '']
         lines += ['**Master-Begründung:** ' + '; '.join(asset['reasons']), '']
+        gates = asset.get('gates', {})
+        if gates:
+            lines += ['**Prüfung aller Kaufbedingungen:**', '',
+                      '| Bedingung | Ergebnis |', '|:--|:--|']
+            lines += [f'| {name} | {"OK" if passed else "FEHLT"} |'
+                      for name, passed in gates.items()]
+            lines.append('')
         lines += ['| Spezialist | Signal | Fakten |', '|:--|:--|:--|']
         for key in SPECIALISTS:
             if key not in asset['agents']:
