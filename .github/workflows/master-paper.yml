@@ -43,8 +43,8 @@ jobs:
           cache: pip
       - name: Bibliotheken installieren
         run: python -m pip install -r requirements.txt
-      - name: Alle Softwaretests einschließlich v1.3
-        run: python -m unittest -q test_netzwerk test_trading test_master_backtest test_research_master
+      - name: Alle Softwaretests einschließlich v1.4
+        run: python -m unittest -q test_netzwerk test_trading test_master_backtest test_research_master test_trailing_v14
       - name: Gewählten Modus ausführen
         shell: bash
         env:
@@ -84,13 +84,13 @@ jobs:
                 if [ -f "$p" ]; then git add -- "$p"; fi
               done ;;
             paper|analyse)
-              for p in TRADING_STATUS.md NETZWERK.md daten/master_paper_state.json daten/netzwerk_analysen.json; do
+              for p in TRADING_STATUS.md TRAILING_STATUS.md VERGLEICH_MASTER.md NETZWERK.md daten/master_paper_state.json daten/master_trailing_state.json daten/netzwerk_analysen.json; do
                 if [ -f "$p" ]; then git add -- "$p"; fi
               done ;;
             *) echo 'Nur Testmodus, keine Ergebnisspeicherung.' ;;
           esac
           if ! git diff --cached --quiet; then
-            git commit -m "Master Network v1.3: $MODUS aktualisiert"
+            git commit -m "Master Network v1.4: $MODUS aktualisiert"
             git push origin "HEAD:${{ github.ref_name }}"
           else
             echo 'Keine Änderungen an GitHub nötig.'
