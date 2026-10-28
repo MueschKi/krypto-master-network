@@ -1,0 +1,70 @@
+name: Krypto Master Network – Analyse und Paper Trading
+
+on:
+  schedule:
+    # Once per day after UTC daily candle close, delayed starts possible.
+    - cron: '43 3 * * *'
+  workflow_dispatch:
+    inputs:
+      modus:
+        description: 'Startmodus (kein Echtgeldhandel möglich)'
+        required: true
+        type: choice
+        default: demo
+        options:
+          - demo
+          - analyse
+          - paper
+
+permissions:
+  contents: write
+
+concurrency:
+  group: master-paper-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      - name: Python-Pakete
+        run: python -m pip install -r requirements.txt
+      - name: Sicherheit und Fachtests
+        run: python -m unittest -q test_netzwerk test_trading
+      - name: Master und Trading Engine
+        shell: bash
+        env:
+          MODUS: ${{ github.event.inputs.modus || 'paper' }}
+        run: |
+          set -euo pipefail
+          python trading.py "$MODUS" | tee laufbericht.txt
+          {
+            echo "## Master Network: $MODUS"
+            echo '```text'
+            cat laufbericht.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Analyse und Demokonto speichern
+        if: ${{ success() && (github.event_name == 'schedule' || inputs.modus == 'paper' || inputs.modus == 'analyse') }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          for path in TRADING_STATUS.md NETZWERK.md daten/master_paper_state.json daten/netzwerk_analysen.json; do
+            if [ -f "$path" ]; then git add -- "$path"; fi
+          done
+          if ! git diff --cached --quiet; then
+            git commit -m 'Paper Trading: Aktualisierung des Demokontos'
+            git push origin "HEAD:${{ github.ref_name }}"
+          else
+            echo 'Keine Änderungen nötig.'
+          fi
