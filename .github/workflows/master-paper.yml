@@ -3,7 +3,8 @@ name: Krypto Master Network – Analyse, Paper und historische Diagnostik
 on:
   schedule:
     # Einmal täglich; nur Paper Trading. GitHub kann verzögert starten.
-    - cron: '43 3 * * *'
+    - cron: '17 4 * * *'
+    - cron: '47 6 * * *'
   workflow_dispatch:
     inputs:
       modus:
