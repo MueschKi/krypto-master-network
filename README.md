@@ -80,7 +80,7 @@ Kursdaten nur von **abgeschlossenen 1d-Kerzen**. Die Kraken-OHLC-Schnittstelle i
 
 ## Automatische tägliche Ausführung
 
-Der Workflow [master-paper.yml](.github/workflows/master-paper.yml) ist auf dem Standardbranch täglich für **04:17 und 06:47 UTC** geplant. Vor jedem Paper-Trading-Durchlauf werden alle fünf Softwaretestmodule ausgeführt; nur bei Erfolg folgen die Simulation und das Speichern der Ergebnisse. Die Läufe werden je Branch nacheinander ausgeführt; derselbe abgeschlossene UTC-Handelstag wird höchstens einmal gebucht. GitHub kann geplante Läufe verzögern oder auslassen. Unter **Actions → Run workflow** ist außerdem ein manueller Start möglich (Standardmodus: `demo`). Echtgeldhandel bleibt technisch gesperrt.
+Der Workflow [master-paper.yml](.github/workflows/master-paper.yml) ist auf dem Standardbranch täglich für **04:17 und 06:47 UTC** geplant. Vor jedem Paper-Trading-Durchlauf werden alle Softwaretestmodule ausgeführt; nur bei Erfolg folgen die Simulation und das Speichern der Ergebnisse. Die Läufe werden je Branch nacheinander ausgeführt; derselbe abgeschlossene UTC-Handelstag wird höchstens einmal gebucht. GitHub kann geplante Läufe verzögern oder auslassen. Unter **Actions → Run workflow** ist außerdem ein manueller Start möglich (Standardmodus: `demo`). Echtgeldhandel bleibt technisch gesperrt.
 
 ## Echtgeld-Schnittstelle
 
@@ -144,9 +144,89 @@ Stunden davor. Indikatorwerte sind Beobachtungen historischer Kurse.
    Verfügung, weil GitHub den Workflow auf dem Standardbranch benötigt.
 4. Den Lauf öffnen: Zusammenfassung und das Artefakt `multi-timeframe-berichte`
    enthalten die Markdown-/JSON-Dateien. Artefakte benötigen GitHub-Anmeldung.
-5. Nur `mtf-analyse` committet die beiden neuen Ergebnisdateien auf dem gewählten
-   Branch. Danach lässt sich `ZEITFENSTER.md` direkt unter **Code** lesen.
+5. Nur `mtf-analyse` auf `main` speichert die beiden Ergebnisdateien sicher auf
+   `main`; Nebenbranches liefern ausschließlich Summary und Artifact. Danach lässt sich `ZEITFENSTER.md` direkt unter **Code** lesen.
    Demo committet nichts. Für die reine Beobachtung nicht `paper` auswählen.
 
 Die Cron-Zeiten **04:17 und 06:47 UTC** verwenden weiterhin ausschließlich `paper`.
 Es sind keine neuen Secrets, Wallets oder Exchange-Zugangsdaten nötig.
+
+
+## v1.5.1: Unabhängiger MTF-Zeitplan und Betriebsdiagnose
+
+[mtf-schedule.yml](.github/workflows/mtf-schedule.yml) läuft unabhängig vom
+Paper-Workflow auf einem Standard-GitHub-Runner. Cron: `37 0,4,8,12,16,20 * * *`.
+Die geplanten Zeiten liegen 37 Minuten nach den 4h-Kerzengrenzen:
+
+| Workflow | UTC (täglich) | Deutschland MEZ (Winter) | Deutschland MESZ (Sommer) |
+|---|---|---|---|
+| MTF | 00:37, 04:37, 08:37, 12:37, 16:37, 20:37 | 01:37, 05:37, 09:37, 13:37, 17:37, 21:37 | 02:37, 06:37, 10:37, 14:37, 18:37, 22:37 |
+| Paper | 04:17, 06:47 | 05:17, 07:47 | 06:17, 08:47 |
+
+Das sind **sechs Snapshots pro Tag**, keine fortlaufende 15-Minuten-Überwachung.
+Die UTC-Termine bleiben bei der Zeitumstellung gleich. Die Paper-Ausführung
+verarbeitet weiterhin zwei getrennte Konten, jeden UTC-Handelstag höchstens
+einmal; es gibt keine zusätzlichen Paper-Läufe oder neue Trading-Regeln.
+
+### Ablauf und sichere Speicherung
+
+Nach `pip install -r requirements.txt` und der gesamten Testsuite
+(`python -m unittest discover -q`, einschließlich `test_mtf` und
+`test_mtf_schedule`) startet der Wrapper ausschließlich
+`python mtf_analysis.py analyse`. Er entfernt zuvor nur die beiden alten
+MTF-Ergebnisdateien, prüft Snapshot-Zeit und Übereinstimmung von Markdown/JSON
+und legt das neue Berichtspaar separat im Runner-Temp-Verzeichnis ab.
+Fehlende Kraken-Daten liefern einen neuen, ausdrücklich **BLOCKIERT** markierten
+Diagnosebericht. Er wird ebenso gespeichert wie ein OK-Bericht; alte OK-Daten
+werden nicht als neuer Snapshot ausgegeben. Ein CLI-Absturz, Timeout oder
+ungültiger Bericht erzeugt eine neue BLOCKIERT-Fehlerdiagnose und einen roten Job,
+aber keinen Report-Commit. Fehlgeschlagene Installation/Tests verhindern die
+Analyse; das Summary meldet, dass kein neuer Snapshot vorliegt.
+
+Markdown und JSON stehen im Job Summary beziehungsweise im Artifact
+`mtf-snapshot-<run_id>-<run_attempt>` bereit (Aufbewahrung **7 Tage**).
+Das Artifact wird vor dem Push hochgeladen und bleibt bei GitHub-Schreibfehlern
+erhalten. Bei abgebrochenem Runner oder gestörter Artifact-Schnittstelle kann
+auch dieser Upload ausfallen; der Job meldet fehlende Dateien als Fehler.
+
+Nur Läufe auf `main` veröffentlichen Berichte auf `main`. Der Publisher
+`mtf_snapshot.py` verwendet einen separaten temporären Git-Worktree und committet
+**ausschließlich** `ZEITFENSTER.md` und `daten/zeitfenster_analysen.json`, nur bei
+Änderungen. Er holt vor jedem Push das aktuelle Remote-main und baut den
+Berichtscommit darauf neu auf. So bleiben parallele Paper- oder Code-Commits
+erhalten, ohne sie zu überschreiben. Maximal drei normale Fast-forward-Push-
+Versuche, kein Force-Push. Bei Änderungen am Remote-Berichtspaar während des
+Pushs bricht er mit Konflikt ab; gleich alte oder neuere Remote-Snapshots
+verhindern den Push bereits über den UTC-Zeitstempel. Ungültige Zeitstempel
+oder unvollständige Remote-Berichtspaare führen zum sicheren Abbruch.
+Push-Fehler sind in Log und Summary sichtbar; Branch-Schutz wird nicht umgangen.
+
+Der neue Workflow und die bisherigen manuellen `mtf-*`-Modi teilen die
+Concurrency-Gruppe `mtf-snapshot-main` ohne Abbruch laufender Jobs. GitHub
+garantiert keine FIFO-Reihenfolge und kann wartende Läufe ersetzen; deshalb
+bleibt der Zeitstempelvergleich zusätzlich erforderlich. Auch der bisherige
+manuelle `mtf-analyse`-Modus nutzt den sicheren Publisher auf `main`;
+Nebenbranches speichern nur Summary und Artifact. Die Paper-Concurrency und
+beide Paper-Kontodateien bleiben unverändert. Es werden ausschließlich öffentliche
+Kraken-Daten abgerufen, keine neuen Secrets, OpenAI-API-Schlüssel, bezahlten
+Dienste oder externen Scheduler eingerichtet. GitHub-Actions-Kontingente und
+Repository-Einstellungen gelten weiterhin.
+
+### Geplanten Start nachweisen und Fehler untersuchen
+
+In **Actions → MTF – unabhängige Beobachtung** einen Lauf öffnen. Das Trigger-
+Event muss **`schedule`** lauten (auch im Job Summary); **`workflow_dispatch`**
+belegt lediglich einen manuellen Start über **Run workflow**. Alternativ mit
+GitHub CLI: `gh run list --workflow mtf-schedule.yml --event schedule`.
+Ein grüner Job mit BLOCKIERT-Bericht bedeutet erfolgreiche Diagnose einer
+Datenstörung, keine Freigabe der Marktdaten. Details stehen im Bericht je
+Coin/Zeitfenster. Ein roter Job verlangt Prüfung von Tests, Ausführung,
+Artifact-Upload beziehungsweise Push im jeweiligen Schritt.
+
+**Noch kein automatischer Erfolg nachgewiesen:** Diese Änderung richtet den
+Zeitplan ein. Erst ein tatsächlich beobachteter `schedule`-Lauf nach dem Merge
+belegt einen automatischen Start. Für bisher fehlende Paper-Cron-Ereignisse ist
+keine Ursache bewiesen. GitHub-Cron kann verspätet starten oder ausfallen; allein
+mit GitHub Actions lässt sich ein verpasster Cron nicht zuverlässig erkennen,
+wenn kein Workflow läuft. Kein 100-%-Verfügbarkeitsversprechen. Bei Bedarf den
+MTF-Workflow manuell auf `main` starten und das Event dabei korrekt einordnen.

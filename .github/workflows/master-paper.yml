@@ -2,7 +2,7 @@ name: Krypto Master Network – Analyse, Paper und historische Diagnostik
 
 on:
   schedule:
-    # Einmal täglich; nur Paper Trading. GitHub kann verzögert starten.
+    # Zwei tägliche Termine; nur Paper Trading. GitHub kann verzögert starten.
     - cron: '17 4 * * *'
     - cron: '47 6 * * *'
   workflow_dispatch:
@@ -27,7 +27,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: master-paper-${{ github.ref }}
+  group: ${{ startsWith(github.event.inputs.modus, 'mtf-') && 'mtf-snapshot-main' || format('master-paper-{0}', github.ref) }}
   cancel-in-progress: false
 
 jobs:
@@ -47,7 +47,7 @@ jobs:
       - name: Bibliotheken installieren
         run: python -m pip install -r requirements.txt
       - name: Alle Softwaretests einschließlich v1.4
-        run: python -m unittest -q test_netzwerk test_trading test_master_backtest test_research_master test_trailing_v14 test_mtf
+        run: python -m unittest -q test_netzwerk test_trading test_master_backtest test_research_master test_trailing_v14 test_mtf test_mtf_schedule
       - name: Gewählten Modus ausführen
         shell: bash
         env:
@@ -101,7 +101,12 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           case "$MODUS" in
             mtf-analyse)
-              git add -- ZEITFENSTER.md daten/zeitfenster_analysen.json ;;
+              if [ "$GITHUB_REF" = refs/heads/main ]; then
+                python mtf_snapshot.py publish .
+              else
+                echo 'MTF auf Nebenbranch: nur Summary und Artifact, kein Push auf main.'
+              fi
+              exit 0 ;;
             backtest)
               for p in BACKTEST_MASTER.md daten/master_backtest_kurve.csv daten/master_backtest_trades.csv; do
                 if [ -f "$p" ]; then git add -- "$p"; fi

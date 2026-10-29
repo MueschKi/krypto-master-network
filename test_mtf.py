@@ -176,7 +176,7 @@ class MTFTests(unittest.TestCase):
         self.assertIn('mtf-demo) python mtf_analysis.py demo', workflow)
         self.assertIn('mtf-analyse) python mtf_analysis.py analyse', workflow)
         section = workflow.split('            mtf-analyse)\n')[1].split(';;')[0]
-        self.assertIn('git add -- ZEITFENSTER.md daten/zeitfenster_analysen.json', section)
+        self.assertIn('python mtf_snapshot.py publish .', section)
         self.assertNotIn('state', section)
 
 
