@@ -1,0 +1,330 @@
+{
+  "schema_version": "1.5",
+  "mode": "analyse",
+  "snapshot_utc": "2026-10-29T06:40:11.853000+00:00",
+  "source": "Kraken public spot EUR",
+  "classification": "BLOCKIERT",
+  "methodological_limits": "Reine Beobachtung, keine Orders und keine Übergabe an Paper-Engines. Keine Prognosewahrscheinlichkeiten. Kraken liefert maximal ca. 720 Kerzen: 15m ca. 7,5 Tage, 1h ca. 30 Tage, 4h ca. 120 Tage, 1d ca. 720 Tage; die laufende Kerze wird entfernt. EMA startet am ersten vorhandenen Schlusskurs; RSI/ATR verwenden rekursive Wilder-Glättung ab erstem Wert. Mindestens 250 abgeschlossene Kerzen, begrenzter Warm-up besonders für EMA200. Alle Zeiten UTC; Fenster enden unterschiedlich. Kein Resampling oder Auffüllen. Fehlende zuletzt erwartete Kerzen blockieren auch bei Börsenverzögerungen. Überlappende Zeitfenster sind keine unabhängigen Beweise. Keine historischen Intraday-Daten außerhalb des Kraken-Limits und kein Backtest.",
+  "assets": [
+    {
+      "symbol": "BTC/EUR",
+      "timeframes": {
+        "1d": {
+          "classification": "BLOCKIERT",
+          "quality": {
+            "status": "BLOCKIERT",
+            "reason": "Marktliste: NetworkError: kraken GET https://api.kraken.com/0/public/Assets",
+            "closed_count": 0,
+            "excluded_unclosed": 0,
+            "latest_open_utc": null,
+            "latest_close_utc": null
+          },
+          "agents": {},
+          "reasons": [
+            "Marktliste: NetworkError: kraken GET https://api.kraken.com/0/public/Assets"
+          ]
+        },
+        "4h": {
+          "classification": "BLOCKIERT",
+          "quality": {
+            "status": "BLOCKIERT",
+            "reason": "Marktliste: NetworkError: kraken GET https://api.kraken.com/0/public/Assets",
+            "closed_count": 0,
+            "excluded_unclosed": 0,
+            "latest_open_utc": null,
+            "latest_close_utc": null
+          },
+          "agents": {},
+          "reasons": [
+            "Marktliste: NetworkError: kraken GET https://api.kraken.com/0/public/Assets"
+          ]
+        },
+        "1h": {
+          "classification": "BLOCKIERT",
+          "quality": {
+            "status": "BLOCKIERT",
+            "reason": "Marktliste: NetworkError: kraken GET https://api.kraken.com/0/public/Assets",
+            "closed_count": 0,
+            "excluded_unclosed": 0,
+            "latest_open_utc": null,
+            "latest_close_utc": null
+          },
+          "agents": {},
+          "reasons": [
+            "Marktliste: NetworkError: kraken GET https://api.kraken.com/0/public/Assets"
+          ]
+        },
+        "15m": {
+          "classification": "BLOCKIERT",
+          "quality": {
+            "status": "BLOCKIERT",
+            "reason": "Marktliste: NetworkError: kraken GET https://api.kraken.com/0/public/Assets",
+            "closed_count": 0,
+            "excluded_unclosed": 0,
+            "latest_open_utc": null,
+            "latest_close_utc": null
+          },
+          "agents": {},
+          "reasons": [
+            "Marktliste: NetworkError: kraken GET https://api.kraken.com/0/public/Assets"
+          ]
+        }
+      },
+      "summary": {
+        "classification": "BLOCKIERT",
+        "signals": {
+          "1d": "BLOCKIERT",
+          "4h": "BLOCKIERT",
+          "1h": "BLOCKIERT",
+          "15m": "BLOCKIERT"
+        },
+        "conflict": false,
+        "reasons": [
+          "Positive Zeitfenster: []; negative: []; blockiert: ['1d', '4h', '1h', '15m'].",
+          "Kein positiver/negativer Kreuzwiderspruch.",
+          "Gleichgewichtete Einstimmigkeit aller vier Fenster für POSITIV/NEGATIV; sonst NEUTRAL. Jede Sperre blockiert die Gesamtauswertung. Keine Wahrscheinlichkeit."
+        ]
+      }
+    },
+    {
+      "symbol": "ETH/EUR",
+      "timeframes": {
+        "1d": {
+          "classification": "BLOCKIERT",
+          "quality": {
+            "status": "BLOCKIERT",
+            "reason": "Marktliste: NetworkError: kraken GET https://api.kraken.com/0/public/Assets",
+            "closed_count": 0,
+            "excluded_unclosed": 0,
+            "latest_open_utc": null,
+            "latest_close_utc": null
+          },
+          "agents": {},
+          "reasons": [
+            "Marktliste: NetworkError: kraken GET https://api.kraken.com/0/public/Assets"
+          ]
+        },
+        "4h": {
+          "classification": "BLOCKIERT",
+          "quality": {
+            "status": "BLOCKIERT",
+            "reason": "Marktliste: NetworkError: kraken GET https://api.kraken.com/0/public/Assets",
+            "closed_count": 0,
+            "excluded_unclosed": 0,
+            "latest_open_utc": null,
+            "latest_close_utc": null
+          },
+          "agents": {},
+          "reasons": [
+            "Marktliste: NetworkError: kraken GET https://api.kraken.com/0/public/Assets"
+          ]
+        },
+        "1h": {
+          "classification": "BLOCKIERT",
+          "quality": {
+            "status": "BLOCKIERT",
+            "reason": "Marktliste: NetworkError: kraken GET https://api.kraken.com/0/public/Assets",
+            "closed_count": 0,
+            "excluded_unclosed": 0,
+            "latest_open_utc": null,
+            "latest_close_utc": null
+          },
+          "agents": {},
+          "reasons": [
+            "Marktliste: NetworkError: kraken GET https://api.kraken.com/0/public/Assets"
+          ]
+        },
+        "15m": {
+          "classification": "BLOCKIERT",
+          "quality": {
+            "status": "BLOCKIERT",
+            "reason": "Marktliste: NetworkError: kraken GET https://api.kraken.com/0/public/Assets",
+            "closed_count": 0,
+            "excluded_unclosed": 0,
+            "latest_open_utc": null,
+            "latest_close_utc": null
+          },
+          "agents": {},
+          "reasons": [
+            "Marktliste: NetworkError: kraken GET https://api.kraken.com/0/public/Assets"
+          ]
+        }
+      },
+      "summary": {
+        "classification": "BLOCKIERT",
+        "signals": {
+          "1d": "BLOCKIERT",
+          "4h": "BLOCKIERT",
+          "1h": "BLOCKIERT",
+          "15m": "BLOCKIERT"
+        },
+        "conflict": false,
+        "reasons": [
+          "Positive Zeitfenster: []; negative: []; blockiert: ['1d', '4h', '1h', '15m'].",
+          "Kein positiver/negativer Kreuzwiderspruch.",
+          "Gleichgewichtete Einstimmigkeit aller vier Fenster für POSITIV/NEGATIV; sonst NEUTRAL. Jede Sperre blockiert die Gesamtauswertung. Keine Wahrscheinlichkeit."
+        ]
+      }
+    },
+    {
+      "symbol": "SOL/EUR",
+      "timeframes": {
+        "1d": {
+          "classification": "BLOCKIERT",
+          "quality": {
+            "status": "BLOCKIERT",
+            "reason": "Marktliste: NetworkError: kraken GET https://api.kraken.com/0/public/Assets",
+            "closed_count": 0,
+            "excluded_unclosed": 0,
+            "latest_open_utc": null,
+            "latest_close_utc": null
+          },
+          "agents": {},
+          "reasons": [
+            "Marktliste: NetworkError: kraken GET https://api.kraken.com/0/public/Assets"
+          ]
+        },
+        "4h": {
+          "classification": "BLOCKIERT",
+          "quality": {
+            "status": "BLOCKIERT",
+            "reason": "Marktliste: NetworkError: kraken GET https://api.kraken.com/0/public/Assets",
+            "closed_count": 0,
+            "excluded_unclosed": 0,
+            "latest_open_utc": null,
+            "latest_close_utc": null
+          },
+          "agents": {},
+          "reasons": [
+            "Marktliste: NetworkError: kraken GET https://api.kraken.com/0/public/Assets"
+          ]
+        },
+        "1h": {
+          "classification": "BLOCKIERT",
+          "quality": {
+            "status": "BLOCKIERT",
+            "reason": "Marktliste: NetworkError: kraken GET https://api.kraken.com/0/public/Assets",
+            "closed_count": 0,
+            "excluded_unclosed": 0,
+            "latest_open_utc": null,
+            "latest_close_utc": null
+          },
+          "agents": {},
+          "reasons": [
+            "Marktliste: NetworkError: kraken GET https://api.kraken.com/0/public/Assets"
+          ]
+        },
+        "15m": {
+          "classification": "BLOCKIERT",
+          "quality": {
+            "status": "BLOCKIERT",
+            "reason": "Marktliste: NetworkError: kraken GET https://api.kraken.com/0/public/Assets",
+            "closed_count": 0,
+            "excluded_unclosed": 0,
+            "latest_open_utc": null,
+            "latest_close_utc": null
+          },
+          "agents": {},
+          "reasons": [
+            "Marktliste: NetworkError: kraken GET https://api.kraken.com/0/public/Assets"
+          ]
+        }
+      },
+      "summary": {
+        "classification": "BLOCKIERT",
+        "signals": {
+          "1d": "BLOCKIERT",
+          "4h": "BLOCKIERT",
+          "1h": "BLOCKIERT",
+          "15m": "BLOCKIERT"
+        },
+        "conflict": false,
+        "reasons": [
+          "Positive Zeitfenster: []; negative: []; blockiert: ['1d', '4h', '1h', '15m'].",
+          "Kein positiver/negativer Kreuzwiderspruch.",
+          "Gleichgewichtete Einstimmigkeit aller vier Fenster für POSITIV/NEGATIV; sonst NEUTRAL. Jede Sperre blockiert die Gesamtauswertung. Keine Wahrscheinlichkeit."
+        ]
+      }
+    },
+    {
+      "symbol": "NEAR/EUR",
+      "timeframes": {
+        "1d": {
+          "classification": "BLOCKIERT",
+          "quality": {
+            "status": "BLOCKIERT",
+            "reason": "Marktliste: NetworkError: kraken GET https://api.kraken.com/0/public/Assets",
+            "closed_count": 0,
+            "excluded_unclosed": 0,
+            "latest_open_utc": null,
+            "latest_close_utc": null
+          },
+          "agents": {},
+          "reasons": [
+            "Marktliste: NetworkError: kraken GET https://api.kraken.com/0/public/Assets"
+          ]
+        },
+        "4h": {
+          "classification": "BLOCKIERT",
+          "quality": {
+            "status": "BLOCKIERT",
+            "reason": "Marktliste: NetworkError: kraken GET https://api.kraken.com/0/public/Assets",
+            "closed_count": 0,
+            "excluded_unclosed": 0,
+            "latest_open_utc": null,
+            "latest_close_utc": null
+          },
+          "agents": {},
+          "reasons": [
+            "Marktliste: NetworkError: kraken GET https://api.kraken.com/0/public/Assets"
+          ]
+        },
+        "1h": {
+          "classification": "BLOCKIERT",
+          "quality": {
+            "status": "BLOCKIERT",
+            "reason": "Marktliste: NetworkError: kraken GET https://api.kraken.com/0/public/Assets",
+            "closed_count": 0,
+            "excluded_unclosed": 0,
+            "latest_open_utc": null,
+            "latest_close_utc": null
+          },
+          "agents": {},
+          "reasons": [
+            "Marktliste: NetworkError: kraken GET https://api.kraken.com/0/public/Assets"
+          ]
+        },
+        "15m": {
+          "classification": "BLOCKIERT",
+          "quality": {
+            "status": "BLOCKIERT",
+            "reason": "Marktliste: NetworkError: kraken GET https://api.kraken.com/0/public/Assets",
+            "closed_count": 0,
+            "excluded_unclosed": 0,
+            "latest_open_utc": null,
+            "latest_close_utc": null
+          },
+          "agents": {},
+          "reasons": [
+            "Marktliste: NetworkError: kraken GET https://api.kraken.com/0/public/Assets"
+          ]
+        }
+      },
+      "summary": {
+        "classification": "BLOCKIERT",
+        "signals": {
+          "1d": "BLOCKIERT",
+          "4h": "BLOCKIERT",
+          "1h": "BLOCKIERT",
+          "15m": "BLOCKIERT"
+        },
+        "conflict": false,
+        "reasons": [
+          "Positive Zeitfenster: []; negative: []; blockiert: ['1d', '4h', '1h', '15m'].",
+          "Kein positiver/negativer Kreuzwiderspruch.",
+          "Gleichgewichtete Einstimmigkeit aller vier Fenster für POSITIV/NEGATIV; sonst NEUTRAL. Jede Sperre blockiert die Gesamtauswertung. Keine Wahrscheinlichkeit."
+        ]
+      }
+    }
+  ]
+}

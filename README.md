@@ -89,3 +89,64 @@ Der Workflow [master-paper.yml](.github/workflows/master-paper.yml) ist auf dem 
 ## Nutzung
 
 Zur Einrichtung auf dem iPhone siehe `ANLEITUNG_IPHONE.md` im Installationspaket. Der GitHub-Workflow liegt separat zum Einfügen bereit, weil die GitHub-Mobile-App vorhandene Dateien nicht direkt hochladen kann; über Safari funktioniert es.
+
+## v1.5: Multi-Timeframe-Beobachtung
+
+Die neue, isolierte Analyse beobachtet BTC/EUR, ETH/EUR, SOL/EUR und NEAR/EUR auf
+**1d, 4h, 1h und 15m**. Sie übergibt keine Signale an die beiden Paper-Konten.
+Trading-Regeln, tägliche Paper-Läufe und Echtgeldsperre bleiben unverändert.
+
+```bash
+python mtf_analysis.py demo     # offline, deterministisch, künstliche Kurse
+python mtf_analysis.py analyse  # nur öffentliche Kraken-Spotdaten, ohne Schlüssel
+python -m unittest discover -q
+```
+
+Demo schreibt ausschließlich `DEMO_ZEITFENSTER.md` und `DEMO_ZEITFENSTER.json`
+(beide ignoriert); Analyse schreibt `ZEITFENSTER.md` und
+`daten/zeitfenster_analysen.json`. Ein BLOCKIERT-Bericht ist ein gültiges
+Diagnoseergebnis und wird gespeichert, damit alte gültige Berichte nicht irreführen.
+`OK` im Bericht bezeichnet nur die Freigabe der Datenprüfung, keine Kaufempfehlung.
+
+`mtf_data.py` prüft Datenqualität und ruft mit injizierbarem Exchange höchstens
+16 OHLCV-Abfragen mit Limit 720 sequenziell ab (Rate-Limit aktiv, 20s Timeout,
+keine Wiederholungen). `mtf_trend.py`, `mtf_momentum.py` und `mtf_volatility.py`
+berechnen EMA20/50/200, RSI14/MACD12/26/9 und ATR14. `net_timeframe_bot.py`
+führt diese Beobachtungen zusammen; `mtf_analysis.py` schreibt die Berichte.
+
+POSITIV/NEGATIV erfordern gleichgerichteten Trend und Momentum. ATR14 über
+10 % des Schlusskurses blockiert als transparente Heuristik. Die Cross-Timeframe-
+Auswertung verlangt Einstimmigkeit aller vier Fenster für POSITIV/NEGATIV;
+gemischte Einstufungen ergeben NEUTRAL, jede Datensperre ergibt BLOCKIERT.
+Widersprüche werden separat genannt. Es gibt keine Prognoseprozente.
+
+Ausschließlich abgeschlossene Kerzen werden anhand UTC-Start plus exakter Dauer
+verwendet; die Snapshot-Zeit wird vor dem Abruf eingefroren. Fehlende, veraltete,
+doppelte, unsortierte oder unplausible Daten sowie NaN/inf blockieren. Nichts wird
+aufgefüllt oder sortiert. Mindestens 250 abgeschlossene Kerzen sind erforderlich.
+Die jüngste laut UTC-Raster erwartete Kerze muss vorhanden sein; auch kurze
+Veröffentlichungsverzögerungen bei Kraken führen deshalb zu einer Sperre.
+
+Kraken begrenzt OHLC auf etwa **720 Kerzen**: 15m ca. **7,5 Tage**, 1h ca.
+**30 Tage**, 4h ca. **120 Tage**, 1d ca. 720 Tage, abzüglich laufender Kerze.
+EMA/RSI/ATR sind rekursiv mit begrenztem Warm-up initialisiert; insbesondere
+EMA200 hängt von der verfügbaren Historie ab. Fenster schließen unterschiedlich
+und überlappen, sind also keine unabhängigen Beweise. Kein Intraday-Backtest.
+Alle Zeitangaben sind **UTC**; Deutschland liegt im Winter eine, im Sommer zwei
+Stunden davor. Indikatorwerte sind Beobachtungen historischer Kurse.
+
+### Start und Berichte auf dem iPhone
+
+1. Repository in Safari öffnen, bei Bedarf „Desktop-Website anfordern“.
+2. **Actions → Krypto Master Network → Run workflow** öffnen.
+3. Nach Freigabe/Merge Branch `main` und `mtf-demo` oder `mtf-analyse` wählen.
+   Vor dem Merge stehen die neuen Dispatch-Optionen eventuell noch nicht zur
+   Verfügung, weil GitHub den Workflow auf dem Standardbranch benötigt.
+4. Den Lauf öffnen: Zusammenfassung und das Artefakt `multi-timeframe-berichte`
+   enthalten die Markdown-/JSON-Dateien. Artefakte benötigen GitHub-Anmeldung.
+5. Nur `mtf-analyse` committet die beiden neuen Ergebnisdateien auf dem gewählten
+   Branch. Danach lässt sich `ZEITFENSTER.md` direkt unter **Code** lesen.
+   Demo committet nichts. Für die reine Beobachtung nicht `paper` auswählen.
+
+Die Cron-Zeiten **04:17 und 06:47 UTC** verwenden weiterhin ausschließlich `paper`.
+Es sind keine neuen Secrets, Wallets oder Exchange-Zugangsdaten nötig.

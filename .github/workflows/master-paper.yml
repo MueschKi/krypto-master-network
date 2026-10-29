@@ -20,6 +20,8 @@ on:
           - backtest
           - diagnose-demo
           - diagnose
+          - mtf-demo
+          - mtf-analyse
 
 permissions:
   contents: write
@@ -45,7 +47,7 @@ jobs:
       - name: Bibliotheken installieren
         run: python -m pip install -r requirements.txt
       - name: Alle Softwaretests einschließlich v1.4
-        run: python -m unittest -q test_netzwerk test_trading test_master_backtest test_research_master test_trailing_v14
+        run: python -m unittest -q test_netzwerk test_trading test_master_backtest test_research_master test_trailing_v14 test_mtf
       - name: Gewählten Modus ausführen
         shell: bash
         env:
@@ -58,6 +60,8 @@ jobs:
             backtest) python backtest_master.py historisch | tee laufbericht.txt ;;
             diagnose-demo) python research_master.py demo | tee laufbericht.txt ;;
             diagnose) python research_master.py historisch | tee laufbericht.txt ;;
+            mtf-demo) python mtf_analysis.py demo | tee laufbericht.txt ;;
+            mtf-analyse) python mtf_analysis.py analyse | tee laufbericht.txt ;;
             *) echo 'Ungültiger Modus' >&2; exit 1 ;;
           esac
           {
@@ -66,6 +70,26 @@ jobs:
             cat laufbericht.txt
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
+      - name: MTF-Bericht in Zusammenfassung anzeigen
+        if: ${{ success() && startsWith(github.event.inputs.modus, 'mtf-') }}
+        shell: bash
+        env:
+          MODUS: ${{ github.event.inputs.modus }}
+        run: |
+          if [ "$MODUS" = mtf-demo ]; then
+            cat DEMO_ZEITFENSTER.md >> "$GITHUB_STEP_SUMMARY"
+          else
+            cat ZEITFENSTER.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - name: MTF-Berichte zum Download
+        if: ${{ success() && startsWith(github.event.inputs.modus, 'mtf-') }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: multi-timeframe-berichte
+          path: |
+            ${{ github.event.inputs.modus == 'mtf-demo' && 'DEMO_ZEITFENSTER.*' || 'ZEITFENSTER.md' }}
+            ${{ github.event.inputs.modus == 'mtf-demo' && 'DEMO_ZEITFENSTER.json' || 'daten/zeitfenster_analysen.json' }}
+          retention-days: 14
       - name: Nur Ergebnisse des angeforderten Modus speichern
         if: ${{ success() }}
         shell: bash
@@ -76,6 +100,8 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           case "$MODUS" in
+            mtf-analyse)
+              git add -- ZEITFENSTER.md daten/zeitfenster_analysen.json ;;
             backtest)
               for p in BACKTEST_MASTER.md daten/master_backtest_kurve.csv daten/master_backtest_trades.csv; do
                 if [ -f "$p" ]; then git add -- "$p"; fi
