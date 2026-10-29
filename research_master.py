@@ -67,6 +67,10 @@ def _research_step(state, report, quotes, variant):
     and exit-on-weak-market logic. Parity with original on fixed 7%-exit is a
     mandatory assertion in historical runs and automated tests.
     """
+    if variant == 'ATR-Trailing 2,5x':
+        from trailing_engine import run_trailing_paper
+        result, _ = run_trailing_paper(state, report, quotes)
+        return result
     validate_state(state)
     s = deepcopy(state)
     day = report['assets'][0]['date']
@@ -100,12 +104,6 @@ def _research_step(state, report, quotes, variant):
             trade(s, sym, 'SELL', quotes[sym], 0, day, reason)
             decisions.append({'symbol': sym, 'decision': 'SELL', 'reason': reason})
         else:
-            if variant == 'ATR-Trailing 2,5x':
-                # Update AFTER stop check. The bar is closed; the next day's
-                # stop comparison is made to this newly known value.
-                p['research_peak_close'] = max(float(p['research_peak_close']),last_close)
-                p['research_stop_eur'] = max(float(p['research_stop_eur']),
-                                            float(p['research_peak_close']) - 2.5*_get_atr(a))
             decisions.append({'symbol': sym, 'decision':'HOLD', 'reason':'Bestehende Position halten'})
     for a in sorted(report['assets'], key=lambda a: a['symbol']):
         sym = a['symbol']
@@ -132,13 +130,11 @@ def _research_step(state, report, quotes, variant):
             continue
         trade(s, sym, 'BUY', quotes[sym], budget, day,
               'Master-Kaufkandidat + Risiko-Freigabe')
-        if variant in ('ATR-Stopp 2x', 'ATR-Trailing 2,5x'):
+        if variant == 'ATR-Stopp 2x':
             p = s['positions'][sym]
             entry = float(p['entry_price_eur'])
-            factor = 2.0 if variant == 'ATR-Stopp 2x' else 2.5
+            factor = 2.0
             p['research_stop_eur'] = max(0.000000001, entry - factor*_get_atr(a))
-            if variant == 'ATR-Trailing 2,5x':
-                p['research_peak_close'] = _get_close(a)
         decisions.append({'symbol':sym,'decision':'BUY','reason':f'Virtueller Einsatz {budget:.2f} EUR'})
     now_equity = equity(s, quotes)
     s['highest_equity_eur'] = max(float(s['highest_equity_eur']), now_equity)

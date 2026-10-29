@@ -31,6 +31,8 @@ def fresh_account() -> dict:
 
 
 def validate_state(s: dict) -> None:
+    if not isinstance(s, dict):
+        raise ValueError('Kontodaten müssen ein Objekt sein')
     if s.get('version') != '1.1' or s.get('currency') != 'EUR':
         raise ValueError('Unbekanntes Kontodatenformat: niemals automatisch zurücksetzen')
     cash = s.get('cash_eur')
@@ -39,9 +41,86 @@ def validate_state(s: dict) -> None:
     if not isinstance(s.get('trades'), list) or not isinstance(s.get('positions'), dict):
         raise ValueError('Beschädigtes Demokonto')
     for symbol, p in s['positions'].items():
-        if symbol not in ALLOWED or any(not isfinite(float(p[k])) or float(p[k]) <= 0
+        if symbol not in ALLOWED or any(isinstance(p[k], bool) or not isfinite(float(p[k])) or float(p[k]) <= 0
                                      for k in ('qty', 'entry_price_eur', 'cost_basis_eur')):
             raise ValueError('Ungültiger Coin-Bestand')
+
+    def number(value, name, minimum=0):
+        if isinstance(value, bool) or not isinstance(value, (int, float)) or not isfinite(value) or value < minimum:
+            raise ValueError(f'Ungültiges Kontofeld: {name}')
+        return float(value)
+
+    def iso_day(value):
+        from datetime import date
+        if not isinstance(value, str) or date.fromisoformat(value).isoformat() != value:
+            raise ValueError('Ungültiger Kontotag')
+        return value
+
+    initial = number(s.get('initial_eur'), 'initial_eur', 1e-12)
+    high = number(s.get('highest_equity_eur'), 'highest_equity_eur', 1e-12)
+    last = number(s.get('last_equity_eur'), 'last_equity_eur', 1e-12)
+    number(cash, 'cash_eur', -1e-6)
+    if high + 1e-6 < max(initial, last) or not isinstance(s.get('halt_new_buys'), bool):
+        raise ValueError('Ungültiger Höchstwert oder Risikosperre')
+    prior = s.get('last_processed_day')
+    if prior is not None:
+        iso_day(prior)
+    history = s.get('equity_history')
+    if not isinstance(history, list):
+        raise ValueError('Equity-Historie fehlt')
+    days = []
+    for row in history:
+        days.append(iso_day(row['day']))
+        value = number(row['equity_eur'], 'Historienwert', 1e-12)
+        balance = number(row['cash_eur'], 'Historienguthaben', -1e-6)
+        if value > high + 1e-6 or balance > value + 1e-6:
+            raise ValueError('Inkonsistente Equity-Historie')
+    if days != sorted(set(days)) or (days and days[-1] != prior) or (prior is not None and not days):
+        raise ValueError('Doppelte/unsortierte Historientage oder letzter Kontotag inkonsistent')
+    if history and (abs(history[-1]['equity_eur'] - last) > 1e-6 or abs(history[-1]['cash_eur'] - cash) > 1e-6):
+        raise ValueError('Letzter Kontostand stimmt nicht mit Historie überein')
+    if cash > last + 1e-6:
+        raise ValueError('Cash über Gesamtwert')
+    running_cash = initial
+    holdings = {}
+    previous_day = None
+    executions = set()
+    for t in s['trades']:
+        day = iso_day(t['day'])
+        sym, side = t['symbol'], t['side']
+        if (sym not in ALLOWED or side not in ('BUY', 'SELL') or t.get('type') != 'SIMULATION_ONLY'
+                or day not in days or (previous_day and day < previous_day)
+                or (day, sym) in executions):
+            raise ValueError('Ungültige oder doppelte Handelshistorie')
+        previous_day = day
+        executions.add((day, sym))
+        for field in ('qty', 'fill_price_eur', 'gross_eur'):
+            number(t[field], field, 1e-12)
+        for field in ('fee_eur', 'slippage_eur'):
+            number(t[field], field)
+        if side == 'BUY':
+            if sym in holdings or t.get('realized_pnl_eur') is not None:
+                raise ValueError('Inkonsistenter Kauf')
+            holdings[sym] = t['qty']
+            running_cash -= t['gross_eur'] + t['fee_eur']
+        else:
+            if sym not in holdings or abs(holdings.pop(sym) - t['qty']) > 1e-9:
+                raise ValueError('Verkauf ohne passenden Bestand')
+            number(t['realized_pnl_eur'], 'realized_pnl_eur', -float('inf'))
+            running_cash += t['gross_eur'] - t['fee_eur']
+    # Stored executions are rounded; positions/cash deliberately retain full precision.
+    if abs(running_cash - cash) > max(1e-5, len(s['trades']) * 2e-6) or set(holdings) != set(s['positions']):
+        raise ValueError('Handelshistorie passt nicht zu Cash/Beständen')
+    for sym, p in s['positions'].items():
+        if abs(float(p['qty']) - holdings[sym]) > 1e-9:
+            raise ValueError('Bestandsmenge passt nicht zu Historie')
+        if iso_day(p['entry_day']) > prior:
+            raise ValueError('Position aus zukünftigem Kontotag')
+        if s.get('exit_policy') == 'atr_trailing_2_5_close':
+            stop = number(p.get('trailing_stop_eur'), 'Trailing-Stopp', 1e-12)
+            peak = number(p.get('trailing_peak_close'), 'Trailing-Hoch', 1e-12)
+            if stop >= peak or peak < p['entry_price_eur']:
+                raise ValueError('Unplausibler Trailing-Stopp/Höchstkurs')
 
 
 def equity(s: dict, quotes: dict[str, Quote]) -> float:

@@ -126,6 +126,7 @@ class TrailingV14Tests(unittest.TestCase):
                 Path('daten').mkdir()
                 rep=r(actions={'BTC/EUR':'BEOBACHTEN: KAUFKANDIDAT'})
                 old,_=run_paper(fresh_account(),rep,q())
+                trading.initialize_account(Path('daten/master_trailing_state.json'), trailing=True)
                 old_text=json.dumps(old,indent=2,ensure_ascii=False)
                 Path('daten/master_paper_state.json').write_text(old_text,encoding='utf8')
                 with patch('sys.argv',['trading.py','paper']), \
@@ -148,6 +149,8 @@ class TrailingV14Tests(unittest.TestCase):
             orig=os.getcwd()
             os.chdir(d)
             try:
+                trading.initialize_account(Path('daten/master_paper_state.json'))
+                trading.initialize_account(Path('daten/master_trailing_state.json'), trailing=True)
                 rep=r(actions={'BTC/EUR':'BEOBACHTEN: KAUFKANDIDAT'})
                 with patch('sys.argv',['trading.py','paper']), \
                      patch.object(trading,'get_daily',return_value=({},object())), \

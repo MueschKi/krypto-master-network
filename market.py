@@ -16,6 +16,18 @@ def exchange():
     return ccxt.kraken({"enableRateLimit": True, "timeout": 20000})
 
 
+def validate_daily_index(index, symbol='Markt'):
+    """Reject raw grid errors; never repair, sort or fill market data."""
+    if (not isinstance(index, pd.DatetimeIndex) or index.empty or index.tz is None
+            or index.hasnans):
+        raise ValueError(f'{symbol}: ungültiger UTC-Tagesindex')
+    utc = index.tz_convert('UTC')
+    if (not utc.equals(utc.normalize()) or utc.has_duplicates
+            or not utc.is_monotonic_increasing
+            or (len(utc) > 1 and not ((utc.as_unit('ns').asi8[1:] - utc.as_unit('ns').asi8[:-1]) == 86_400_000_000_000).all())):
+        raise ValueError(f'{symbol}: fehlende, doppelte, unsortierte oder verschobene UTC-Tageskerzen')
+
+
 def get_daily(exchange_obj=None) -> tuple[dict[str, pd.DataFrame], object]:
     ex = exchange_obj or exchange()
     ex.load_markets()
@@ -28,11 +40,14 @@ def get_daily(exchange_obj=None) -> tuple[dict[str, pd.DataFrame], object]:
         if not raw:
             raise RuntimeError(f"Keine Kursdaten von Kraken für {symbol}")
         data = pd.DataFrame(raw, columns=["timestamp", "open", "high", "low", "close", "volume"])
+        raw_index = pd.to_datetime(data['timestamp'], unit='ms', utc=True)
+        validate_daily_index(pd.DatetimeIndex(raw_index), symbol)
+        if (data['timestamp'] > now_ms).any():
+            raise ValueError(f'{symbol}: zukünftige Kursdaten')
         # Kraken also returns the incomplete current candle. Never use it in signals.
         data = data[data["timestamp"] + DAY_MS <= now_ms].copy()
         data.index = pd.to_datetime(data["timestamp"], unit="ms", utc=True)
         data = data[["open", "high", "low", "close", "volume"]].astype(float)
-        data = data[~data.index.duplicated(keep="last")].sort_index()
         if len(data) < 250:
             raise RuntimeError(f"Nicht genug abgeschlossene Tageskerzen für {symbol}: {len(data)}")
         result[symbol] = data
@@ -40,6 +55,10 @@ def get_daily(exchange_obj=None) -> tuple[dict[str, pd.DataFrame], object]:
 
 
 def aligned(data: dict[str, pd.DataFrame]) -> dict[str, pd.DataFrame]:
+    if not data:
+        raise ValueError('Keine Märkte')
+    for symbol, frame in data.items():
+        validate_daily_index(frame.index, symbol)
     dates = sorted(set.intersection(*(set(d.index) for d in data.values())))
     if len(dates) < 250:
         raise RuntimeError("Zu wenige gemeinsame tägliche Kerzen für alle Märkte")

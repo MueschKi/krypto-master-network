@@ -47,7 +47,7 @@ jobs:
       - name: Bibliotheken installieren
         run: python -m pip install -r requirements.txt
       - name: Alle Softwaretests einschließlich v1.4
-        run: python -m unittest -q test_netzwerk test_trading test_master_backtest test_research_master test_trailing_v14 test_mtf test_mtf_schedule
+        run: python -m unittest discover -q
       - name: Gewählten Modus ausführen
         shell: bash
         env:
@@ -90,11 +90,27 @@ jobs:
             ${{ github.event.inputs.modus == 'mtf-demo' && 'DEMO_ZEITFENSTER.*' || 'ZEITFENSTER.md' }}
             ${{ github.event.inputs.modus == 'mtf-demo' && 'DEMO_ZEITFENSTER.json' || 'daten/zeitfenster_analysen.json' }}
           retention-days: 14
+      - name: Paper-Ergebnisse vor Veröffentlichung sichern
+        if: ${{ success() && (github.event.inputs.modus == 'paper' || github.event_name == 'schedule') }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: paper-ergebnisse
+          if-no-files-found: error
+          retention-days: 7
+          path: |
+            daten/master_paper_state.json
+            daten/master_trailing_state.json
+            TRADING_STATUS.md
+            TRAILING_STATUS.md
+            VERGLEICH_MASTER.md
+            NETZWERK.md
+            daten/netzwerk_analysen.json
       - name: Nur Ergebnisse des angeforderten Modus speichern
         if: ${{ success() }}
         shell: bash
         env:
           MODUS: ${{ github.event.inputs.modus || 'paper' }}
+          PUBLISH_BRANCH: ${{ github.ref_name }}
         run: |
           set -euo pipefail
           git config user.name 'github-actions[bot]'
@@ -116,14 +132,13 @@ jobs:
                 if [ -f "$p" ]; then git add -- "$p"; fi
               done ;;
             paper|analyse)
-              for p in TRADING_STATUS.md TRAILING_STATUS.md VERGLEICH_MASTER.md NETZWERK.md daten/master_paper_state.json daten/master_trailing_state.json daten/netzwerk_analysen.json; do
-                if [ -f "$p" ]; then git add -- "$p"; fi
-              done ;;
+              python paper_publish.py --mode "$MODUS" --branch "$PUBLISH_BRANCH"
+              exit 0 ;;
             *) echo 'Nur Testmodus, keine Ergebnisspeicherung.' ;;
           esac
           if ! git diff --cached --quiet; then
             git commit -m "Master Network v1.4: $MODUS aktualisiert"
-            git push origin "HEAD:${{ github.ref_name }}"
+            git push origin "HEAD:$PUBLISH_BRANCH"
           else
             echo 'Keine Änderungen an GitHub nötig.'
           fi

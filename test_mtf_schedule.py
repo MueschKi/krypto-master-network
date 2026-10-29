@@ -45,8 +45,9 @@ class SnapshotTests(unittest.TestCase):
         self.assertIn("cron: '17 4 * * *'", old)
         self.assertIn("cron: '47 6 * * *'", old)
         self.assertIn("github.event.inputs.modus || 'paper'", old)
-        # Everything in the Paper mode execution and staging stays identical.
-        expected = {'            paper|analyse)': '263691eedd4c04cb5d2cdb3f48abaf45ecc3c2c31b59b93e9e3db7c4b460a02f', '            demo|analyse|paper)': '4658a830acb065c1ed70c2ba799126021f1b2e3006ce84f7cfcd6251e6564a25'}
+        # Execution routing remains; Paper publication now uses its safe publisher.
+        self.assertIn('python paper_publish.py --mode', old)
+        expected = {'            demo|analyse|paper)': '4658a830acb065c1ed70c2ba799126021f1b2e3006ce84f7cfcd6251e6564a25'}
         for start, digest in expected.items():
             self.assertEqual(hashlib.sha256(old.split(start)[1].split(';;')[0].encode()).hexdigest(), digest)
 

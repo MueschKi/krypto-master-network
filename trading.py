@@ -42,22 +42,35 @@ def atomic_text(path: Path, content: str):
 
 def load_state(path: Path = STATE_FILE) -> dict:
     if not path.exists():
-        return fresh_account()
+        raise FileNotFoundError(f"Paper-Konto fehlt: {path}; Normalbetrieb gesperrt, keine automatische Neuanlage")
     s = json.loads(path.read_text(encoding='utf-8'))
     validate_state(s)
     return s
 
 
 def load_trailing_state(path: Path = TRAILING_STATE_FILE) -> dict:
-    # A missing account is a NEW 1,000 EUR virtual account. A broken existing
-    # account ALWAYS raises and is never reset.
+    # Missing or damaged accounts ALWAYS stop normal operation.
     if not path.exists():
-        return fresh_account()
+        raise FileNotFoundError(f"Paper-Konto fehlt: {path}; Normalbetrieb gesperrt, keine automatische Neuanlage")
     s = json.loads(path.read_text(encoding='utf-8'))
     validate_state(s)
+    from trailing_engine import _validate_trailing_positions
+    _validate_trailing_positions(s)
     if s.get('exit_policy') != 'atr_trailing_2_5_close':
         raise ValueError('Falsche Strategie in gespeicherter Trailing-Kontodatei')
     return s
+
+
+def initialize_account(path: Path, *, trailing=False):
+    """Explicit operator-only bootstrap. Exclusive create can never overwrite history."""
+    state = fresh_account()
+    if trailing:
+        state['exit_policy'] = 'atr_trailing_2_5_close'
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open('x', encoding='utf-8') as stream:
+        json.dump(state, stream, indent=2, allow_nan=False)
+        stream.flush()
+        os.fsync(stream.fileno())
 
 
 def save_report(report: dict):
@@ -68,8 +81,17 @@ def save_report(report: dict):
 
 def main():
     parser = argparse.ArgumentParser(description='Krypto Master Network – nur Paper Trading')
-    parser.add_argument('modus', choices=['demo', 'analyse', 'paper'])
+    parser.add_argument('modus', choices=['demo', 'analyse', 'paper', 'init'])
+    parser.add_argument('--account-path', type=Path)
+    parser.add_argument('--trailing', action='store_true')
     args = parser.parse_args()
+    if args.modus == 'init':
+        if args.account_path is None:
+            parser.error('init benötigt einen ausdrücklich angegebenen --account-path')
+        initialize_account(args.account_path, trailing=args.trailing)
+        return
+    if args.account_path is not None or args.trailing:
+        parser.error('Initialisierungsoptionen nur für init')
     if args.modus == 'demo':
         data = aligned(synthetic_demo())
         report = run_all(data, reference_day=None)
@@ -87,6 +109,9 @@ def main():
               'Keine echte Kontodatei verändert.')
         return
 
+    if args.modus == 'paper':
+        fixed = load_state()
+        trailing = load_trailing_state()
     data, exchange = get_daily()
     data = aligned(data)
     report = run_all(data, reference_day=datetime.now(timezone.utc).date())
@@ -98,8 +123,6 @@ def main():
     # Two separate paper accounts: original stays on fixed 7%-stop, while the
     # second account uses 2.5x ATR trailing. Decisions are calculated BEFORE
     # writing either account. GitHub commits all files only after job success.
-    fixed = load_state()
-    trailing = load_trailing_state()
     day = report['assets'][0]['date']
     fixed_due = not fixed.get('last_processed_day') or day > fixed['last_processed_day']
     trail_due = not trailing.get('last_processed_day') or day > trailing['last_processed_day']
