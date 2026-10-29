@@ -1,30 +1,48 @@
-# Krypto Master Network – Trading Edition v1.1
+# Krypto Master Network – Paper Trading & Multi-Timeframe v1.5.2
 
-**Prototyp: automatisches Paper Trading, keine echten Orders. Keine Gewinngarantie.**
+**Forschungs- und Paper-Trading-System für BTC/EUR, ETH/EUR, SOL/EUR und NEAR/EUR. Nur virtuelle Konten; keine echten Orders, keine Gewinngarantie und kein nachgewiesener Handelsvorteil.**
+
+**Aktueller Stand (29.10.2026):** v1.5.2 auf `main`, 97 automatisierte Tests im [GitHub-CI-Lauf](https://github.com/MueschKi/krypto-master-network/actions/runs/40887673658) erfolgreich. Ein automatischer Paper-Lauf über `schedule` wurde am 29.10.2026 um 13:45 UTC [bestätigt](https://github.com/MueschKi/krypto-master-network/actions/runs/40884879154); für die unabhängige MTF-Automatik ist bisher nur ein manueller Erfolg belegt. Geplante GitHub-Zeiten sind **keine garantierten Ausführungszeitpunkte**.
+
+## Auf einen Blick
+
+| Modul | Funktion | Ergebnis |
+|---|---|---|
+| Master-Netzwerk | Zwölf regelbasierte Spezialisten auf abgeschlossenen 1d-Kerzen | `NETZWERK.md` |
+| Original-Paper-Konto | Unveränderte Entry-Regeln, 7-%-Tagesschluss-Stopp | `TRADING_STATUS.md` |
+| ATR-Trailing-Paper-Konto | Gleiche Entry-Regeln, 2,5× ATR14-Trailing-Stopp | `TRAILING_STATUS.md` |
+| Kontovergleich | Zwei unabhängige virtuelle Startkonten à 1.000 € | `VERGLEICH_MASTER.md` |
+| MTF-Beobachtung | 1d / 4h / 1h / 15m, **ohne** Einfluss auf beide Paper-Konten | `ZEITFENSTER.md` |
+
+Die beiden Konten sind weiterhin getrennt. Zum dokumentierten Stand vom 29.10.2026 enthalten sie jeweils **1.000 € und null Trades**; letzter verarbeiteter UTC-Börsentag ist der **28.10.2026**. Kontowerte und Signale ändern sich nur nach einem tatsächlich erfolgreich veröffentlichten Lauf.
 
 ## Architektur
 
 ```text
-Öffentliche Kraken-Kursdaten (abgeschlossene 1d Kerzen)
-                  |
-       12 Analyse-Spezialisten
-                  |
-          Master-Entscheidung
-       BUY-KANDIDAT / HOLD / SCHWACH
-                  |
-       Datenqualität + Risiko-Veto
-                  |
-      Orderbuch-Snapshot (öffentlich)
-                  |
-         PaperTradingEngine
-        |              |
-  Transaktionsbuch   Portfolio / Risikolimits
-        \              /
-         TRADING_STATUS.md
+                     Kraken (öffentlich, ohne Zugangsdaten)
+                        /                     \
+             1d-OHLCV-Daten              1d/4h/1h/15m-OHLCV
+                    |                            |
+             12 Spezialisten              Trend / Momentum / ATR
+                    |                            |
+             Master + Risiko-Veto           MTF-Beobachtung
+                    |                            |
+              9 Entry-Prüfungen          ZEITFENSTER.md + JSON
+                    |
+             Öffentliche Bid-/Ask-Quotes
+                    |
+         +----------+----------+
+         |                     |
+   Paper-Konto 7 %       Paper-Konto ATR 2,5x
+   Tagesschluss-Stopp    Trailing-Schlusskurs-Stopp
+         |                     |
+   TRADING_STATUS.md      TRAILING_STATUS.md
+         +----------+----------+
+                    |
+           VERGLEICH_MASTER.md
 
-      LiveExchangeAdapter = hart gesperrt
+    Nur Simulation. Echtgeld-Orderadapter dauerhaft gesperrt.
 ```
-
 ## Spezialisten
 
 - Datenqualität und Frische
@@ -42,7 +60,9 @@
 
 **Wichtig:** Auch zwölf unterschiedliche Module schaffen keine zwölf unabhängigen Datenquellen. Die meisten Signale beruhen auf denselben OHLCV-Kursen. Der Master verwendet feste, dokumentierte Bedingungen statt eine erfundene KI-„Sicherheit in Prozent“.
 
-## Trading-Logik (MVP)
+## Trading-Logik der zwei Paper-Konten
+
+Beide Konten erhalten dieselben Master-Kaufsignale, führen jedoch ihre Stop-Strategie **unabhängig** aus. Das Original verwendet einen festen **7-%-Tagesschluss-Stopp** relativ zum Einstieg; der Vergleich verwendet einen **2,5× ATR14-Trailing-Stopp**, dessen Schwelle nur auf Basis abgeschlossener Kerzen nachgezogen und niemals abgesenkt wird. Beide Stopps sind **keine** Börsenaufträge und werden erst beim nächsten erfolgreichen Tageslauf geprüft.
 
 - Der Master lässt nur einen technisch begründeten **Kaufkandidaten** zu, wenn die Risiko- und Datenqualitätsprüfung OK ist.
 - Die getrennte Paper-Engine verarbeitet **BUY / SELL / HOLD / BLOCK**, niemals echte Börsenorders.
@@ -51,8 +71,8 @@
 - Nach einem Drawdown von 12 % vom bisher erreichten Depot-Hoch **dauerhafte Sperre weiterer Käufe bis zur manuellen Prüfung**. Bestehende Positionen können weiterhin verkauft werden.
 - Gebührenannahme 0,4 % je Ausführung; zusätzliche modellierte Slippage 0,1 % gegenüber Bid/Ask. Mindestorder 15 €.
 - Portfolio: nur Spot-Käufe/Verkäufe, **kein Shorting, keine Hebel, keine Kreditaufnahme**.
-- Jeder abgeschlossene UTC-Handelstag wird höchstens einmal gebucht. Gleichzeitige GitHub-Actions-Läufe werden serialisiert.
-- Fehlende, unplausible oder veraltete Daten stoppen den Durchlauf; keine stillen Preisersatzwerte.
+- Derselbe abgeschlossene UTC-Handelstag wird in jedem Konto höchstens einmal verarbeitet. Paper-Läufe sind über eine eigene Concurrency-Gruppe serialisiert; MTF und Paper können parallel laufen. Die sichere Veröffentlichung erkennt Änderungen am Konto und schützt vor Konflikten.
+- Für aktuelle Paper-Signale ist **exakt die vollständig abgeschlossene UTC-Tageskerze des Vortags** erforderlich. Fehlende, doppelte, unsortierte, unplausible oder veraltete Rohdaten blockieren den Lauf; keine Preisersatzwerte, kein Auffüllen.
 
 Der öffentliche Bid-/Ask-Snapshot ist keine Garantie für ausführbare Mengen oder Preise. Die Engine berücksichtigt weder vollständige Orderbuchtiefe noch echte Teilausführungen oder Börsenrestriktionen. Ohne dauerhaft laufenden Dienst ist dies keine durchgehende Stop-Überwachung. Tagesbasierte Kurslücken können zu erheblich größeren Verlusten führen. **Diese Grenzen schließen einen verantwortbaren Echtgeldbetrieb der aktuellen Version aus.**
 
@@ -60,27 +80,32 @@ Der öffentliche Bid-/Ask-Snapshot ist keine Garantie für ausführbare Mengen o
 
 ```bash
 python -m pip install -r requirements.txt
-python -m unittest -q test_netzwerk test_trading
+python -m unittest discover -q   # vollständige Testsuite, Stand v1.5.2: 97 Tests
 python trading.py demo        # künstliche Kurse, getrennte DEMO_TRADING.md
 python trading.py analyse     # echte öffentliche Daten, ohne Transaktion
 python trading.py paper       # echte öffentliche Daten, NUR simulierte Orders
 ```
 
-`paper` benötigt **keine Zugangsdaten**: der Kursabruf verwendet ausschließlich öffentliche Kraken-Schnittstellen. Keine Börsenkonten und keine Wallets verbinden.
+`paper` benötigt **keine Zugangsdaten**: der Kursabruf verwendet ausschließlich öffentliche Kraken-Schnittstellen. Keine Börsenkonten und keine Wallets verbinden. **Wichtig:** Im Normalbetrieb müssen die beiden bestehenden, gültigen Kontodateien vorhanden sein. Sind sie gelöscht oder beschädigt, bricht der Lauf vor dem Netzwerkzugriff ab; es wird kein neues 1.000-€-Konto erzeugt. Eine ausdrücklich angeforderte Initialisierung ist ausschließlich für **neue** Konten vorgesehen und darf niemals zur Wiederherstellung einer vorhandenen Historie verwendet werden.
 
 ## Ergebnisse
 
-- `TRADING_STATUS.md`: zentraler, mobil lesbarer Überblick über Depot, Signale und simulierte Orders.
+- `TRADING_STATUS.md`: Original-Paper-Konto mit festem 7-%-Stopp.
+- `TRAILING_STATUS.md`: separates Paper-Konto mit ATR-Trailing-Stopp.
+- `VERGLEICH_MASTER.md`: gemeinsamer Vergleich der beiden simulierten Konten.
 - `NETZWERK.md`: die zwölf Spezialanalysen für BTC, ETH, SOL und NEAR.
-- `daten/master_paper_state.json`: **einzige verbindliche Kontodatei** einschließlich unveränderlicher Trade-Historie. Nicht löschen, nicht manuell verändern.
+- `daten/master_paper_state.json` und `daten/master_trailing_state.json`: **zwei verbindliche, getrennte Kontodateien** einschließlich Trade- und Equity-Historie. Nicht löschen, zurücksetzen oder manuell verändern.
 - `daten/netzwerk_analysen.json`: alle Einzelwerte maschinenlesbar.
+- `ZEITFENSTER.md` und `daten/zeitfenster_analysen.json`: unabhängige MTF-Beobachtung, keine Handelsfreigabe.
 - `DEMO_TRADING.md`: nur künstliche Demo, nicht Teil des produktiven Kontos, per `.gitignore` ausgeschlossen.
 
 Kursdaten nur von **abgeschlossenen 1d-Kerzen**. Die Kraken-OHLC-Schnittstelle ist auf ca. 720 Kerzen begrenzt.
 
 ## Automatische tägliche Ausführung
 
-Der Workflow [master-paper.yml](.github/workflows/master-paper.yml) ist auf dem Standardbranch täglich für **04:17 und 06:47 UTC** geplant. Vor jedem Paper-Trading-Durchlauf werden alle Softwaretestmodule ausgeführt; nur bei Erfolg folgen die Simulation und das Speichern der Ergebnisse. Die Läufe werden je Branch nacheinander ausgeführt; derselbe abgeschlossene UTC-Handelstag wird höchstens einmal gebucht. GitHub kann geplante Läufe verzögern oder auslassen. Unter **Actions → Run workflow** ist außerdem ein manueller Start möglich (Standardmodus: `demo`). Echtgeldhandel bleibt technisch gesperrt.
+Der Workflow [master-paper.yml](.github/workflows/master-paper.yml) ist auf `main` täglich für **04:17 und 06:47 UTC** geplant. Geplante `schedule`-Ereignisse verwenden automatisch den Modus `paper`; bei einem **manuellen** Start über **Actions → Run workflow** ist dagegen `demo` voreingestellt und `paper` muss ausdrücklich gewählt werden. Vor der Berechnung läuft die vollständige Testsuite. Ergebnisse und beide Kontodateien werden im Paper-Modus zunächst als GitHub-Artifact (7 Tage) gesichert; die Veröffentlichung auf `main` erfolgt danach über `paper_publish.py` mit Allowlist, Konfliktprüfung und bis zu drei normalen Fast-forward-Versuchen. Bei einer zwischenzeitlichen Kontoänderung bricht der Publisher ab, statt neuere Zustände zu überschreiben. Ein fehlgeschlagener Push ist als Workflow-Fehler sichtbar.
+
+**Belegter Betriebsstand:** Am **29.10.2026 um 13:45 UTC** lief das Paper-Workflow-Ereignis `schedule` erfolgreich ([GitHub-Lauf](https://github.com/MueschKi/krypto-master-network/actions/runs/40884879154)); dies war noch **vor** dem Merge von v1.5.2. Der Lauf aktualisierte die Berichte, ohne einen neuen Handelstag zu buchen. Die v1.5.2-Persistenz wird erstmals bei einem späteren Lauf auf `main` produktiv erprobt. GitHub kann geplante Läufe verzögern oder auslassen: ein aktivierter Workflow beweist nicht die Zustellung jedes Cron-Ereignisses.
 
 ## Echtgeld-Schnittstelle
 
@@ -88,7 +113,7 @@ Der Workflow [master-paper.yml](.github/workflows/master-paper.yml) ist auf dem 
 
 ## Nutzung
 
-Zur Einrichtung auf dem iPhone siehe `ANLEITUNG_IPHONE.md` im Installationspaket. Der GitHub-Workflow liegt separat zum Einfügen bereit, weil die GitHub-Mobile-App vorhandene Dateien nicht direkt hochladen kann; über Safari funktioniert es.
+Auf dem iPhone das [Repository](https://github.com/MueschKi/krypto-master-network) in Safari öffnen (bei Bedarf **Desktop-Website anfordern**). Unter **Actions** den gewünschten Workflow auswählen und die Läufe beziehungsweise **Run workflow** öffnen. Die Ergebnisdateien sind anschließend unter **Code** und gegebenenfalls als Artifact im Workflow-Lauf verfügbar. Für den normalen Betrieb müssen keine Dateien manuell hochgeladen werden.
 
 ## v1.5: Multi-Timeframe-Beobachtung
 
@@ -139,9 +164,7 @@ Stunden davor. Indikatorwerte sind Beobachtungen historischer Kurse.
 
 1. Repository in Safari öffnen, bei Bedarf „Desktop-Website anfordern“.
 2. **Actions → Krypto Master Network → Run workflow** öffnen.
-3. Nach Freigabe/Merge Branch `main` und `mtf-demo` oder `mtf-analyse` wählen.
-   Vor dem Merge stehen die neuen Dispatch-Optionen eventuell noch nicht zur
-   Verfügung, weil GitHub den Workflow auf dem Standardbranch benötigt.
+3. Branch `main` und `mtf-demo` oder `mtf-analyse` wählen. Alternativ direkt den unabhängigen Workflow **MTF – unabhängige Beobachtung** manuell starten; dieser führt die echte öffentliche Beobachtung aus.
 4. Den Lauf öffnen: Zusammenfassung und das Artefakt `multi-timeframe-berichte`
    enthalten die Markdown-/JSON-Dateien. Artefakte benötigen GitHub-Anmeldung.
 5. Nur `mtf-analyse` auf `main` speichert die beiden Ergebnisdateien sicher auf
@@ -223,10 +246,24 @@ Datenstörung, keine Freigabe der Marktdaten. Details stehen im Bericht je
 Coin/Zeitfenster. Ein roter Job verlangt Prüfung von Tests, Ausführung,
 Artifact-Upload beziehungsweise Push im jeweiligen Schritt.
 
-**Noch kein automatischer Erfolg nachgewiesen:** Diese Änderung richtet den
-Zeitplan ein. Erst ein tatsächlich beobachteter `schedule`-Lauf nach dem Merge
-belegt einen automatischen Start. Für bisher fehlende Paper-Cron-Ereignisse ist
-keine Ursache bewiesen. GitHub-Cron kann verspätet starten oder ausfallen; allein
-mit GitHub Actions lässt sich ein verpasster Cron nicht zuverlässig erkennen,
-wenn kein Workflow läuft. Kein 100-%-Verfügbarkeitsversprechen. Bei Bedarf den
-MTF-Workflow manuell auf `main` starten und das Event dabei korrekt einordnen.
+**Betriebsstand vom 29.10.2026:** Für **Paper** ist ein echtes, erfolgreiches `schedule`-Ereignis nachgewiesen ([Lauf](https://github.com/MueschKi/krypto-master-network/actions/runs/40884879154)). Für **MTF** ist bislang nur ein erfolgreicher **manueller** `workflow_dispatch`-Lauf nachgewiesen ([Lauf](https://github.com/MueschKi/krypto-master-network/actions/runs/40836826622)); der automatisierte MTF-Betrieb ist damit noch **nicht** verifiziert. Für zuvor fehlende Cron-Ereignisse ist keine eindeutige Ursache bewiesen. GitHub-Cron kann verspätet starten oder ausfallen; ohne ausgeführtes Ereignis kann GitHub Actions allein keinen versäumten Termin zuverlässig melden. Kein 100-%-Verfügbarkeitsversprechen. Bei Bedarf MTF manuell auf `main` ausführen und den manuellen Trigger korrekt kennzeichnen.
+
+
+## v1.5.2: Paper-Persistenz und Datenintegrität
+
+Die Sicherheitskorrekturen aus [Issue #6](https://github.com/MueschKi/krypto-master-network/issues/6) wurden mit [Pull Request #7](https://github.com/MueschKi/krypto-master-network/pull/7) auf `main` übernommen. Sie ändern **keine** Entry-/Exit-Regeln und keine bestehenden Paper-Kontodaten.
+
+- **Kein stiller Kontoreset:** Fehlende oder beschädigte Kontodateien stoppen `python trading.py paper` bereits vor dem Kursabruf. Der explizite Operator-Modus `python trading.py init --account-path /pfad/zu/neuem-konto.json [--trailing]` erzeugt nur neue Dateien und verweigert das Überschreiben bestehender Dateien. **Nicht** auf vorhandene Paper-Konten anwenden.
+- **Transaktionssichere Veröffentlichung:** `paper_publish.py` committet im Paper-Modus ausschließlich die sieben ausdrücklich erlaubten Konto-/Berichtsdateien in einem separaten Git-Worktree. Parallele MTF-Commits bleiben erhalten. Bei konkurrierender Kontoänderung oder veränderter Berechnungsgrundlage wird ohne Überschreiben abgebrochen; bis zu drei Fast-forward-Push-Versuche, **kein Force-Push**. Berichte sind davor sieben Tage als Workflow-Artifact gesichert.
+- **Strenge 1d-Rohdatenprüfung:** Exakte, aufsteigende UTC-Tageskerzen, keine Lücken, doppelten oder unsortierten Bars; Prüfung **vor** der Ausrichtung der Märkte. Für die laufende Analyse zählt nur der vollständig abgeschlossene UTC-Vortag. Historische Replays prüfen zeitkausal ohne Bezug auf die heutige Uhr.
+- **Validierte Kontohistorie:** Bilanz, historische Handelstage, Trade-Reihenfolge und Positionsmengen werden auf Plausibilität geprüft; beide bestehenden Kontodateien bleiben erhalten.
+- **ATR-Forschung vereinheitlicht:** Die historische Variante `ATR-Trailing 2,5x` nutzt jetzt die unveränderte Produktions-Engine. Ältere historische Ergebnisse (insbesondere **+8,63 %** auf bereits bekannten Daten) müssen mit der korrigierten Forschung **neu berechnet** werden; sie sind keine unabhängige Renditeprognose.
+
+**Abnahme:** [97 Tests mit Python 3.11 erfolgreich](https://github.com/MueschKi/krypto-master-network/actions/runs/40887673658). Die vollständige technische Erläuterung einschließlich Grenzen steht unter [docs/SAFETY_v1.5.2.md](docs/SAFETY_v1.5.2.md). Auch mit diesen Sicherungen gibt es kein Echtzeit-Monitoring, keine garantierten Stopps und keinen Echtgeld-Modus.
+
+## Nächste Betriebsprüfungen
+
+1. Einen tatsächlich durch `schedule` gestarteten **MTF**-Lauf einschließlich Report-Publikation auf `main` nachweisen; ein manueller Lauf reicht hierfür nicht.
+2. Nach dem Merge v1.5.2 einen erfolgreichen **Paper**-Lauf inklusive Artifact und sicherer Veröffentlichung kontrollieren.
+3. Versäumte UTC-Tage und ausgefallene Zeitpläne ausdrücklich erfassen: derzeit verarbeitet der Paper-Bot pro erfolgreich gestarteten Lauf nur den jüngsten zulässigen Tagesabschluss und holt fehlende Handelstage nicht rückwirkend automatisch nach.
+4. Erst nach zusätzlicher unabhängiger Paper-Beobachtung Strategiequalität beurteilen; keine Echtgeldfreigabe.
