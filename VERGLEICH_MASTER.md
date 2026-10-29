@@ -2,7 +2,7 @@
 
 **KEIN ECHTGELD. Keine Gewinngarantie. Unterschiedliche Konto-Starttermine beachten.**
 
-Erstellt: 29.10.2026 05:25 UTC
+Erstellt: 29.10.2026 13:46 UTC
 
 ## Aktuelle Depotwerte
 
