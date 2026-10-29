@@ -2,6 +2,7 @@
 from __future__ import annotations
 import pandas as pd
 import numpy as np
+from market import validate_daily_index
 from net_core import Finding
 
 
@@ -24,14 +25,14 @@ def analyze(symbol: str, df: pd.DataFrame, reference_day=None) -> Finding:
         fail.append('Nicht plausible Kurs- oder Volumenwerte')
     if (d[:, 1] < d[:, [0, 2, 3]].max(axis=1)).any() or (d[:, 2] > d[:, [0, 1, 3]].min(axis=1)).any():
         fail.append('High/Low inkonsistent')
-    if len(df) > 1:
-        gaps = (df.index[1:] - df.index[:-1]).days
-        if (gaps > 2).any() or (gaps < 1).any():
-            fail.append('Lücken oder doppelte Tagesabstände in den Daten')
+    try:
+        validate_daily_index(df.index, symbol)
+    except ValueError as exc:
+        fail.append(str(exc))
     if reference_day is not None:
-        last = df.index[-1].date()
-        if (reference_day - last).days > 2 or last > reference_day:
-            fail.append(f'Letzter abgeschlossener Kurstag {last}: veraltete / zukünftige Daten')
+        last = df.index[-1].tz_convert('UTC').date()
+        if (reference_day - last).days != 1:
+            fail.append(f'Letzter abgeschlossener UTC-Kurstag {last}: erwartet Vortag von {reference_day}; API-Lag / zukünftige Daten')
     if fail:
         return Finding('Datenqualität', 'BLOCKIERT', -2, {'kerzen': len(df), 'letzter_tag': df.index[-1].date().isoformat()}, fail)
     return Finding('Datenqualität', 'OK', 0, {'kerzen': len(df), 'letzter_tag': df.index[-1].date().isoformat()},

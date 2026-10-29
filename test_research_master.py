@@ -68,7 +68,7 @@ class ResearchMasterTests(unittest.TestCase):
         a['action']='BEOBACHTEN: KAUFKANDIDAT'
         state=_research_step(fresh_account(),rep,open_quotes(self.data,i+1), 'ATR-Trailing 2,5x')
         self.assertIn('BTC/EUR',state['positions'])
-        original=state['positions']['BTC/EUR']['research_stop_eur']
+        original=state['positions']['BTC/EUR']['trailing_stop_eur']
         rep2=deepcopy(rep)
         for a in rep2['assets']:
             a['date']=self.data[SYMBOLS[0]].index[i+1].date().isoformat()
@@ -77,7 +77,7 @@ class ResearchMasterTests(unittest.TestCase):
         a['agents']['setup']['facts']['indikative_einstiegsbasis']=state['positions']['BTC/EUR']['entry_price_eur']*1.2
         a['agents']['volatilitaet']['facts']['atr14']=float(state['positions']['BTC/EUR']['entry_price_eur'])*0.01
         nextstate=_research_step(state,rep2,open_quotes(self.data,i+2), 'ATR-Trailing 2,5x')
-        self.assertGreaterEqual(nextstate['positions']['BTC/EUR']['research_stop_eur'],original)
+        self.assertGreaterEqual(nextstate['positions']['BTC/EUR']['trailing_stop_eur'],original)
         self.assertLessEqual(sum(p['cost_basis_eur'] for p in nextstate['positions'].values()),450+1e-6)
 
     def test_mfe_excludes_fill_day_extremes(self):
