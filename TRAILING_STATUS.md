@@ -2,8 +2,8 @@
 
 **NUR PAPER TRADING – ECHTGELD TECHNISCH GESPERRT.**
 
-Aktualisierungszeit: 28.10.2026 21:54 UTC  
-Letzter verarbeiteter Börsentag: **2026-10-27**  
+Aktualisierungszeit: 29.10.2026 05:25 UTC  
+Letzter verarbeiteter Börsentag: **2026-10-28**  
 Kontolauf: **reguläre Tagesverarbeitung**
 
 ## ATR-Trailing-Demokonto (2,5× ATR14)

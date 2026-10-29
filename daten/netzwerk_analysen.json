@@ -1,6 +1,6 @@
 {
   "network_version": "1.2",
-  "created_utc": "2026-10-28T21:54:20+00:00",
+  "created_utc": "2026-10-29T05:25:41+00:00",
   "basis": "Nur abgeschlossene Kraken-Tageskerzen (optional separater Live-Orderbuch-Snapshot)",
   "mode": "RESEARCH_ONLY_NO_TRADES",
   "assets": [
@@ -8,15 +8,14 @@
       "symbol": "BTC/EUR",
       "action": "ABWARTEN",
       "reasons": [
-        "Kaufprüfung: 2 von 9 Bedingungen nicht erfüllt",
-        "Fehlt: Momentum positiv",
+        "Kaufprüfung: 1 von 9 Bedingungen nicht erfüllt",
         "Fehlt: Einstiegsszenario akzeptabel",
         "Orderbuch/Spread nicht geprüft (historische Tagesanalyse)"
       ],
-      "date": "2026-10-27",
+      "date": "2026-10-28",
       "gates": {
         "Trend positiv": true,
-        "Momentum positiv": false,
+        "Momentum positiv": true,
         "Struktur mindestens neutral": true,
         "Volumensignal mindestens neutral": true,
         "Relatives Tagesvolumen mindestens 0,8": true,
@@ -26,7 +25,6 @@
         "Risiko-Bot: freigegeben": true
       },
       "failed_gates": [
-        "Momentum positiv",
         "Einstiegsszenario akzeptabel"
       ],
       "agents": {
@@ -36,7 +34,7 @@
           "score": 0,
           "facts": {
             "kerzen": 719,
-            "letzter_tag": "2026-10-27"
+            "letzter_tag": "2026-10-28"
           },
           "reasons": [
             "Abgeschlossene Tageskerzen plausibel; keine Echtzeitgarantie"
@@ -47,10 +45,10 @@
           "signal": "POSITIV",
           "score": 1,
           "facts": {
-            "kurs": 72600.9,
-            "ema20": 72882.1952,
-            "sma50": 72229.318,
-            "sma200": 63440.2865,
+            "kurs": 72872.3,
+            "ema20": 72881.2528,
+            "sma50": 72337.088,
+            "sma200": 63492.83,
             "wochen_ema8": 71056.9049,
             "wochen_sma20": 63245.4,
             "tag_aufwaerts": false,
@@ -66,7 +64,7 @@
           "signal": "NEUTRAL",
           "score": 0,
           "facts": {
-            "hoch_20": 76071.8,
+            "hoch_20": 75525.6,
             "tief_20": 70635.1,
             "hoch_60": 77520.9,
             "tief_60": 64927.2,
@@ -82,29 +80,29 @@
         },
         "momentum": {
           "agent": "Momentum (RSI/MACD)",
-          "signal": "NEUTRAL",
-          "score": 0,
+          "signal": "POSITIV",
+          "score": 1,
           "facts": {
-            "rsi14": 49.0202,
-            "macd_histogramm": -292.2056,
-            "macd_histogramm_vortag": -372.7035
+            "rsi14": 50.3892,
+            "macd_histogramm": -210.2825,
+            "macd_histogramm_vortag": -292.2056
           },
           "reasons": [
-            "RSI14 49.0 (über 70 = überkauft, nicht automatisch Verkauf)",
+            "RSI14 50.4 (über 70 = überkauft, nicht automatisch Verkauf)",
             "MACD-Histogramm ohne eindeutigen Schub"
           ]
         },
         "volumen": {
           "agent": "Volumen (relativ/OBV)",
           "signal": "POSITIV",
-          "score": 1,
+          "score": 2,
           "facts": {
-            "volumen_faktor_20": 0.9198,
+            "volumen_faktor_20": 1.3494,
             "obv_10_tage_steigend": true,
             "tageskurs_gestiegen": true
           },
           "reasons": [
-            "Volumen: 0.92× gegenüber 20 Tagen",
+            "Volumen: 1.35× gegenüber 20 Tagen",
             "10-Tage-OBV: steigend",
             "Volumendaten sind börsenspezifisch, kein globales Krypto-Gesamtvolumen"
           ]
@@ -114,13 +112,13 @@
           "signal": "NEUTRAL",
           "score": 0,
           "facts": {
-            "atr14": 1735.2714,
-            "atr14_prozent": 2.39,
+            "atr14": 1674.9143,
+            "atr14_prozent": 2.3,
             "bollinger_breite_prozent": 5.13,
             "risikostufe": "NORMAL"
           },
           "reasons": [
-            "ATR14: 2.39% des Kurses",
+            "ATR14: 2.30% des Kurses",
             "Bollinger-Bandbreite: 5.13%",
             "Volatilität bestimmt Risiko/Positionsgröße, nicht die Kursrichtung"
           ]
@@ -130,14 +128,14 @@
           "signal": "NEUTRAL",
           "score": 0,
           "facts": {
-            "adx14": 18.49,
-            "plus_di14": 18.18,
-            "minus_di14": 22.16,
+            "adx14": 17.48,
+            "plus_di14": 19.15,
+            "minus_di14": 20.91,
             "phase": "SEITWAERTS/UNSICHER",
             "richtung": "ABWAERTS"
           },
           "reasons": [
-            "ADX14 18.5: SEITWAERTS/UNSICHER",
+            "ADX14 17.5: SEITWAERTS/UNSICHER",
             "DI-Richtung: ABWAERTS",
             "ADX allein zeigt Trendstärke, keinen zukünftigen Gewinn"
           ]
@@ -149,14 +147,14 @@
           "facts": {
             "unterstuetzung": 64927.2,
             "widerstand": 77520.9,
-            "abstand_widerstand_prozent": 6.7768,
-            "abstand_unterstuetzung_prozent": 11.8189,
+            "abstand_widerstand_prozent": 6.3791,
+            "abstand_unterstuetzung_prozent": 12.2369,
             "nahe_widerstand": false,
             "nahe_unterstuetzung": false
           },
           "reasons": [
-            "60-Tage-Widerstand 77520.9000 EUR, Distanz 6.78%",
-            "60-Tage-Unterstützung 64927.2000 EUR, Abstand 11.82%",
+            "60-Tage-Widerstand 77520.9000 EUR, Distanz 6.38%",
+            "60-Tage-Unterstützung 64927.2000 EUR, Abstand 12.24%",
             "Historische Niveaus sind keine garantierten Stop- oder Umkehrpunkte"
           ]
         },
@@ -165,17 +163,17 @@
           "signal": "NEUTRAL",
           "score": 0,
           "facts": {
-            "indikative_einstiegsbasis": 72600.9,
-            "theoretischer_2atr_stop": 69130.3571,
+            "indikative_einstiegsbasis": 72872.3,
+            "theoretischer_2atr_stop": 69522.4714,
             "60t_widerstand": 77520.9,
             "60t_unterstuetzung": 64927.2,
-            "indikatives_crv_zum_widerstand": 1.42,
+            "indikatives_crv_zum_widerstand": 1.39,
             "bewertung": "UNGÜNSTIGER_ABSTAND_ZUM_WIDERSTAND"
           },
           "reasons": [
-            "Nur Szenario: Einstieg Schlusskurs 72600.9000, Abstand Stop 2×ATR",
+            "Nur Szenario: Einstieg Schlusskurs 72872.3000, Abstand Stop 2×ATR",
             "Historischer 60-Tage-Widerstand 77520.9000 (kein Kursziel)",
-            "Indikatives Chance-Risiko-Verhältnis: 1.42",
+            "Indikatives Chance-Risiko-Verhältnis: 1.39",
             "Schlusskurs-Stop/ATR schützt nicht vor Kurslücken, Spreads und Slippage"
           ]
         },
@@ -184,8 +182,8 @@
           "signal": "NEUTRAL",
           "score": 0,
           "facts": {
-            "rendite_30_tage_prozent": -2.181,
-            "btc_30_tage_prozent": -2.181,
+            "rendite_30_tage_prozent": -0.7403,
+            "btc_30_tage_prozent": -0.7403,
             "relative_starke_pp": 0.0,
             "korrelation_60_tage": 1.0
           },
@@ -210,7 +208,7 @@
           "score": 0,
           "facts": {
             "kaufkandidat_erlaubt": true,
-            "atr_prozent": 2.39
+            "atr_prozent": 2.3
           },
           "reasons": [
             "Kein aktuelles Orderbuch: tatsächliche Ausführbarkeit nicht geprüft"
@@ -220,8 +218,8 @@
       "scores": {
         "trend": 1,
         "struktur": 0,
-        "momentum": 0,
-        "volumen": 1,
+        "momentum": 1,
+        "volumen": 2,
         "niveaus": 0,
         "relativ": 0
       }
@@ -237,7 +235,7 @@
         "Fehlt: Relatives Tagesvolumen mindestens 0,8",
         "Orderbuch/Spread nicht geprüft (historische Tagesanalyse)"
       ],
-      "date": "2026-10-27",
+      "date": "2026-10-28",
       "gates": {
         "Trend positiv": false,
         "Momentum positiv": false,
@@ -262,7 +260,7 @@
           "score": 0,
           "facts": {
             "kerzen": 719,
-            "letzter_tag": "2026-10-27"
+            "letzter_tag": "2026-10-28"
           },
           "reasons": [
             "Abgeschlossene Tageskerzen plausibel; keine Echtzeitgarantie"
@@ -273,10 +271,10 @@
           "signal": "NEUTRAL",
           "score": 0,
           "facts": {
-            "kurs": 2108.89,
-            "ema20": 2165.7058,
-            "sma50": 2237.9418,
-            "sma200": 1875.1435,
+            "kurs": 2113.82,
+            "ema20": 2160.7643,
+            "sma50": 2237.4888,
+            "sma200": 1875.9624,
             "wochen_ema8": 2157.8596,
             "wochen_sma20": 1891.05,
             "tag_aufwaerts": false,
@@ -292,7 +290,7 @@
           "signal": "NEGATIV",
           "score": -1,
           "facts": {
-            "hoch_20": 2398.74,
+            "hoch_20": 2309.43,
             "tief_20": 2037.54,
             "hoch_60": 2466.25,
             "tief_60": 2036.02,
@@ -311,12 +309,12 @@
           "signal": "NEUTRAL",
           "score": 0,
           "facts": {
-            "rsi14": 40.3512,
-            "macd_histogramm": -8.8681,
-            "macd_histogramm_vortag": -12.0103
+            "rsi14": 41.1294,
+            "macd_histogramm": -5.7935,
+            "macd_histogramm_vortag": -8.8681
           },
           "reasons": [
-            "RSI14 40.4 (über 70 = überkauft, nicht automatisch Verkauf)",
+            "RSI14 41.1 (über 70 = überkauft, nicht automatisch Verkauf)",
             "MACD-Histogramm ohne eindeutigen Schub"
           ]
         },
@@ -325,12 +323,12 @@
           "signal": "POSITIV",
           "score": 1,
           "facts": {
-            "volumen_faktor_20": 0.5358,
+            "volumen_faktor_20": 0.7425,
             "obv_10_tage_steigend": true,
             "tageskurs_gestiegen": true
           },
           "reasons": [
-            "Volumen: 0.54× gegenüber 20 Tagen",
+            "Volumen: 0.74× gegenüber 20 Tagen",
             "10-Tage-OBV: steigend",
             "Volumendaten sind börsenspezifisch, kein globales Krypto-Gesamtvolumen"
           ]
@@ -340,14 +338,14 @@
           "signal": "NEUTRAL",
           "score": 0,
           "facts": {
-            "atr14": 80.7586,
-            "atr14_prozent": 3.83,
-            "bollinger_breite_prozent": 9.74,
+            "atr14": 77.7129,
+            "atr14_prozent": 3.68,
+            "bollinger_breite_prozent": 9.79,
             "risikostufe": "NORMAL"
           },
           "reasons": [
-            "ATR14: 3.83% des Kurses",
-            "Bollinger-Bandbreite: 9.74%",
+            "ATR14: 3.68% des Kurses",
+            "Bollinger-Bandbreite: 9.79%",
             "Volatilität bestimmt Risiko/Positionsgröße, nicht die Kursrichtung"
           ]
         },
@@ -356,14 +354,14 @@
           "signal": "NEUTRAL",
           "score": 0,
           "facts": {
-            "adx14": 28.65,
-            "plus_di14": 15.04,
-            "minus_di14": 25.95,
+            "adx14": 28.03,
+            "plus_di14": 16.32,
+            "minus_di14": 24.51,
             "phase": "STARKER_TREND",
             "richtung": "ABWAERTS"
           },
           "reasons": [
-            "ADX14 28.6: STARKER_TREND",
+            "ADX14 28.0: STARKER_TREND",
             "DI-Richtung: ABWAERTS",
             "ADX allein zeigt Trendstärke, keinen zukünftigen Gewinn"
           ]
@@ -375,14 +373,14 @@
           "facts": {
             "unterstuetzung": 2036.02,
             "widerstand": 2466.25,
-            "abstand_widerstand_prozent": 16.9454,
-            "abstand_unterstuetzung_prozent": 3.579,
+            "abstand_widerstand_prozent": 16.6727,
+            "abstand_unterstuetzung_prozent": 3.8212,
             "nahe_widerstand": false,
             "nahe_unterstuetzung": false
           },
           "reasons": [
-            "60-Tage-Widerstand 2466.2500 EUR, Distanz 16.95%",
-            "60-Tage-Unterstützung 2036.0200 EUR, Abstand 3.58%",
+            "60-Tage-Widerstand 2466.2500 EUR, Distanz 16.67%",
+            "60-Tage-Unterstützung 2036.0200 EUR, Abstand 3.82%",
             "Historische Niveaus sind keine garantierten Stop- oder Umkehrpunkte"
           ]
         },
@@ -391,17 +389,17 @@
           "signal": "NEUTRAL",
           "score": 0,
           "facts": {
-            "indikative_einstiegsbasis": 2108.89,
-            "theoretischer_2atr_stop": 1947.3729,
+            "indikative_einstiegsbasis": 2113.82,
+            "theoretischer_2atr_stop": 1958.3943,
             "60t_widerstand": 2466.25,
             "60t_unterstuetzung": 2036.02,
-            "indikatives_crv_zum_widerstand": 2.21,
+            "indikatives_crv_zum_widerstand": 2.27,
             "bewertung": "THEORETISCH_GUENSTIG"
           },
           "reasons": [
-            "Nur Szenario: Einstieg Schlusskurs 2108.8900, Abstand Stop 2×ATR",
+            "Nur Szenario: Einstieg Schlusskurs 2113.8200, Abstand Stop 2×ATR",
             "Historischer 60-Tage-Widerstand 2466.2500 (kein Kursziel)",
-            "Indikatives Chance-Risiko-Verhältnis: 2.21",
+            "Indikatives Chance-Risiko-Verhältnis: 2.27",
             "Schlusskurs-Stop/ATR schützt nicht vor Kurslücken, Spreads und Slippage"
           ]
         },
@@ -410,13 +408,13 @@
           "signal": "NEGATIV",
           "score": -1,
           "facts": {
-            "rendite_30_tage_prozent": -10.7087,
-            "btc_30_tage_prozent": -2.181,
-            "relative_starke_pp": -8.5278,
-            "korrelation_60_tage": 0.9198
+            "rendite_30_tage_prozent": -10.5784,
+            "btc_30_tage_prozent": -0.7403,
+            "relative_starke_pp": -9.8381,
+            "korrelation_60_tage": 0.9197
           },
           "reasons": [
-            "30-Tage-Mehr-/Minderrendite zu BTC: -8.53 Prozentpunkte",
+            "30-Tage-Mehr-/Minderrendite zu BTC: -9.84 Prozentpunkte",
             "60-Tage-Korrelation zu BTC: 0.92",
             "BTC ist der Vergleichsmaßstab, kein unabhängiger Kaufsignalgeber"
           ]
@@ -436,7 +434,7 @@
           "score": 0,
           "facts": {
             "kaufkandidat_erlaubt": true,
-            "atr_prozent": 3.83
+            "atr_prozent": 3.68
           },
           "reasons": [
             "Kein aktuelles Orderbuch: tatsächliche Ausführbarkeit nicht geprüft"
@@ -456,19 +454,18 @@
       "symbol": "SOL/EUR",
       "action": "ABWARTEN",
       "reasons": [
-        "Kaufprüfung: 3 von 9 Bedingungen nicht erfüllt",
+        "Kaufprüfung: 2 von 9 Bedingungen nicht erfüllt",
         "Fehlt: Trend positiv",
         "Fehlt: Momentum positiv",
-        "Fehlt: Relatives Tagesvolumen mindestens 0,8",
         "Orderbuch/Spread nicht geprüft (historische Tagesanalyse)"
       ],
-      "date": "2026-10-27",
+      "date": "2026-10-28",
       "gates": {
         "Trend positiv": false,
         "Momentum positiv": false,
         "Struktur mindestens neutral": true,
         "Volumensignal mindestens neutral": true,
-        "Relatives Tagesvolumen mindestens 0,8": false,
+        "Relatives Tagesvolumen mindestens 0,8": true,
         "OBV steigend": true,
         "Einstiegsszenario akzeptabel": true,
         "Nicht knapp unter Widerstand": true,
@@ -476,8 +473,7 @@
       },
       "failed_gates": [
         "Trend positiv",
-        "Momentum positiv",
-        "Relatives Tagesvolumen mindestens 0,8"
+        "Momentum positiv"
       ],
       "agents": {
         "daten": {
@@ -486,7 +482,7 @@
           "score": 0,
           "facts": {
             "kerzen": 719,
-            "letzter_tag": "2026-10-27"
+            "letzter_tag": "2026-10-28"
           },
           "reasons": [
             "Abgeschlossene Tageskerzen plausibel; keine Echtzeitgarantie"
@@ -497,10 +493,10 @@
           "signal": "NEUTRAL",
           "score": 0,
           "facts": {
-            "kurs": 90.95,
-            "ema20": 94.0426,
-            "sma50": 96.5696,
-            "sma200": 76.9676,
+            "kurs": 91.79,
+            "ema20": 93.8281,
+            "sma50": 96.6272,
+            "sma200": 77.0641,
             "wochen_ema8": 93.1238,
             "wochen_sma20": 79.7645,
             "tag_aufwaerts": false,
@@ -516,7 +512,7 @@
           "signal": "NEUTRAL",
           "score": 0,
           "facts": {
-            "hoch_20": 107.26,
+            "hoch_20": 104.28,
             "tief_20": 88.06,
             "hoch_60": 109.9,
             "tief_60": 82.9,
@@ -532,15 +528,15 @@
         },
         "momentum": {
           "agent": "Momentum (RSI/MACD)",
-          "signal": "NEGATIV",
-          "score": -1,
+          "signal": "NEUTRAL",
+          "score": 0,
           "facts": {
-            "rsi14": 38.8204,
-            "macd_histogramm": -0.4829,
-            "macd_histogramm_vortag": -0.6006
+            "rsi14": 41.772,
+            "macd_histogramm": -0.3162,
+            "macd_histogramm_vortag": -0.4829
           },
           "reasons": [
-            "RSI14 38.8 (über 70 = überkauft, nicht automatisch Verkauf)",
+            "RSI14 41.8 (über 70 = überkauft, nicht automatisch Verkauf)",
             "MACD-Histogramm ohne eindeutigen Schub"
           ]
         },
@@ -549,12 +545,12 @@
           "signal": "POSITIV",
           "score": 1,
           "facts": {
-            "volumen_faktor_20": 0.5297,
+            "volumen_faktor_20": 0.8393,
             "obv_10_tage_steigend": true,
             "tageskurs_gestiegen": true
           },
           "reasons": [
-            "Volumen: 0.53× gegenüber 20 Tagen",
+            "Volumen: 0.84× gegenüber 20 Tagen",
             "10-Tage-OBV: steigend",
             "Volumendaten sind börsenspezifisch, kein globales Krypto-Gesamtvolumen"
           ]
@@ -564,14 +560,14 @@
           "signal": "NEUTRAL",
           "score": 0,
           "facts": {
-            "atr14": 3.4714,
-            "atr14_prozent": 3.82,
-            "bollinger_breite_prozent": 11.39,
+            "atr14": 3.3986,
+            "atr14_prozent": 3.7,
+            "bollinger_breite_prozent": 10.9,
             "risikostufe": "NORMAL"
           },
           "reasons": [
-            "ATR14: 3.82% des Kurses",
-            "Bollinger-Bandbreite: 11.39%",
+            "ATR14: 3.70% des Kurses",
+            "Bollinger-Bandbreite: 10.90%",
             "Volatilität bestimmt Risiko/Positionsgröße, nicht die Kursrichtung"
           ]
         },
@@ -580,14 +576,14 @@
           "signal": "NEUTRAL",
           "score": 0,
           "facts": {
-            "adx14": 28.43,
-            "plus_di14": 12.88,
-            "minus_di14": 25.82,
+            "adx14": 28.02,
+            "plus_di14": 15.34,
+            "minus_di14": 24.37,
             "phase": "STARKER_TREND",
             "richtung": "ABWAERTS"
           },
           "reasons": [
-            "ADX14 28.4: STARKER_TREND",
+            "ADX14 28.0: STARKER_TREND",
             "DI-Richtung: ABWAERTS",
             "ADX allein zeigt Trendstärke, keinen zukünftigen Gewinn"
           ]
@@ -599,14 +595,14 @@
           "facts": {
             "unterstuetzung": 82.9,
             "widerstand": 109.9,
-            "abstand_widerstand_prozent": 20.8356,
-            "abstand_unterstuetzung_prozent": 9.7105,
+            "abstand_widerstand_prozent": 19.7298,
+            "abstand_unterstuetzung_prozent": 10.7238,
             "nahe_widerstand": false,
             "nahe_unterstuetzung": false
           },
           "reasons": [
-            "60-Tage-Widerstand 109.9000 EUR, Distanz 20.84%",
-            "60-Tage-Unterstützung 82.9000 EUR, Abstand 9.71%",
+            "60-Tage-Widerstand 109.9000 EUR, Distanz 19.73%",
+            "60-Tage-Unterstützung 82.9000 EUR, Abstand 10.72%",
             "Historische Niveaus sind keine garantierten Stop- oder Umkehrpunkte"
           ]
         },
@@ -615,17 +611,17 @@
           "signal": "NEUTRAL",
           "score": 0,
           "facts": {
-            "indikative_einstiegsbasis": 90.95,
-            "theoretischer_2atr_stop": 84.0071,
+            "indikative_einstiegsbasis": 91.79,
+            "theoretischer_2atr_stop": 84.9929,
             "60t_widerstand": 109.9,
             "60t_unterstuetzung": 82.9,
-            "indikatives_crv_zum_widerstand": 2.73,
+            "indikatives_crv_zum_widerstand": 2.66,
             "bewertung": "THEORETISCH_GUENSTIG"
           },
           "reasons": [
-            "Nur Szenario: Einstieg Schlusskurs 90.9500, Abstand Stop 2×ATR",
+            "Nur Szenario: Einstieg Schlusskurs 91.7900, Abstand Stop 2×ATR",
             "Historischer 60-Tage-Widerstand 109.9000 (kein Kursziel)",
-            "Indikatives Chance-Risiko-Verhältnis: 2.73",
+            "Indikatives Chance-Risiko-Verhältnis: 2.66",
             "Schlusskurs-Stop/ATR schützt nicht vor Kurslücken, Spreads und Slippage"
           ]
         },
@@ -634,13 +630,13 @@
           "signal": "NEGATIV",
           "score": -1,
           "facts": {
-            "rendite_30_tage_prozent": -15.1348,
-            "btc_30_tage_prozent": -2.181,
-            "relative_starke_pp": -12.9539,
+            "rendite_30_tage_prozent": -12.1879,
+            "btc_30_tage_prozent": -0.7403,
+            "relative_starke_pp": -11.4476,
             "korrelation_60_tage": 0.846
           },
           "reasons": [
-            "30-Tage-Mehr-/Minderrendite zu BTC: -12.95 Prozentpunkte",
+            "30-Tage-Mehr-/Minderrendite zu BTC: -11.45 Prozentpunkte",
             "60-Tage-Korrelation zu BTC: 0.85",
             "BTC ist der Vergleichsmaßstab, kein unabhängiger Kaufsignalgeber"
           ]
@@ -660,7 +656,7 @@
           "score": 0,
           "facts": {
             "kaufkandidat_erlaubt": true,
-            "atr_prozent": 3.82
+            "atr_prozent": 3.7
           },
           "reasons": [
             "Kein aktuelles Orderbuch: tatsächliche Ausführbarkeit nicht geprüft"
@@ -670,7 +666,7 @@
       "scores": {
         "trend": 0,
         "struktur": 0,
-        "momentum": -1,
+        "momentum": 0,
         "volumen": 1,
         "niveaus": 0,
         "relativ": -1
@@ -680,16 +676,15 @@
       "symbol": "NEAR/EUR",
       "action": "ABWARTEN",
       "reasons": [
-        "Kaufprüfung: 3 von 9 Bedingungen nicht erfüllt",
-        "Fehlt: Momentum positiv",
+        "Kaufprüfung: 2 von 9 Bedingungen nicht erfüllt",
         "Fehlt: Relatives Tagesvolumen mindestens 0,8",
         "Fehlt: Einstiegsszenario akzeptabel",
         "Orderbuch/Spread nicht geprüft (historische Tagesanalyse)"
       ],
-      "date": "2026-10-27",
+      "date": "2026-10-28",
       "gates": {
         "Trend positiv": true,
-        "Momentum positiv": false,
+        "Momentum positiv": true,
         "Struktur mindestens neutral": true,
         "Volumensignal mindestens neutral": true,
         "Relatives Tagesvolumen mindestens 0,8": false,
@@ -699,7 +694,6 @@
         "Risiko-Bot: freigegeben": true
       },
       "failed_gates": [
-        "Momentum positiv",
         "Relatives Tagesvolumen mindestens 0,8",
         "Einstiegsszenario akzeptabel"
       ],
@@ -710,7 +704,7 @@
           "score": 0,
           "facts": {
             "kerzen": 719,
-            "letzter_tag": "2026-10-27"
+            "letzter_tag": "2026-10-28"
           },
           "reasons": [
             "Abgeschlossene Tageskerzen plausibel; keine Echtzeitgarantie"
@@ -721,10 +715,10 @@
           "signal": "POSITIV",
           "score": 1,
           "facts": {
-            "kurs": 4.2056,
-            "ema20": 4.2769,
-            "sma50": 3.8566,
-            "sma200": 2.1489,
+            "kurs": 4.2445,
+            "ema20": 4.2738,
+            "sma50": 3.9016,
+            "sma200": 2.1641,
             "wochen_ema8": 3.8471,
             "wochen_sma20": 2.5113,
             "tag_aufwaerts": false,
@@ -756,15 +750,15 @@
         },
         "momentum": {
           "agent": "Momentum (RSI/MACD)",
-          "signal": "NEUTRAL",
-          "score": 0,
+          "signal": "POSITIV",
+          "score": 1,
           "facts": {
-            "rsi14": 49.9406,
-            "macd_histogramm": -0.0993,
-            "macd_histogramm_vortag": -0.1147
+            "rsi14": 50.6441,
+            "macd_histogramm": -0.0833,
+            "macd_histogramm_vortag": -0.0993
           },
           "reasons": [
-            "RSI14 49.9 (über 70 = überkauft, nicht automatisch Verkauf)",
+            "RSI14 50.6 (über 70 = überkauft, nicht automatisch Verkauf)",
             "MACD-Histogramm ohne eindeutigen Schub"
           ]
         },
@@ -773,12 +767,12 @@
           "signal": "POSITIV",
           "score": 1,
           "facts": {
-            "volumen_faktor_20": 0.7495,
+            "volumen_faktor_20": 0.3649,
             "obv_10_tage_steigend": true,
             "tageskurs_gestiegen": true
           },
           "reasons": [
-            "Volumen: 0.75× gegenüber 20 Tagen",
+            "Volumen: 0.36× gegenüber 20 Tagen",
             "10-Tage-OBV: steigend",
             "Volumendaten sind börsenspezifisch, kein globales Krypto-Gesamtvolumen"
           ]
@@ -788,14 +782,14 @@
           "signal": "RISIKO",
           "score": 0,
           "facts": {
-            "atr14": 0.3983,
-            "atr14_prozent": 9.47,
-            "bollinger_breite_prozent": 27.06,
+            "atr14": 0.3893,
+            "atr14_prozent": 9.17,
+            "bollinger_breite_prozent": 25.72,
             "risikostufe": "HOCH"
           },
           "reasons": [
-            "ATR14: 9.47% des Kurses",
-            "Bollinger-Bandbreite: 27.06%",
+            "ATR14: 9.17% des Kurses",
+            "Bollinger-Bandbreite: 25.72%",
             "Volatilität bestimmt Risiko/Positionsgröße, nicht die Kursrichtung"
           ]
         },
@@ -804,14 +798,14 @@
           "signal": "NEUTRAL",
           "score": 0,
           "facts": {
-            "adx14": 25.94,
-            "plus_di14": 16.97,
-            "minus_di14": 19.19,
-            "phase": "STARKER_TREND",
+            "adx14": 24.53,
+            "plus_di14": 16.31,
+            "minus_di14": 18.45,
+            "phase": "TRENDPHASE",
             "richtung": "ABWAERTS"
           },
           "reasons": [
-            "ADX14 25.9: STARKER_TREND",
+            "ADX14 24.5: TRENDPHASE",
             "DI-Richtung: ABWAERTS",
             "ADX allein zeigt Trendstärke, keinen zukünftigen Gewinn"
           ]
@@ -823,14 +817,14 @@
           "facts": {
             "unterstuetzung": 1.5384,
             "widerstand": 5.35,
-            "abstand_widerstand_prozent": 27.2113,
-            "abstand_unterstuetzung_prozent": 173.3749,
+            "abstand_widerstand_prozent": 26.0455,
+            "abstand_unterstuetzung_prozent": 175.9035,
             "nahe_widerstand": false,
             "nahe_unterstuetzung": false
           },
           "reasons": [
-            "60-Tage-Widerstand 5.3500 EUR, Distanz 27.21%",
-            "60-Tage-Unterstützung 1.5384 EUR, Abstand 173.37%",
+            "60-Tage-Widerstand 5.3500 EUR, Distanz 26.05%",
+            "60-Tage-Unterstützung 1.5384 EUR, Abstand 175.90%",
             "Historische Niveaus sind keine garantierten Stop- oder Umkehrpunkte"
           ]
         },
@@ -839,33 +833,33 @@
           "signal": "NEUTRAL",
           "score": 0,
           "facts": {
-            "indikative_einstiegsbasis": 4.2056,
-            "theoretischer_2atr_stop": 3.4091,
+            "indikative_einstiegsbasis": 4.2445,
+            "theoretischer_2atr_stop": 3.4658,
             "60t_widerstand": 5.35,
             "60t_unterstuetzung": 1.5384,
-            "indikatives_crv_zum_widerstand": 1.44,
+            "indikatives_crv_zum_widerstand": 1.42,
             "bewertung": "UNGÜNSTIGER_ABSTAND_ZUM_WIDERSTAND"
           },
           "reasons": [
-            "Nur Szenario: Einstieg Schlusskurs 4.2056, Abstand Stop 2×ATR",
+            "Nur Szenario: Einstieg Schlusskurs 4.2445, Abstand Stop 2×ATR",
             "Historischer 60-Tage-Widerstand 5.3500 (kein Kursziel)",
-            "Indikatives Chance-Risiko-Verhältnis: 1.44",
+            "Indikatives Chance-Risiko-Verhältnis: 1.42",
             "Schlusskurs-Stop/ATR schützt nicht vor Kurslücken, Spreads und Slippage"
           ]
         },
         "relativ": {
           "agent": "Relative Stärke zu BTC",
-          "signal": "NEGATIV",
-          "score": -1,
+          "signal": "NEUTRAL",
+          "score": 0,
           "facts": {
-            "rendite_30_tage_prozent": -11.1036,
-            "btc_30_tage_prozent": -2.181,
-            "relative_starke_pp": -8.9226,
-            "korrelation_60_tage": 0.395
+            "rendite_30_tage_prozent": 0.151,
+            "btc_30_tage_prozent": -0.7403,
+            "relative_starke_pp": 0.8913,
+            "korrelation_60_tage": 0.3943
           },
           "reasons": [
-            "30-Tage-Mehr-/Minderrendite zu BTC: -8.92 Prozentpunkte",
-            "60-Tage-Korrelation zu BTC: 0.40",
+            "30-Tage-Mehr-/Minderrendite zu BTC: +0.89 Prozentpunkte",
+            "60-Tage-Korrelation zu BTC: 0.39",
             "BTC ist der Vergleichsmaßstab, kein unabhängiger Kaufsignalgeber"
           ]
         },
@@ -884,7 +878,7 @@
           "score": 0,
           "facts": {
             "kaufkandidat_erlaubt": true,
-            "atr_prozent": 9.47
+            "atr_prozent": 9.17
           },
           "reasons": [
             "Hohe Volatilität: im Paper Trading besonders vorsichtig",
@@ -895,10 +889,10 @@
       "scores": {
         "trend": 1,
         "struktur": 1,
-        "momentum": 0,
+        "momentum": 1,
         "volumen": 1,
         "niveaus": 0,
-        "relativ": -1
+        "relativ": 0
       }
     }
   ]
