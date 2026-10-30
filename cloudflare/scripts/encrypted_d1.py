@@ -4,6 +4,8 @@ No network, remote SQL or deletion API. Plaintext stays in a caller-owned privat
 TemporaryDirectory. Only publish() may copy ciphertext into an artifact directory.
 """
 from __future__ import annotations
+from contextlib import contextmanager
+from functools import wraps
 import hashlib
 import json
 import os
@@ -24,8 +26,50 @@ MEMBERS = {'export.sql', 'snapshot.sqlite', 'snapshot.sqlite.sha256.json', 'proo
 MIGRATIONS = ('0001_observation.sql', '0002_review_guards.sql', '0003_storage_guard.sql')
 
 
+STAGES = frozenset("ENV_CONTEXT SECRET_FORMAT D1_LIST D1_DETAIL_EU WRANGLER_EXPORT EXPORT_EMPTY SQL_IMPORT SCHEMA_MISMATCH GPG_ENCRYPT GPG_DECRYPT RESTORE_PARITY ARTIFACT_LIMIT ARTIFACT_UPLOAD".split())
+
+
 class BackupError(Exception):
-    """Only fixed diagnostic codes may cross the CLI/log boundary."""
+    """Internal detail is never rendered by the CLI; only validated fields are."""
+    def __init__(self, code, *, stage=None, http=None, cf_codes=()):
+        super().__init__(code)
+        self.stage = stage if stage in STAGES else None
+        self.http = http if type(http) is int and 100 <= http <= 599 else None
+        self.cf_codes = tuple(sorted({c for c in cf_codes if type(c) is int and 0 <= c <= 99999999}))[:20]
+
+
+def safe_failure(error):
+    stage = error.stage if isinstance(error, BackupError) and error.stage in STAGES else 'ENV_CONTEXT'
+    result = 'FAILED stage=' + stage
+    if isinstance(error, BackupError) and error.http is not None and stage in ('ENV_CONTEXT', 'D1_LIST', 'D1_DETAIL_EU'):
+        result += ' HTTP=' + str(error.http)
+        if error.cf_codes:
+            result += ' CF=' + ','.join(map(str, error.cf_codes))
+    return result
+
+
+@contextmanager
+def at_stage(stage):
+    if stage not in STAGES:
+        raise BackupError('ENV_CONTEXT', stage='ENV_CONTEXT')
+    try:
+        yield
+    except BackupError as exc:
+        if exc.stage is None:
+            exc.stage = stage
+        raise
+    except Exception:
+        raise BackupError(stage, stage=stage) from None
+
+
+def staged(stage):
+    def decorate(function):
+        @wraps(function)
+        def call(*args, **kwargs):
+            with at_stage(stage):
+                return function(*args, **kwargs)
+        return call
+    return decorate
 
 
 def require(condition, code):
@@ -33,6 +77,7 @@ def require(condition, code):
         raise BackupError(code)
 
 
+@staged('SECRET_FORMAT')
 def identity(account, database):
     require(bool(re.fullmatch('[0-9a-f]{32}', account or '')), 'ACCOUNT_INVALID')
     try:
@@ -48,6 +93,7 @@ def write_new(path, data):
         stream.write(data)
 
 
+@staged('SQL_IMPORT')
 def import_sql(source, destination):
     """Only a NEW local SQLite file. SQLite cannot attach/read/write other files."""
     source, destination = Path(source), Path(destination)
@@ -80,6 +126,7 @@ def _quoted(name):
     return '"' + name.replace('"', '""') + '"'
 
 
+@staged('SCHEMA_MISMATCH')
 def summary(path):
     with sqlite3.connect(Path(path).resolve().as_uri() + '?mode=ro', uri=True) as db:
         storage_snapshot.integrity(db)
@@ -112,6 +159,13 @@ def summary(path):
 
 
 def gpg(source, destination, secret, scratch, decrypt=False):
+    with at_stage('SECRET_FORMAT'):
+        require(isinstance(secret, str) and len(secret) >= 32 and '\n' not in secret and '\r' not in secret, 'KEY_MISSING_OR_INVALID')
+    with at_stage('GPG_DECRYPT' if decrypt else 'GPG_ENCRYPT'):
+        return _gpg(source, destination, secret, scratch, decrypt)
+
+
+def _gpg(source, destination, secret, scratch, decrypt=False):
     require(isinstance(secret, str) and len(secret) >= 32 and '\n' not in secret and '\r' not in secret, 'KEY_MISSING_OR_INVALID')
     require(shutil.which('gpg') is not None, 'GPG_MISSING')
     # Never put the passphrase in argv, output, a key file, or the child environment.
@@ -135,7 +189,7 @@ def gpg(source, destination, secret, scratch, decrypt=False):
         require(Path(destination).stat().st_size > 0, 'CIPHERTEXT_EMPTY')
     except Exception:
         Path(destination).unlink(missing_ok=True)
-        raise BackupError('DECRYPT_FAILED' if decrypt else 'ENCRYPT_FAILED') from None
+        raise BackupError('DECRYPT_FAILED' if decrypt else 'ENCRYPT_FAILED', stage='GPG_DECRYPT' if decrypt else 'GPG_ENCRYPT') from None
     finally:
         try:
             subprocess.run(['gpgconf', '--homedir', str(home), '--kill', 'gpg-agent'],
@@ -145,6 +199,7 @@ def gpg(source, destination, secret, scratch, decrypt=False):
         shutil.rmtree(home, ignore_errors=True)
 
 
+@staged('RESTORE_PARITY')
 def pack(source_sql, scratch, binding, origin, secret):
     scratch = Path(scratch)
     imported = scratch/'imported.sqlite'
@@ -165,12 +220,15 @@ def pack(source_sql, scratch, binding, origin, secret):
     os.chmod(archive, 0o600)
     cipher = scratch/'backup.tar.gz.gpg'
     gpg(archive, cipher, secret, scratch)
-    require(cipher.stat().st_size <= MAX_CIPHERTEXT, 'CIPHERTEXT_TOO_LARGE')
+    with at_stage('ARTIFACT_LIMIT'):
+        require(cipher.stat().st_size <= MAX_CIPHERTEXT, 'CIPHERTEXT_TOO_LARGE')
     return cipher, proof
 
 
+@staged('RESTORE_PARITY')
 def recover(cipher, cipher_hash, scratch, binding, origin, secret):
-    require(Path(cipher).is_file() and not Path(cipher).is_symlink() and 0 < Path(cipher).stat().st_size <= MAX_CIPHERTEXT, 'CIPHERTEXT_INVALID')
+    with at_stage('ARTIFACT_LIMIT'):
+        require(Path(cipher).is_file() and not Path(cipher).is_symlink() and 0 < Path(cipher).stat().st_size <= MAX_CIPHERTEXT, 'CIPHERTEXT_INVALID')
     require(bool(re.fullmatch('[0-9a-f]{64}', cipher_hash)), 'CIPHERTEXT_HASH_INVALID')
     require(storage_snapshot.digest(cipher) == cipher_hash, 'CIPHERTEXT_HASH_MISMATCH')
     scratch = Path(scratch)
@@ -201,6 +259,7 @@ def recover(cipher, cipher_hash, scratch, binding, origin, secret):
     return proof
 
 
+@staged('ARTIFACT_UPLOAD')
 def publish(cipher, directory):
     # Caller uploads only these two explicit files after a successful recovery.
     directory = Path(directory)
