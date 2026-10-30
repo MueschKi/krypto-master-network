@@ -1,74 +1,58 @@
-# Cloudflare Free – Einrichtung ohne eigenen PC (Phase A)
+# Cloudflare Free ohne eigenen PC: Einrichtung über GitHub Actions
 
-**Status:** Anleitung + separater manueller GitHub-Actions-Workflow. **Kein Deployment in diesem PR.** Nur lesende Kraken-MTF-Beobachtung, keine Paper-Konto-Migration, kein Broker/keine Echtgeld-Orders. Keine kostenpflichtige Cloudflare-Aktivierung.
+**Stand:** Phase A · read-only Kraken-MTF-Beobachtung, KEIN automatisches Cloud-Paper-Trading und KEINE Echtgeld-Orderfunktion. Dieser PR deployed **nichts**. Erst eine später bewusst gestartete GitHub Action legt D1 an oder veröffentlicht den Worker.
 
-## 1. Cloudflare-D1-Datenbank im Browser anlegen
+## Was du selbst einmalig machen musst
 
-1. Bei https://dash.cloudflare.com/ anmelden und das richtige Account-Konto auswählen.
-2. Im Bereich **D1 SQL database** (unter Storage & databases, abhängig von Dashboard-Version) **Create database** wählen.
-3. **Name genau** `kmn`. Optional EU-Jurisdiktion festlegen (vor Anlage bewusst entscheiden: regionale Datenbindung ist später nicht beliebig änderbar); ansonsten Standort nahe Europa auswählen.
-4. Nach Erstellung die **Database ID (UUID)** kopieren und zunächst privat aufbewahren. **Keine** SQL-Tabellen manuell anlegen: Die zwei vorhandenen Repository-Migrationen erzeugt später der einmalig manuell gestartete GitHub-Workflow.
-5. Keine persönlichen Kontodateien importieren.
+Das Cloudflare-Konto ist erstellt. Zur Verbindung Cloudflare ↔ GitHub wird ein **eingeschränkter API-Token** benötigt. Aus Sicherheitsgründen kann weder Codex noch der Assistent ohne eine von dir autorisierte Verbindung auf dein Cloudflare-Konto zugreifen. Niemals Tokens, Passwörter oder vollständige Secrets in Chat, Issues, PRs oder Code schreiben.
 
-## 2. Cloudflare-Account-ID und eingeschränkten API-Token vorbereiten
+### A. Account-ID in GitHub als Variable speichern
 
-1. Unter **Workers & Pages → Account details** die **Account ID** kopieren. Alternativ über die globale Dashboard-Suche `Copy account ID`.
-2. In Cloudflare den Bereich **Account API Tokens** öffnen, **Create Token / Custom Token** auswählen.
-3. Einen dedizierten Token für dieses Repository erstellen. Benötigt **Account: Workers Scripts Edit** (bzw. entsprechende Workers-Deploy-Berechtigung) und **Account: D1 Edit** (D1-Migrationsschreibrecht), möglichst nur für das betreffende Konto und ggf. konkrete Ressourcen. **Kein globaler API-Key**, keine breitflächigen Administrator-, DNS- oder Auszahlungsrechte.
-4. Token nach dem Erstellen einmal kopieren und **niemals in ein Issue, einen PR, eine Chatnachricht, Repository-Datei oder einen Screenshot** schreiben. Bei versehentlicher Offenlegung sofort widerrufen/rotieren.
+1. https://dash.cloudflare.com/ öffnen, Cloudflare-Account auswählen, **Account ID** kopieren (32 hexadezimale Zeichen, nicht Zone ID).
+2. GitHub-Repository `MueschKi/krypto-master-network` → **Settings → Secrets and variables → Actions → Variables → New repository variable**.
+3. Name: `CLOUDFLARE_ACCOUNT_ID`; Wert: kopierte Account ID.
 
-## 3. Repository-Konfiguration über die GitHub-Weboberfläche
+### B. Cloudflare-API-Token direkt in GitHub als Secret hinterlegen
 
-Im privaten Einstellungen-Bereich des Repositories `MueschKi/krypto-master-network` → **Settings → Secrets and variables → Actions**:
+1. Im Cloudflare-Dashboard unter **Account API tokens** → **Create Token → Custom Token**.
+2. Dem Token ausschließlich für deinen ausgewählten Cloudflare-Account die Rechte geben, eine **D1-Datenbank anzulegen und deren Schema zu bearbeiten** sowie einen **neuen Workers-Script-Dienst zu erstellen und zu aktualisieren**. Bei der aktuellen Rollenoberfläche sind für die Erstanlage D1-/Workers-Produktrechte bis **Admin/Create** erforderlich. Weder DNS-/Domainverwaltung noch Account-Vollzugriff gewähren. Bereits existierende Worker können später mit einem engeren Editor-Token betrieben werden.
+3. Token einmalig kopieren und unter GitHub **Settings → Secrets and variables → Actions → Secrets → New repository secret** ablegen.
+4. Exakter Secret-Name: `CLOUDFLARE_API_TOKEN`; Wert: der Token. Diese Zeichenfolge ist geheim. Du musst mir nur bestätigen, dass das Secret angelegt ist – **nicht den Wert mitteilen**.
+5. Erhältst du bei der Ausführung eine Berechtigungsfehlermeldung, nicht pauschal auf einen globalen API-Key wechseln; Rechte gezielt korrigieren.
 
-- Tab **Variables** → `CLOUDFLARE_ACCOUNT_ID` = Account ID (32 hex chars).
-- Tab **Variables** → `CF_D1_DATABASE_ID` = UUID der frisch angelegten D1-Datenbank namens `kmn`.
-- Tab **Secrets** → `CLOUDFLARE_API_TOKEN` = eingeschränkter API-Token.
+**Hinweis zur Sicherheit:** Die GitHub-Workflow-Datei ist öffentlich, aber Secrets bleiben privat. Änderungen an `main` sollten vor dem Merge geprüft werden, da Workflow-Code ein Secret verwenden darf. Den ersten Einrichtungs-Token nach erfolgreicher Einrichtung durch enger berechtigte Zugangsdaten ersetzen.
 
-Account-ID und D1-ID sind Kennungen, keine Zugangsschlüssel. Nur der Token ist ein Secret. **Alle Werte direkt in GitHub eingeben**, nicht im Chat senden. Nicht mit D1-`database_name` oder Cloudflare-`Zone ID` verwechseln.
+## Was GitHub danach vollständig automatisch übernimmt
 
-## 4. Workflows zusammenführen und bewusst auslösen
+Nach Prüfung und bewusstem Merge von PR #13 ist in GitHub unter **Actions → Cloudflare Phase A - manueller Test-Deploy → Run workflow** die Auswahl verfügbar. Branch **main** verwenden.
 
-Der PR stellt `.github/workflows/cloudflare-manual-deploy.yml` bereit. Der Workflow kann **erst nach bewusstem Merge** in den Default-Branch ausgewählt werden. Er läuft **niemals automatisch** bei Push, Pull Request oder Cron.
+1. **Operation `validate`**: führt Python-, TypeScript- und Worker-Tests und lokalen Dry-Run aus. **Keine Änderungen bei Cloudflare.**
+2. **Operation `bootstrap`**: prüft zuerst, ob Cloudflare bereits eine D1-Datenbank mit dem Namen **`kmn`** enthält. Nur falls nicht vorhanden, erstellt die Action sie mit **EU-Jurisdiktion**. Anschließend liest sie die echte Datenbank-ID über Wrangler aus. **Keine Tabellen und kein Worker-Deployment durch diese Operation.** Bei mehrdeutigem Namen oder API-Fehler wird sicher abgebrochen.
+3. **Operation `deploy`**: verwendet die bestehende `kmn`-ID, bereitet nur im temporären GitHub-Runner die Worker-D1-Konfiguration vor, spielt die zwei D1-Migrationen in die Cloud ein und veröffentlicht ausschließlich die **read-only MTF-App** auf `*.workers.dev`. **Nichts wird an den ursprünglichen Paper-Konten oder deren GitHub-Zeitplänen verändert.** Erst nach ausdrücklicher manueller Entscheidung ausführen, nicht im Rahmen des Test-PR.
 
-GitHub → Repository → **Actions → Cloudflare Phase A - manueller Test-Deploy → Run workflow**:
-1. Branch `main` und Operation `validate` wählen. Es laufen Python-/TypeScript-/Cloudflare-Tests und **lokaler** Wrangler-Dry-Run; kein Deployment.
-2. Erst nach erfolgreichen Tests, mit geprüften GitHub-Variablen/Secret und **ausdrücklichem Betreiber-Entschluss**, Operation `deploy` wählen. Der Workflow prüft die ID-Formate, erzeugt **nur im GitHub-Runner** eine temporäre Konfiguration mit der echten D1-ID, führt die D1-Migrationen mit `--remote` aus und veröffentlicht die Worker-Dateien auf einer `*.workers.dev`-Adresse.
-3. Das Repository und die beiden bestehenden Paper-Konto-JSON werden **nicht** durch diesen Workflow verändert.
-4. Im Action-Log die Worker-URL ablesen. Direkt nach dem ersten Deploy antwortet der Worker zunächst mit **401 / Anmeldung erforderlich**, weil noch keine Anmelde-Secrets gesetzt sind. **Nicht** aus Unsicherheit die Zugangsdaten in die URL oder in den Browser-Quellcode einfügen.
+Es wird **keine** GitHub-Variable `CF_D1_DATABASE_ID` mehr benötigt. Die ID ermittelt der neue Bootstrap-/Deploy-Workflow selbständig. Kein lokaler PC und keine GitHub-CLI sind erforderlich.
 
-## 5. Anmeldung im Cloudflare-Dashboard setzen
+## Nach einem bewusst durchgeführten Deploy
 
-Im Cloudflare-Dashboard → **Workers & Pages → krypto-master-phase-a → Settings → Variables and Secrets → Add** jeweils **Typ Secret**:
+1. Cloudflare Dashboard → **Workers & Pages → krypto-master-phase-a → Settings → Variables and Secrets**. Dort zwei **Worker-Secrets** anlegen:
+   - `AUTH_USER`: eigenes Benutzerkürzel
+   - `AUTH_PASSWORD`: neu generiertes, zufälliges Passwort mit mindestens 32 Zeichen
+2. Einstellungen deployen/aktivieren. Bis diese Secrets gesetzt sind, verweigert die App **alle** Zugriffe (HTTP 401). Nur HTTPS-`workers.dev`-URL verwenden.
+3. Beobachtungs-UI am PC und iPhone ausprobieren. Fehlende Zeitfenster sind als blockiert zu betrachten; die erste Gesamterfassung braucht mehrere Cron-Takte.
+4. Im Cloudflare-Dashboard **Observability / Logs / Metrics** prüfen, ob Worker Scheduled-Invocations im **10-ms-Free-CPU-Budget**, D1- und Subrequest-Quoten bleiben. 720-OHLCV-Kerzen und UTC-Grenzübergänge testen. Lokale Walltime und grüner GitHub-CI-Test sind **kein** echter Free-Tier-Nachweis.
+5. Bei CPU-/Quota-Überschreitung kein automatisches Upgrade. Betrieb pausieren und die Arbeitseinheiten in Codex neu aufteilen.
 
-- `AUTH_USER`: ein nichtöffentliches Benutzerkürzel (z.B. `owner`).
-- `AUTH_PASSWORD`: ein neu generiertes zufälliges langes Passwort von **mindestens 32 Zeichen**; kein sonst genutztes Passwort.
+### Sicherheitsgrenzen
 
-Nach Eingabe **Deploy** zur Aktivierung. Die App verwendet derzeit HTTP Basic über HTTPS; deshalb **kein anwendungsseitiger Logout und keine widerrufbare Sitzung**. Browser können Basic-Zugangsdaten behalten. Dies ist nur eine erste Einbenutzer-Beobachtungsoberfläche.
+- Basic Auth hat noch keinen serverseitigen Logout und keine dedizierte Rate-Limit-Policy. Persönliche Paper-Konto-Lesestände sind auf dem öffentlichen Cloudflare-Worker **absichtlich gesperrt**; keine privaten Konto-JSONs/SQL-Dumps in D1 remote importieren.
+- Kein Cloud-Paper-Trading und keine Kraken-Orders. Bestehende GitHub-Paper-Automatik bleibt alleinige Konto-Autorität.
+- Der Worker ist serverlos und reagiert auf Cron; kein ununterbrochener Python- oder WebSocket-Daemon und keine garantierte minutengenaue Ausführung.
+- Cloudflare-Free-Nutzung ist angestrebt, aber erst nach realen Messungen überprüfbar.
 
-**Papier-Kontolesestände auf dem öffentlichen Worker bleiben absichtlich gesperrt**, selbst nach dem Login. Diese erst nach separater Authentifizierungs-/Session-Härtung freigeben; keine privaten D1-Importe in Remote-D1 durchführen.
+## Offizielle Dokumentation
 
-## 6. Phase-A-Betriebs- und Free-Tier-Nachweis
-
-1. Die HTTPS-Worker-URL im PC-/iPhone-Browser aufrufen und Basic-Zugangsdaten eingeben.
-2. Startseite: `BEOBACHTUNG` / keine Orders, Systemstatus und 16 MTF-Fenster. Nach Kaltstart benötigen diese mehrere Cron-Takte; für gültige Freigabe müssen die 16 Kerzenanalysen jeweils aktuell und ohne Datenqualitätsfehler sein. Volatilitätsveto kann auch bei qualitativ guten Daten `BLOCKIERT` auslösen.
-3. Dashboard → Worker → **Observability / Logs / Metrics**: CPU-Zeit je Cron und HTTP, Worker-Fehler, D1-Quoten, Speicher/Bytes, Kraken-HTTP-Fehler und ausgelassene Fenster beobachten. **10 ms CPU-Zeit/Invocation im Free-Tier** samt Sicherheitsmarge nachweisen; besonders Vollerfassung von 720 Kerzen, UTC-Tageswechsel und Fehler-/Retry-Pfad. `elapsed_ms` in D1 ist *Walltime*, kein CPU-Messwert.
-4. Falls CPU/Quoten überschritten werden, **nicht** kostenpflichtig upgraden; Dienst pausieren bzw. Cron entfernen und die Arbeitsaufteilung mit Codex nachbessern.
-5. Mobile PWA später auf physischem iPhone testen. Keine Rendite- oder 24/7-Verfügbarkeitsgarantie.
-
-### Bereits vorhandene Grenzen
-
-- Free Worker ≠ ständig laufender Python-Prozess. Ein Minutentakt ist *geplant*, nicht garantiert.
-- Aktiv: öffentliche Kraken-Daten, MTF-Analyse, D1-Logs, read-only API, mobile PWA.
-- **Nicht aktiv**: automatische Cloud-Paper-Käufe, Kraken-Echtgeldorders, Remote-Papierkonten, Kontoimport, Wallet-/Auszahlungsfunktionen.
-- GitHub-Paper-Workflows und Originalkonten bleiben für die bisherigen simulierten täglichen Aktivitäten autoritativ.
-- Kein Cloudflare-Billing-Upgrade/keine Auto-Zahlungen.
-
-### Dokumentation
-
-- https://developers.cloudflare.com/d1/get-started/
-- https://developers.cloudflare.com/fundamentals/account/find-account-and-zone-ids/
-- https://developers.cloudflare.com/workers/ci-cd/external-cicd/github-actions/
-- https://developers.cloudflare.com/workers/configuration/secrets/
-- https://developers.cloudflare.com/workers/platform/limits/
-- https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets
+- D1 Create/List: https://developers.cloudflare.com/workers/wrangler/commands/d1/
+- GitHub Actions: https://developers.cloudflare.com/workers/ci-cd/external-cicd/github-actions/
+- Rollen/Berechtigungen: https://developers.cloudflare.com/workers/authorization/
+- Worker Secrets: https://developers.cloudflare.com/workers/configuration/secrets/
+- Free-CPU und Quoten: https://developers.cloudflare.com/workers/platform/limits/
