@@ -1,0 +1,7 @@
+{
+  "source": "https://api.kraken.com/0/public/OHLC?pair=XBTEUR&interval=15",
+  "retrieved_utc": "2026-10-30T11:54:27.422611+00:00",
+  "sha256": "c67001583abdd6f42b3aa09428c6ae8b29d3c62d28cc7f54b2dc4d6270e372c3",
+  "snapshot_ms": 1793360700000,
+  "note": "Unmodified public Kraken response; 720 finalized + running candle; normalize to requested Python limit=720 by retaining last 720 rows."
+}

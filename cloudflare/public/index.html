@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#0c1220" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="/icon-192.png" />
+    <link rel="stylesheet" href="/style.css" />
+    <title>Krypto Master Network</title>
+  </head>
+  <body>
+    <header>
+      <a class="brand" href="#start"
+        >◈ <span>KRYPTO MASTER<small>NETWORK / 2.0</small></span></a
+      ><span class="badge">PHASE A · NUR BEOBACHTUNG</span>
+    </header>
+    <div class="layout">
+      <nav aria-label="Hauptnavigation">
+        <a href="#start">Übersicht</a><a href="#analyse">MTF-Analyse</a
+        ><a href="#portfolio">Portfolio</a><a href="#historie">Historie</a
+        ><a href="#system">System</a>
+      </nav>
+      <main>
+        <section id="start">
+          <p class="eyebrow">MARKTBEOBACHTUNG / UTC</p>
+          <h1>Der Markt im Blick.</h1>
+          <p class="muted">
+            Vier Märkte. Vier Zeitfenster. Nachvollziehbare Entscheidungen.
+          </p>
+          <p id="connection" role="status">Verbindung wird geprüft …</p>
+          <div id="status" class="grid"></div>
+          <div id="markets" class="grid"></div>
+        </section>
+        <section id="analyse">
+          <p class="eyebrow">MULTI-TIMEFRAME</p>
+          <h2>Analyse & Begründungen</h2>
+          <p class="muted">
+            Trend und Momentum müssen übereinstimmen. Das Volatilitätsveto hat
+            Vorrang. Keine Handelsfreigabe.
+          </p>
+          <div id="analysis"></div>
+        </section>
+        <section id="portfolio">
+          <p class="eyebrow">ZWEI GETRENNTE PAPER-KONTEN</p>
+          <h2>Portfolio · nur lesend</h2>
+          <p class="muted">
+            Unveränderlicher Importstand, keine Live-Bewertung. Die
+            GitHub-Automatik bleibt alleiniger Schreiber.
+          </p>
+          <div id="accounts" class="grid"></div>
+        </section>
+        <section id="historie">
+          <p class="eyebrow">AUDIT-TRAIL</p>
+          <h2>Läufe & Signale</h2>
+          <p class="muted">
+            Letzte 100 Einträge. Zeitlücken sind ausgefallene Takte.
+          </p>
+          <div id="runs" class="scroll"></div>
+          <details>
+            <summary>Frühere Analysen</summary>
+            <div id="history"></div>
+          </details>
+        </section>
+        <section id="system">
+          <h2>System</h2>
+          <div id="system-data" class="card"></div>
+          <p>Kein Echtgeldadapter · keine Wallets · keine Konto-Schreib-API.</p>
+        </section>
+      </main>
+    </div>
+    <footer>KRYPTO MASTER NETWORK · Beobachtung, keine Renditeprognose.</footer>
+    <script src="/app.js" defer></script>
+  </body>
+</html>

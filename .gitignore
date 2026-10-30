@@ -1,3 +1,34 @@
 __pycache__/
 DEMO_ZEITFENSTER.md
 DEMO_ZEITFENSTER.json
+
+# Python / local development
+*.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+.venv/
+venv/
+.env
+.env.*
+!.env.example
+.DS_Store
+*.log
+# Generated demos (historical tracked reports are deliberately retained)
+DEMO_*.md
+DEMO_*.json
+# Isolated Worker build / credentials / private exports
+node_modules/
+.wrangler/
+.dev.vars
+.dev.vars.*
+dist/
+coverage/
+playwright-report/
+test-results/
+cloudflare/tests/reference.generated.json
+cloudflare/private-*.sql
+cloudflare/private-*.json
+cloudflare/wrangler.local.toml
+
+cloudflare/tests/import.generated.json
