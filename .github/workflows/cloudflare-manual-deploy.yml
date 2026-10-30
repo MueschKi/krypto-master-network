@@ -1,0 +1,125 @@
+name: Cloudflare Phase A - manueller Test-Deploy
+
+# No automatic deployment. Only user-triggered on main.
+on:
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: "Zuerst validate, dann bootstrap, spaeter bewusst deploy"
+        required: true
+        type: choice
+        default: validate
+        options:
+          - validate
+          - bootstrap
+          - deploy
+      free_plan_confirmation:
+        description: "Cloudflare Workers-Tarif im Dashboard selbst als Free bestaetigt? Wort FREE eingeben fuer bootstrap/deploy"
+        type: string
+        required: false
+        default: ""
+      deploy_confirmation:
+        description: "Nur fuer deploy: DEPLOY_READ_ONLY eingeben (remote D1-Migrationen und Worker-Deployment)"
+        type: string
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cloudflare-phase-a-manual-deploy
+  cancel-in-progress: false
+
+jobs:
+  cloudflare:
+    if: github.ref == 'refs/heads/main'
+    name: Tests und optionale Cloudflare-Einrichtung
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: cloudflare
+    steps:
+      - name: main auschecken
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Python einrichten
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Bestehende Python-Tests
+        run: |
+          python -m pip install -r ../requirements.txt
+          cd ..
+          python -m unittest discover -q
+
+      - name: Node einrichten
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: cloudflare/package-lock.json
+
+      - name: Lokale Tests und Dry-Run
+        run: |
+          npm ci
+          npm run check
+          npm test
+          npx wrangler deploy --dry-run
+
+      - name: Free-Tarif vom Betreiber bestaetigen lassen
+        if: inputs.operation == 'bootstrap' || inputs.operation == 'deploy'
+        env:
+          FREE_CONFIRMATION: ${{ inputs.free_plan_confirmation }}
+        run: |
+          if [[ "$FREE_CONFIRMATION" != "FREE" ]]; then
+            echo "Abbruch: Vor Cloudflare-Ressourcenanlage den Workers Free-Tarif selbst im Dashboard pruefen und FREE bestaetigen."
+            exit 1
+          fi
+          echo "Free-Tarif vom Betreiber manuell bestaetigt; kein automatischer Abo- oder Billing-Nachweis."
+
+      - name: Remote-Deployment separat bestaetigen
+        if: inputs.operation == 'deploy'
+        env:
+          DEPLOY_CONFIRMATION: ${{ inputs.deploy_confirmation }}
+        run: |
+          if [[ "$DEPLOY_CONFIRMATION" != "DEPLOY_READ_ONLY" ]]; then
+            echo "Abbruch: Remote-D1-Migration und Worker-Deploy beduerfen einer gesonderten Freigabe."
+            exit 1
+          fi
+          echo "Read-only-Phase-A-Deployment manuell bestaetigt."
+
+      - name: D1-Datenbank automatisch anlegen oder wiederverwenden
+        if: inputs.operation == 'bootstrap'
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: python scripts/setup_d1_ci.py bootstrap
+
+      - name: Existierende D1-Datenbank fuer Deploy aufloesen
+        if: inputs.operation == 'deploy'
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: python scripts/setup_d1_ci.py resolve
+
+      - name: D1-Migrationen remote anwenden
+        if: inputs.operation == 'deploy'
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: npx wrangler d1 migrations apply kmn --remote --config wrangler.deploy.toml
+
+      - name: Phase A MTF-App deployen (ausschliesslich manuell)
+        if: inputs.operation == 'deploy'
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          npx wrangler deploy --config wrangler.deploy.toml
+          echo "Read-only MTF Phase A deployt. Keine Paper-/Echtgeld-Orders."
+          echo "UI bleibt bei fehlenden AUTH_USER/AUTH_PASSWORD Cloudflare-Secrets gesperrt."
