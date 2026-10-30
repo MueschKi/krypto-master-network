@@ -13,6 +13,16 @@ on:
           - validate
           - bootstrap
           - deploy
+      free_plan_confirmation:
+        description: "Cloudflare Workers-Tarif im Dashboard selbst als Free bestaetigt? Wort FREE eingeben fuer bootstrap/deploy"
+        type: string
+        required: false
+        default: ""
+      deploy_confirmation:
+        description: "Nur fuer deploy: DEPLOY_READ_ONLY eingeben (remote D1-Migrationen und Worker-Deployment)"
+        type: string
+        required: false
+        default: ""
 
 permissions:
   contents: read
@@ -60,6 +70,28 @@ jobs:
           npm run check
           npm test
           npx wrangler deploy --dry-run
+
+      - name: Free-Tarif vom Betreiber bestaetigen lassen
+        if: inputs.operation == 'bootstrap' || inputs.operation == 'deploy'
+        env:
+          FREE_CONFIRMATION: ${{ inputs.free_plan_confirmation }}
+        run: |
+          if [[ "$FREE_CONFIRMATION" != "FREE" ]]; then
+            echo "Abbruch: Vor Cloudflare-Ressourcenanlage den Workers Free-Tarif selbst im Dashboard pruefen und FREE bestaetigen."
+            exit 1
+          fi
+          echo "Free-Tarif vom Betreiber manuell bestaetigt; kein automatischer Abo- oder Billing-Nachweis."
+
+      - name: Remote-Deployment separat bestaetigen
+        if: inputs.operation == 'deploy'
+        env:
+          DEPLOY_CONFIRMATION: ${{ inputs.deploy_confirmation }}
+        run: |
+          if [[ "$DEPLOY_CONFIRMATION" != "DEPLOY_READ_ONLY" ]]; then
+            echo "Abbruch: Remote-D1-Migration und Worker-Deploy beduerfen einer gesonderten Freigabe."
+            exit 1
+          fi
+          echo "Read-only-Phase-A-Deployment manuell bestaetigt."
 
       - name: D1-Datenbank automatisch anlegen oder wiederverwenden
         if: inputs.operation == 'bootstrap'
