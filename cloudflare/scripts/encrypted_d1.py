@@ -26,10 +26,13 @@ MEMBERS = {'export.sql', 'snapshot.sqlite', 'snapshot.sqlite.sha256.json', 'proo
 MIGRATIONS = ('0001_observation.sql', '0002_review_guards.sql', '0003_storage_guard.sql')
 
 
-STAGES = frozenset("ENV_CONTEXT SECRET_FORMAT D1_LIST D1_DETAIL_EU WRANGLER_EXPORT EXPORT_EMPTY SQL_IMPORT SCHEMA_MISMATCH GPG_ENCRYPT GPG_DECRYPT RESTORE_PARITY ARTIFACT_LIMIT ARTIFACT_UPLOAD".split())
+STAGES = frozenset("D1_READ_PROBE ENV_CONTEXT SECRET_FORMAT D1_LIST D1_DETAIL_EU WRANGLER_EXPORT EXPORT_EMPTY SQL_IMPORT SCHEMA_MISMATCH GPG_ENCRYPT GPG_DECRYPT RESTORE_PARITY ARTIFACT_LIMIT ARTIFACT_UPLOAD".split())
 
 
 EXPORT_CLASSES = frozenset('UNKNOWN AUTH_DENIED API_ERROR DOWNLOAD_AUTH_DENIED DOWNLOAD_NOT_FOUND DOWNLOAD_RATE_LIMIT DOWNLOAD_SERVER_ERROR DOWNLOAD_HTTP_ERROR CLI_SYNTAX CONFIG_INVALID SPAWN_FAILED TIMEOUT OUTPUT_LIMIT INTERRUPTED'.split())
+
+
+PROBE_CLASSES = frozenset('UNKNOWN AUTH_DENIED RATE_LIMIT API_UNAVAILABLE HTTP_ERROR NETWORK_ERROR TIMEOUT RESPONSE_LIMIT RESPONSE_INVALID RESULT_INVALID'.split())
 
 
 class BackupError(Exception):
@@ -37,7 +40,7 @@ class BackupError(Exception):
     def __init__(self, code, *, stage=None, http=None, cf_codes=(), failure_class=None, exit_code=None):
         super().__init__(code)
         self.stage = stage if stage in STAGES else None
-        self.failure_class = failure_class if failure_class in EXPORT_CLASSES else 'UNKNOWN'
+        self.failure_class = failure_class if failure_class in EXPORT_CLASSES | PROBE_CLASSES else 'UNKNOWN'
         self.exit_code = exit_code if type(exit_code) is int and -255 <= exit_code <= 255 else None
         self.http = http if type(http) is int and 100 <= http <= 599 else None
         self.cf_codes = tuple(sorted({c for c in cf_codes if type(c) is int and 0 <= c <= 99999999}))[:20]
@@ -56,7 +59,10 @@ def safe_failure(error):
         if kind in ('API_ERROR', 'AUTH_DENIED') and error.cf_codes:
             result += ' CF=' + ','.join(map(str, error.cf_codes))
         return result
-    if isinstance(error, BackupError) and error.http is not None and stage in ('ENV_CONTEXT', 'D1_LIST', 'D1_DETAIL_EU'):
+    if stage == 'D1_READ_PROBE':
+        kind = error.failure_class if error.failure_class in PROBE_CLASSES else 'UNKNOWN'
+        result += ' class=' + kind
+    if isinstance(error, BackupError) and error.http is not None and stage in ('ENV_CONTEXT', 'D1_LIST', 'D1_DETAIL_EU', 'D1_READ_PROBE'):
         result += ' HTTP=' + str(error.http)
         if error.cf_codes:
             result += ' CF=' + ','.join(map(str, error.cf_codes))

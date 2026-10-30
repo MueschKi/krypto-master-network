@@ -335,3 +335,33 @@ Nach Prüfung/Merge dieses PR auf dem iPhone:
 
 Deployment bleibt gesperrt, Echtgeldhandel bleibt gesperrt. Es gibt keine neue
 Export-Alternative, keinen automatischen Retry, keine Migration und keinen Merge.
+
+## Zuerst separat freigeben: `read-probe` mit D1 Read (#24)
+
+Die neue Probe ist noch **keine Sicherung**. Der vollständige `backup-readonly`-Modus
+ist nicht freigeschaltet (Folge-Issue [#25](https://github.com/MueschKi/krypto-master-network/issues/25)), solange [Typgenauigkeit, Vollständigkeit und Konsistenz](D1_READ_ONLY_BACKUP_GATES.md)
+nicht nachgewiesen sind. Bestehende Artifacts/Recovery-Gates werden nicht aufgeweicht.
+
+Nach Review und Merge auf dem iPhone:
+
+1. GitHub → Actions → **D1 - encrypted backup and offline recovery** → Run workflow.
+2. Branch **main**, `operation=read-probe`, `confirmation=READ_ONLY_PROBE_KMN`.
+   Wartungsbestätigung und Source-Run-ID leer lassen; **keine Cron-Pause notwendig**.
+   Bestehendes Environment `cloudflare-backup` bei Bedarf separat freigeben.
+3. Nur die feste Ergebniszeile prüfen: `VERIFIED stage=D1_READ_PROBE HTTP=200`
+   belegt genau eine minimale SELECT-Abfrage nach GET-Identitätsprüfung.
+   Keine Tabellen-/Zeilenanzahlen, Namen, SQL oder Zugangsdaten teilen.
+4. Bei `AUTH_DENIED HTTP=401/403` nur bestehende Token-/Account-Zuordnung prüfen,
+   keine Rechte erweitern und keinen Deployment-Token einsetzen. `RATE_LIMIT` oder
+   `API_UNAVAILABLE` erteilt keine Retry-Freigabe; die Probe wiederholt selbst nichts.
+   `RESULT_INVALID`/`RESPONSE_INVALID`/`RESPONSE_LIMIT` verlangt Code-/API-Prüfung,
+   auch wenn HTTP 200 vorliegt. Keine Debug-Ausgaben aktivieren.
+5. Ein erfolgreicher Probelauf erzeugt kein Artifact, benötigt keine Passphrase und
+   ist keine Recovery-, Export- oder Deployment-Freigabe. Er startet niemals den
+   bestehenden Wrangler-`backup` als Ersatz. `backup-readonly` wird erst durch einen
+   gesonderten geprüften PR verfügbar; anschließend wären eine neue ausdrückliche
+   Sicherungsbestätigung und ein separat bestätigter Stopp **aller** Schreiber nötig.
+
+Der PR selbst und seine Tests greifen nicht auf die produktive Datenbank zu.
+Keine neuen Tokens, kein D1 Write/Edit, keine Migration, kein Deployment und keine
+Aktivierung von Paper-/Echtgeldhandel oder automatischer Merge.

@@ -17,6 +17,7 @@ import tempfile
 from urllib.request import Request, urlopen
 import encrypted_d1 as core
 import backup_preflight
+import d1_read_probe
 import wrangler_export_diagnostics
 
 REPO = 'MueschKi/krypto-master-network'
@@ -137,13 +138,19 @@ def recovery(binding, secret, run_id, scratch):
 
 def main(argv=None):
     parser = argparse.ArgumentParser()
-    parser.add_argument('operation', choices=('diagnose', 'backup', 'recovery'))
+    parser.add_argument('operation', choices=('read-probe', 'diagnose', 'backup', 'recovery'))
     parser.add_argument('--publish-dir', type=Path)
     parser.add_argument('--source-run-id', default='')
     args = parser.parse_args(argv)
     os.umask(0o077)
     origin = context()
     binding = core.identity(os.getenv('CLOUDFLARE_ACCOUNT_ID', ''), os.getenv('KMN_D1_DATABASE_ID', ''))
+    if args.operation == 'read-probe':
+        core.require(os.getenv('BACKUP_CONFIRMATION') == 'READ_ONLY_PROBE_KMN', 'CONSENT_MISSING')
+        # No key, tools, temporary files or artifact path in this independent mode.
+        remote_verify(binding)
+        print(d1_read_probe.run(binding))
+        return
     if args.operation == 'diagnose':
         core.require(os.getenv('BACKUP_CONFIRMATION') == 'DIAGNOSE_EXISTING_KMN', 'CONSENT_MISSING')
         backup_preflight.credentials()

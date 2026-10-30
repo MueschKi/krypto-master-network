@@ -36,12 +36,12 @@ def detail(**change):
 
 class SafeDiagnosticsTests(unittest.TestCase):
     def test_all_stages_render_only_allowlisted_fields(self):
-        self.assertEqual(len(core.STAGES),13)
+        self.assertEqual(len(core.STAGES),14)
         for stage in core.STAGES:
             with self.subTest(stage=stage):
                 with self.assertRaises(core.BackupError) as raised:
                     with core.at_stage(stage): raise RuntimeError(CANARY)
-                self.assertEqual(core.safe_failure(raised.exception),'FAILED stage='+stage+(' class=UNKNOWN' if stage == 'WRANGLER_EXPORT' else ''))
+                self.assertEqual(core.safe_failure(raised.exception),'FAILED stage='+stage+(' class=UNKNOWN' if stage in ('WRANGLER_EXPORT', 'D1_READ_PROBE') else ''))
         for error in (RuntimeError(CANARY),core.BackupError(CANARY),core.BackupError(CANARY,stage=CANARY)):
             self.assertEqual(core.safe_failure(error),'FAILED stage=ENV_CONTEXT')
         error=core.BackupError(CANARY,stage='D1_LIST',http=403,cf_codes=[10000,'secret',True,{},-1,999999999])

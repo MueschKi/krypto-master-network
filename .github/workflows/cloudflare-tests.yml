@@ -12,6 +12,7 @@ on:
         "test_d1_backup.py",
         "test_backup_diagnostics.py",
         "test_wrangler_export_diagnostics.py",
+        "test_d1_read_probe.py",
         ".github/workflows/cloudflare-d1-backup.yml",
         ".github/workflows/cloudflare-manual-deploy.yml",
         ".github/workflows/cloudflare-tests.yml",
