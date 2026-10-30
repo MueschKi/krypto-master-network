@@ -49,6 +49,7 @@ async function serve(r: Request, e: Env) {
       return secure(
         Response.json({
           version: VERSION,
+          build_id: e.CF_VERSION_METADATA?.id ?? null,
           mode: "BEOBACHTUNG",
           trading: false,
           heartbeat: last,
