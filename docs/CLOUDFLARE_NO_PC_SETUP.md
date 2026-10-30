@@ -30,6 +30,21 @@ Das Cloudflare-Konto ist erstellt. Zur Verbindung Cloudflare ↔ GitHub wird ein
 - Der Bootstrap- und Deploy-Code prüft bei jedem Zugriff **`wrangler d1 info kmn --json`** auf nachgewiesene EU-Jurisdiktion **`eu`**. Fehlt die Detailangabe oder liegt die Datenbank außerhalb der EU, **bricht der Workflow ab**, ohne diese Datenbank für einen Deploy zu verwenden. Nicht nachträglich verschieben: D1-Jurisdiktionen sind nach der Erstellung unveränderlich.
 - Die Free-D1-Größe beträgt **maximal 500 MB je Datenbank**, nicht 5 GB. Vor einem langfristigen Betrieb gilt der gesonderte [Speicher-/Retention- und Messplan](CLOUDFLARE_STORAGE_BUDGET.md). **Kein automatisches Löschen historischer Daten.**
 
+## Bei fehlgeschlagenem D1-Bootstrap: sichere Diagnose
+
+Falls `bootstrap` bei `wrangler d1 list --json` fehlschlägt, den Vorgang **nicht** einfach wiederholen und auch **nicht** die Token-Rechte auf Vollzugriff erweitern.
+
+Nach Merge dieses Diagnose-Fixes: **Actions → Cloudflare Phase A - manueller Test-Deploy → Run workflow** mit `operation=diagnose` und `main`. Beide Bestätigungsfelder bleiben **leer**. Dieser Modus führt nur einen Lesezugriff auf die Token-Verifizierung, eine lesende D1-REST-Liste und gegebenenfalls `wrangler d1 list --json` aus. **Keine** Datenbankanlage, Schemaänderung oder Veröffentlichung.
+
+Ergebnis im Job-Log `Cloudflare-Zugriff sicher diagnostizieren`:
+
+- **TOKEN: nicht erfolgreich verifiziert** → GitHub-Secret, Tokenstatus, IP-/Ablaufbeschränkung kontrollieren; keine geheimen Werte posten.
+- **TOKEN: aktiv / D1: Datenbankliste nicht lesbar** → falscher Cloudflare-Account-Scope oder fehlende **Account → D1 Read/Edit**-Berechtigung wahrscheinlich. Verwende den exakten Cloudflare-Account, dessen Account-ID in GitHub als Variable gespeichert ist. Die Diagnose zeigt nur HTTP-Status und **numerische** Cloudflare-Codes, keine vollständigen API-Antworten.
+- **D1: REST erfolgreich / WRANGLER fehlgeschlagen** → Problem möglicherweise Wrangler-/Versions- oder Konfigurationsabhängigkeit. Nicht pauschal Token-Rechte erhöhen.
+- **DIAGNOSE OK** → Berechtigungs- und Listenzugriff funktionieren; `bootstrap` nach eigener Freigabe separat erneut ausführen.
+
+Nur die Fehlerzeilen bzw. einen Screenshot **ohne Token** zur Analyse weitergeben. Das GitHub-Secret `CLOUDFLARE_API_TOKEN` darf niemals im Chat oder als Logauszug mit offengelegten Geheimnissen erscheinen. Die Cloudflare-Dokumentation bestätigt `d1 list --json` als gültigen Befehl; ein nichtnuller Exit-Code ist keine ausreichende Diagnose.
+
 ## Was GitHub danach vollständig automatisch übernimmt
 
 Nach Prüfung und bewusstem Merge von PR #13 ist in GitHub unter **Actions → Cloudflare Phase A - manueller Test-Deploy → Run workflow** die Auswahl verfügbar. Branch **main** verwenden.
