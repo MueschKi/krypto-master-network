@@ -22,13 +22,21 @@ Das Cloudflare-Konto ist erstellt. Zur Verbindung Cloudflare ↔ GitHub wird ein
 
 **Hinweis zur Sicherheit:** Die GitHub-Workflow-Datei ist öffentlich, aber Secrets bleiben privat. Änderungen an `main` sollten vor dem Merge geprüft werden, da Workflow-Code ein Secret verwenden darf. Den ersten Einrichtungs-Token nach erfolgreicher Einrichtung durch enger berechtigte Zugangsdaten ersetzen.
 
+## Verbindliche Sicherheitsprüfungen (nach Code-Review)
+
+- **Free-Tarif ist eine manuelle Betreiberbestätigung, kein API-Beleg.** Vor dem Workflow im Cloudflare-Dashboard im ausgewählten Account unter **Workers & Pages → Plans / Usage** prüfen, dass **Workers Free** gilt. Die Workflow-Aktion kann diesen Tarif nicht unabhängig beweisen. Kein Paid-Upgrade ausführen.
+- Für **bootstrap** oder **deploy** verlangt GitHub das zusätzliche Textfeld `free_plan_confirmation` mit dem exakten Wert **`FREE`**. Ohne ihn werden **keine** Ressourcen verändert.
+- Für **deploy** ist zusätzlich das Textfeld `deploy_confirmation` mit **`DEPLOY_READ_ONLY`** erforderlich. Das ist die ausdrückliche Bestätigung, dass remote D1-Migrationen ausgeführt und die reine Beobachtungs-App veröffentlicht werden dürfen. Ein Merge allein reicht nicht.
+- Der Bootstrap- und Deploy-Code prüft bei jedem Zugriff **`wrangler d1 info kmn --json`** auf nachgewiesene EU-Jurisdiktion **`eu`**. Fehlt die Detailangabe oder liegt die Datenbank außerhalb der EU, **bricht der Workflow ab**, ohne diese Datenbank für einen Deploy zu verwenden. Nicht nachträglich verschieben: D1-Jurisdiktionen sind nach der Erstellung unveränderlich.
+- Die Free-D1-Größe beträgt **maximal 500 MB je Datenbank**, nicht 5 GB. Vor einem langfristigen Betrieb gilt der gesonderte [Speicher-/Retention- und Messplan](CLOUDFLARE_STORAGE_BUDGET.md). **Kein automatisches Löschen historischer Daten.**
+
 ## Was GitHub danach vollständig automatisch übernimmt
 
 Nach Prüfung und bewusstem Merge von PR #13 ist in GitHub unter **Actions → Cloudflare Phase A - manueller Test-Deploy → Run workflow** die Auswahl verfügbar. Branch **main** verwenden.
 
 1. **Operation `validate`**: führt Python-, TypeScript- und Worker-Tests und lokalen Dry-Run aus. **Keine Änderungen bei Cloudflare.**
-2. **Operation `bootstrap`**: prüft zuerst, ob Cloudflare bereits eine D1-Datenbank mit dem Namen **`kmn`** enthält. Nur falls nicht vorhanden, erstellt die Action sie mit **EU-Jurisdiktion**. Anschließend liest sie die echte Datenbank-ID über Wrangler aus. **Keine Tabellen und kein Worker-Deployment durch diese Operation.** Bei mehrdeutigem Namen oder API-Fehler wird sicher abgebrochen.
-3. **Operation `deploy`**: verwendet die bestehende `kmn`-ID, bereitet nur im temporären GitHub-Runner die Worker-D1-Konfiguration vor, spielt die zwei D1-Migrationen in die Cloud ein und veröffentlicht ausschließlich die **read-only MTF-App** auf `*.workers.dev`. **Nichts wird an den ursprünglichen Paper-Konten oder deren GitHub-Zeitplänen verändert.** Erst nach ausdrücklicher manueller Entscheidung ausführen, nicht im Rahmen des Test-PR.
+2. **Operation `bootstrap`** (mit bestätigtem Free-Tarif, Eingabe **`FREE`**): prüft zuerst, ob Cloudflare bereits eine D1-Datenbank mit dem Namen **`kmn`** enthält. Nur falls nicht vorhanden, erstellt die Action sie mit **EU-Jurisdiktion**. Anschließend liest sie die echte Datenbank-ID über Wrangler aus und **prüft die juristische EU-Bindung anhand der Detailabfrage**. **Keine Tabellen und kein Worker-Deployment durch diese Operation.** Bei mehrdeutigem Namen oder API-Fehler wird sicher abgebrochen.
+3. **Operation `deploy`** (zusätzlich **`DEPLOY_READ_ONLY`**): verwendet die bestehende `kmn`-ID, bereitet nur im temporären GitHub-Runner die Worker-D1-Konfiguration vor, spielt die zwei D1-Migrationen in die Cloud ein und veröffentlicht ausschließlich die **read-only MTF-App** auf `*.workers.dev`. **Nichts wird an den ursprünglichen Paper-Konten oder deren GitHub-Zeitplänen verändert.** Der Testbetrieb ist nicht automatisch für eine unbegrenzte Langzeitnutzung freigegeben; Speicherwachstum und CPU bleiben zu messen. Erst nach ausdrücklicher manueller Entscheidung ausführen, nicht im Rahmen des Test-PR.
 
 Es wird **keine** GitHub-Variable `CF_D1_DATABASE_ID` mehr benötigt. Die ID ermittelt der neue Bootstrap-/Deploy-Workflow selbständig. Kein lokaler PC und keine GitHub-CLI sind erforderlich.
 
