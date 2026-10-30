@@ -164,9 +164,9 @@ class ReadProbeOperationTests(unittest.TestCase):
             with self.assertRaises(core.BackupError):ci.main(['read-probe'])
             export.assert_not_called()
 
-    def test_no_backup_readonly_choice_and_successful_probe_is_not_recovery_provenance(self):
+    def test_refused_backup_readonly_and_successful_probe_is_not_recovery_provenance(self):
         with patch.object(probe,'urlopen') as network,contextlib.redirect_stderr(io.StringIO()):
-            with self.assertRaises(SystemExit):ci.main(['backup-readonly'])
+            with self.assertRaisesRegex(core.BackupError, 'CONSISTENCY_UNPROVEN'):ci.main(['backup-readonly'])
             network.assert_not_called()
         with tempfile.TemporaryDirectory() as tmp,patch.dict(os.environ,{**PROBE_ENV,'D1_BACKUP_PASSPHRASE':KEY,'MAINTENANCE_CONFIRMATION':'OWNER_CONFIRMED_MAINTENANCE'},clear=True),patch.object(ci,'backup') as backup:
             with self.assertRaises(core.BackupError):ci.main(['backup','--publish-dir',tmp+'/out'])

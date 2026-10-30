@@ -1,5 +1,12 @@
 # D1 Read: sichere Probe und offene Gates für die Vollsicherung (#24)
 
+Fortschreibung für #25: Die gemeldete produktive Probe #41135253283 war erfolgreich.
+Die [Entscheidung und ausführbare Gegenbeispiele](D1_READ_BACKUP_DECISION.md)
+dokumentieren die weiterhin fehlende Snapshot-Garantie. `backup-readonly` ist
+inzwischen ausschließlich als lokal und vor allen Seiteneffekten abbrechender
+CLI-Verweigerungspfad reserviert; kein Extractor und keine Workflow-Operation.
+Die folgenden Aussagen über den Probe-PR beschreiben dessen ursprünglichen Umfang.
+
 Prüfstand: 30.10.2026. Dieser PR liefert den ausdrücklich erlaubten ersten Teil:
 **`read-probe`, kein `backup-readonly` und kein neues Backup-Artifact.** Während der
 Entwicklung wurden nur öffentliche Dokumentation, Repository-Code und synthetische

@@ -365,3 +365,12 @@ Nach Review und Merge auf dem iPhone:
 Der PR selbst und seine Tests greifen nicht auf die produktive Datenbank zu.
 Keine neuen Tokens, kein D1 Write/Edit, keine Migration, kein Deployment und keine
 Aktivierung von Paper-/Echtgeldhandel oder automatischer Merge.
+
+## D1-Read-Vollsicherung (#25)
+
+Die erfolgreiche Probe #41135253283 erstellt kein Backup. Die Read-Vollsicherung
+ist wegen fehlender nachweisbarer Snapshot-Konsistenz weiterhin gesperrt; siehe
+[Entscheidung](D1_READ_BACKUP_DECISION.md). `backup-readonly` erzeugt ausschließlich
+Exit 1 mit `FAILED stage=D1_READ_CONSISTENCY_UNPROVEN`, keine Dateien und keinen
+Cloudflare-Zugriff. Es gibt dafür keinen Workflow-Dispatch. Wartungsbestätigung
+oder Probe-Erfolg heben diese Sperre nicht auf.

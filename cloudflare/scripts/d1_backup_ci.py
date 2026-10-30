@@ -138,10 +138,15 @@ def recovery(binding, secret, run_id, scratch):
 
 def main(argv=None):
     parser = argparse.ArgumentParser()
-    parser.add_argument('operation', choices=('read-probe', 'diagnose', 'backup', 'recovery'))
+    parser.add_argument('operation', choices=('read-probe', 'diagnose', 'backup', 'recovery', 'backup-readonly'))
     parser.add_argument('--publish-dir', type=Path)
     parser.add_argument('--source-run-id', default='')
     args = parser.parse_args(argv)
+    # Reserved refusal only, not an extractor. A Read probe, operator consent or
+    # matching scans cannot establish an immutable cross-request source snapshot.
+    # Fail before context, credentials, network, temporary files or any fallback.
+    if args.operation == 'backup-readonly':
+        raise core.BackupError('CONSISTENCY_UNPROVEN', stage='D1_READ_CONSISTENCY_UNPROVEN')
     os.umask(0o077)
     origin = context()
     binding = core.identity(os.getenv('CLOUDFLARE_ACCOUNT_ID', ''), os.getenv('KMN_D1_DATABASE_ID', ''))
