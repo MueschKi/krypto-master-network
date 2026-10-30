@@ -11,6 +11,7 @@ on:
         "test_cloud_storage.py",
         "test_d1_backup.py",
         "test_backup_diagnostics.py",
+        "test_wrangler_export_diagnostics.py",
         ".github/workflows/cloudflare-d1-backup.yml",
         ".github/workflows/cloudflare-manual-deploy.yml",
         ".github/workflows/cloudflare-tests.yml",
@@ -36,6 +37,8 @@ jobs:
           cache: npm
           cache-dependency-path: cloudflare/package-lock.json
       - run: npm ci
+        working-directory: cloudflare
+      - run: npm run test:wrangler-export-contract
         working-directory: cloudflare
       - run: npm run check && npm test
         working-directory: cloudflare

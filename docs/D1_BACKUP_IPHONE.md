@@ -301,3 +301,37 @@ Beleg offen. Der Export verwendet das dokumentierte
 [`--skip-confirmation`](https://developers.cloudflare.com/workers/wrangler/commands/d1/)
 für nichtinteraktive CI, ausschließlich hinter den bestehenden ausdrücklichen
 Export-/Wartungs-Gates. Deployment bleibt gesperrt.
+
+## Nach Exportfehler #41129213133 (Issue #22)
+
+Die [Offline-Analyse](D1_EXPORT_ANALYSIS.md) trennt bestätigte Fakten von offenen
+Berechtigungsfragen. Der zweite Lauf hat kein verifiziertes Backup erzeugt.
+`WRANGLER_EXPORT` allein verrät nachträglich weder HTTP-Status noch Tokenursache.
+Der vorherige erfolgreiche GET-Diagnoselauf ist kein POST-Exporttest.
+
+Nach Prüfung/Merge dieses PR auf dem iPhone:
+
+1. Im fehlgeschlagenen Lauf ausschließlich die neue sichere Fehlerzeile lesen:
+   `stage`, `class`, `EXIT`, gegebenenfalls `HTTP` oder `CF`. Alte Läufe gewinnen
+   dadurch keine zusätzlichen Informationen. Keine Rohlogs oder Zugangsdaten teilen.
+2. `AUTH_DENIED` mit `CF=10000`/`9106` bezeichnet einen API-Authentifizierungshinweis;
+   nicht automatisch D1 Write/Edit vergeben. `DOWNLOAD_AUTH_DENIED HTTP=403`
+   betrifft dagegen die signierte Datei-URL und beweist keine fehlende Exportberechtigung.
+   `CLI_SYNTAX`/`CONFIG_INVALID` verlangt Code-/Konfigurationsprüfung; bei `UNKNOWN`
+   keine Ursache erraten und keine Debug-Ausgabe aktivieren.
+3. `operation=diagnose` mit `DIAGNOSE_EXISTING_KMN` bleibt optional eine separate,
+   bewusst gestartete GET-only-Metadatenprüfung. Sie kann POST-/Downloadrechte
+   weiterhin nicht prüfen und startet keinen Export.
+4. Nur der Besitzer darf entscheiden, ob ein **neuer produktiver Export** für die
+   Folgediagnose stattfinden soll. Dies ist keine automatische Fortsetzung des
+   fehlgeschlagenen Laufs: vorher den bestehenden Beobachtungs-Cron separat pausieren,
+   dann auf **main** `operation=backup`, `confirmation=EXPORT_EXISTING_KMN` und
+   `maintenance_confirmation=OWNER_CONFIRMED_MAINTENANCE` ausdrücklich setzen.
+   Der Vorgang kann die Datenbank zeitweise blockieren. Ohne diese Entscheidung
+   keinen Export starten. Actions/Codex startet oder pausiert den Cron nicht.
+5. Erst bei einem spezifischen Beleg für zusätzlich notwendige Berechtigungen eine
+   gesonderte Risikoentscheidung treffen: D1 Write/Edit kann auch Schreib-/Löschzugriff
+   gewähren. Kein pauschaler Wechsel und niemals den Deployment-Token verwenden.
+
+Deployment bleibt gesperrt, Echtgeldhandel bleibt gesperrt. Es gibt keine neue
+Export-Alternative, keinen automatischen Retry, keine Migration und keinen Merge.

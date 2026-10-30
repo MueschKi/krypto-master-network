@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "wrangler dev",
     "check": "tsc --noEmit",
+    "test:wrangler-export-contract": "node scripts/check_wrangler_export_contract.mjs",
     "test": "python scripts/reference.py > tests/reference.generated.json && vitest run",
     "test:mobile": "playwright test",
     "db:local": "wrangler d1 migrations apply kmn --local"

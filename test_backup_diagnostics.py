@@ -41,7 +41,7 @@ class SafeDiagnosticsTests(unittest.TestCase):
             with self.subTest(stage=stage):
                 with self.assertRaises(core.BackupError) as raised:
                     with core.at_stage(stage): raise RuntimeError(CANARY)
-                self.assertEqual(core.safe_failure(raised.exception),'FAILED stage='+stage)
+                self.assertEqual(core.safe_failure(raised.exception),'FAILED stage='+stage+(' class=UNKNOWN' if stage == 'WRANGLER_EXPORT' else ''))
         for error in (RuntimeError(CANARY),core.BackupError(CANARY),core.BackupError(CANARY,stage=CANARY)):
             self.assertEqual(core.safe_failure(error),'FAILED stage=ENV_CONTEXT')
         error=core.BackupError(CANARY,stage='D1_LIST',http=403,cf_codes=[10000,'secret',True,{},-1,999999999])
@@ -107,7 +107,7 @@ class SafeDiagnosticsTests(unittest.TestCase):
     def test_export_interrupt_empty_and_restore_failures_classified(self):
         with tempfile.TemporaryDirectory() as tmp,patch.object(ci,'remote_verify'),patch.object(ci,'quiet',side_effect=TimeoutError(CANARY)):
             with self.assertRaises(core.BackupError) as caught:ci.export_sql(BINDING,tmp)
-            self.assertEqual(core.safe_failure(caught.exception),'FAILED stage=WRANGLER_EXPORT')
+            self.assertEqual(core.safe_failure(caught.exception),'FAILED stage=WRANGLER_EXPORT class=UNKNOWN')
         with tempfile.TemporaryDirectory() as tmp,patch.object(ci,'remote_verify'),patch.object(ci,'quiet'):
             with self.assertRaises(core.BackupError) as caught:ci.export_sql(BINDING,tmp)
             self.assertEqual(core.safe_failure(caught.exception),'FAILED stage=EXPORT_EMPTY')
