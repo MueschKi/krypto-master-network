@@ -70,7 +70,7 @@ class EncryptedBackupTests(unittest.TestCase):
             for p in target.iterdir():
                 self.assertEqual(p.stat().st_mode&0o777,0o600)
                 self.assertNotIn(b'PRIVATE_FIXTURE_CANARY',p.read_bytes())
-            with self.assertRaises(FileExistsError):core.publish(self.cipher,target)
+            with self.assertRaises(core.BackupError):core.publish(self.cipher,target)
 
     def test_wrong_missing_key_corruption_and_hash_fail_closed(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -99,7 +99,7 @@ class EncryptedBackupTests(unittest.TestCase):
     def test_existing_local_restore_target_is_not_overwritten(self):
         with tempfile.TemporaryDirectory() as tmp:
             target=Path(tmp)/'decrypted.tar.gz';target.write_bytes(b'keep')
-            with self.assertRaises(FileExistsError):core.recover(self.cipher,self.checksum,tmp,BINDING,ORIGIN,KEY)
+            with self.assertRaises(core.BackupError):core.recover(self.cipher,self.checksum,tmp,BINDING,ORIGIN,KEY)
             self.assertEqual(target.read_bytes(),b'keep')
 
     def test_empty_export_wrong_schema_and_external_file_sql_rejected(self):
@@ -127,12 +127,9 @@ class EncryptedBackupTests(unittest.TestCase):
 
 class BackupOrchestrationTests(unittest.TestCase):
     def test_database_list_and_eu_must_match_before_export(self):
-        for found in (None,'22345678-1234-4234-8234-123456789abc'):
-            with patch.object(ci.setup_d1_ci,'ensure_credentials'),patch.object(ci.setup_d1_ci,'find_database',return_value=found),patch.object(ci.setup_d1_ci,'require_eu_jurisdiction') as eu:
-                with self.assertRaises(core.BackupError):ci.remote_verify(BINDING)
-                eu.assert_not_called()
-        with patch.object(ci.setup_d1_ci,'ensure_credentials'),patch.object(ci.setup_d1_ci,'find_database',return_value=BINDING['database_id']),patch.object(ci.setup_d1_ci,'require_eu_jurisdiction',side_effect=RuntimeError('not eu')):
-            with self.assertRaises(RuntimeError):ci.remote_verify(BINDING)
+        with patch.object(ci.backup_preflight, 'verify', side_effect=core.BackupError('D1_LIST', stage='D1_LIST')) as verify:
+            with self.assertRaises(core.BackupError): ci.remote_verify(BINDING)
+            verify.assert_called_once_with(BINDING)
 
     def test_export_uses_exact_uuid_private_config_no_mutation_commands(self):
         with tempfile.TemporaryDirectory() as tmp,patch.object(ci,'remote_verify') as verify:

@@ -4,13 +4,13 @@ on:
   workflow_dispatch:
     inputs:
       operation:
-        description: "backup = genehmigter Export; recovery = nur lokale Restore-Probe"
+        description: "diagnose = nur GET-Metadaten; backup = Export; recovery = lokale Restore-Probe"
         type: choice
         required: true
         default: recovery
-        options: [recovery, backup]
+        options: [recovery, backup, diagnose]
       confirmation:
-        description: "EXPORT_EXISTING_KMN oder OFFLINE_RECOVERY_ONLY"
+        description: "DIAGNOSE_EXISTING_KMN, EXPORT_EXISTING_KMN oder OFFLINE_RECOVERY_ONLY"
         type: string
         required: true
       maintenance_confirmation:
@@ -30,6 +30,47 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  diagnose:
+    if: github.event_name == 'workflow_dispatch' && github.repository == 'MueschKi/krypto-master-network' && github.ref == 'refs/heads/main' && inputs.operation == 'diagnose' && inputs.confirmation == 'DIAGNOSE_EXISTING_KMN'
+    environment: cloudflare-backup
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Locked dependencies (no Actions cache)
+        working-directory: cloudflare
+        run: npm ci
+      - name: Read-only metadata preflight (no export)
+        working-directory: cloudflare
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+          KMN_D1_DATABASE_ID: ${{ vars.KMN_D1_DATABASE_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_BACKUP_API_TOKEN }}
+          BACKUP_CONFIRMATION: ${{ inputs.confirmation }}
+          XDG_CONFIG_HOME: ${{ runner.temp }}/kmn-wrangler-config
+        run: |
+          set -euo pipefail
+          umask 077
+          python scripts/d1_backup_ci.py diagnose
+      - name: Cleanup private diagnostics (never upload)
+        if: always()
+        run: |
+          python - <<'PY_CLEANUP'
+          import os, pathlib, shutil
+          root = pathlib.Path(os.environ['RUNNER_TEMP'])
+          for p in root.glob('kmn-private-*'):
+              shutil.rmtree(p, ignore_errors=True)
+          shutil.rmtree(root/'kmn-wrangler-config', ignore_errors=True)
+          PY_CLEANUP
+
   backup:
     if: github.repository == 'MueschKi/krypto-master-network' && github.ref == 'refs/heads/main' && inputs.operation == 'backup'
     environment: cloudflare-backup
@@ -63,6 +104,7 @@ jobs:
           umask 077
           python scripts/d1_backup_ci.py backup --publish-dir "$RUNNER_TEMP/kmn-ciphertext"
       - name: Upload only verified ciphertext (never plaintext)
+        id: ciphertext_upload
         uses: actions/upload-artifact@v4
         with:
           name: kmn-encrypted-d1
@@ -72,6 +114,9 @@ jobs:
           if-no-files-found: error
           retention-days: 7
           compression-level: 0
+      - name: Safe upload failure classification
+        if: failure() && steps.ciphertext_upload.outcome == 'failure'
+        run: echo 'FAILED stage=ARTIFACT_UPLOAD'
       - name: Cleanup also after export/upload failure
         if: always()
         shell: bash

@@ -238,3 +238,66 @@ Offizielle Referenzen:
 [D1 Time Travel](https://developers.cloudflare.com/d1/reference/time-travel/),
 [GitHub Artifact Retention](https://docs.github.com/en/actions/using-workflows/storing-workflow-data-as-artifacts),
 [GnuPG](https://www.gnupg.org/documentation/manuals/gnupg/).
+
+## Sichere Diagnose nach fehlgeschlagenem Backup (Issue #20)
+
+Lauf [41126219688](https://github.com/MueschKi/krypto-master-network/actions/runs/41126219688)
+auf Commit `f57a3ac691981761be202ec950a3dd3e9c07f44b` scheiterte am
+30.10.2026 zwischen 20:49:29 und 20:49:32 UTC im gemeinsamen Export-/Encrypt-/Restore-Schritt.
+Checkout, Python, Node und npm waren erfolgreich, Upload und Recovery wurden übersprungen;
+Cleanup war erfolgreich. Der Log enthält keine Stufe und erlaubt **keine Aussage zur
+Ursache** oder zu Datenverlust. Der PR führt keinen Retry und keine produktive Abfrage aus.
+
+Auf dem iPhone **nach Merge**:
+
+1. GitHub → Actions → **D1 - encrypted backup and offline recovery** → Run workflow.
+2. Branch **main**, `operation=diagnose`, `confirmation=DIAGNOSE_EXISTING_KMN`.
+   Wartungsbestätigung und Source-Run-ID bleiben leer. Bestehendes Environment
+   `cloudflare-backup` gegebenenfalls wie bisher freigeben.
+3. Im Diagnosejob den festen `stage`-Code und gegebenenfalls `HTTP`/numerische `CF`-Codes lesen.
+   Keine Secrets oder Rohantworten teilen. Diagnose lädt keine Artifacts hoch.
+4. Bei fehlenden Rechten ausschließlich die minimal benötigte Berechtigung für den
+   Backup-Token und den vorgesehenen Account prüfen. Keine automatische Erweiterung,
+   kein Ersatz durch einen breiten Deployment-Token, niemals pauschal D1 Edit vergeben.
+5. Erst danach einen **neuen, separaten** Backup-Lauf bewusst freigeben: vorher den
+   bestehenden Beobachtungs-Cron selbst wieder pausieren und anschließend die bestehenden
+   `EXPORT_EXISTING_KMN`- und `OWNER_CONFIRMED_MAINTENANCE`-Bestätigungen setzen.
+   Ein erfolgreicher Diagnosejob autorisiert weder Export noch Deployment.
+
+Wenn kein Export läuft, darf der Betreiber den ursprünglichen Beobachtungs-Cron
+zwischenzeitlich bewusst wieder aktivieren. Actions startet oder pausiert keinen Cron.
+
+Die Diagnose braucht keine Backup-Passphrase. Sie prüft den lokal gesperrten Wrangler
+gegen die Lockfile-Version und GPG-Verfügbarkeit ohne Cloudflare-Token im Unterprozess.
+Danach erfolgen ausschließlich GET `/user/tokens/verify`, paginierte D1-Liste im
+konfigurierten Account und Detailprüfung der exakten UUID, `name=kmn`, `jurisdiction=eu`.
+Es gibt keinen SQL-/Datenzeilenzugriff, POST-Export, Schreibzugriff oder Deploy.
+REST GET ersetzt bewusst `wrangler d1 list --json`, dessen zusätzliche Rechte bei
+eingeschränkten Tokens scheitern können. Fehlende oder unbekannte Identität bricht ab.
+
+| Stufe | Prüfung / nächster manueller Schritt |
+| --- | --- |
+| `ENV_CONTEXT` | Manueller main-/Repository-Kontext, Diagnosebestätigung, Wrapper/GPG oder aktiver Tokenstatus. HTTP 401/403 hier betrifft Token-Verifikation. |
+| `SECRET_FORMAT` | Vorhandensein/Format von Account, UUID, Token oder Backup-Passphrase; Werte niemals loggen. |
+| `D1_LIST` | GET-Listenrecht, eindeutiger Name und exakte UUID im vorgesehenen Account; 401/403 ist gezielt dieser GET-Prüfung zugeordnet. |
+| `D1_DETAIL_EU` | GET-Detailrecht und exakte UUID/Name/EU-Jurisdiktion. Keine automatische Neuanlage oder Verschiebung. |
+| `WRANGLER_EXPORT` | Nur separat bestätigter Backup-Lauf: Export fehlgeschlagen/abgebrochen. Keine rohe Wrangler-Ausgabe. |
+| `EXPORT_EMPTY` | Exportdatei fehlt oder ist leer. |
+| `SQL_IMPORT` | Ausschließlich lokale SQL-Importprüfung fehlgeschlagen. |
+| `SCHEMA_MISMATCH` | Lokale Tabellen-/Migrations-/Schemaprüfung fehlgeschlagen. |
+| `GPG_ENCRYPT` / `GPG_DECRYPT` | Verschlüsselung bzw. authentifizierte Entschlüsselung fehlgeschlagen. |
+| `RESTORE_PARITY` | Lokale Snapshot-/Restore-/Provenienzprüfung fehlgeschlagen. |
+| `ARTIFACT_LIMIT` | Ciphertext überschreitet die zulässige Größe oder ist ungültig. |
+| `ARTIFACT_UPLOAD` | Veröffentlichung des verifizierten Ciphertexts oder Actions-Upload fehlgeschlagen. |
+
+Nur diese festen Stufen, API-HTTP-Status und streng numerische Cloudflare-Fehlercodes
+werden von den Diagnose-/Backup-Skripten ausgegeben. Unbekannte Drittanbieterfehler,
+Antworttexte, URLs, SQL, IDs, Tabellen-/Zeilenhashes und Secrets werden unterdrückt.
+Private temporäre Wrangler-/GPG-Dateien werden gelöscht und nie als Debug-Artifact hochgeladen.
+Ein erfolgreicher GET-Preflight beweist **keine** Exportberechtigung: die
+[Export API](https://developers.cloudflare.com/d1/best-practices/import-export-data/)
+verwendet POST; ob der konkrete D1-Read-Token dafür genügt, bleibt ohne spezifischen
+Beleg offen. Der Export verwendet das dokumentierte
+[`--skip-confirmation`](https://developers.cloudflare.com/workers/wrangler/commands/d1/)
+für nichtinteraktive CI, ausschließlich hinter den bestehenden ausdrücklichen
+Export-/Wartungs-Gates. Deployment bleibt gesperrt.
