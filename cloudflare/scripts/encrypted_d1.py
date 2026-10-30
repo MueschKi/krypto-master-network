@@ -29,11 +29,16 @@ MIGRATIONS = ('0001_observation.sql', '0002_review_guards.sql', '0003_storage_gu
 STAGES = frozenset("ENV_CONTEXT SECRET_FORMAT D1_LIST D1_DETAIL_EU WRANGLER_EXPORT EXPORT_EMPTY SQL_IMPORT SCHEMA_MISMATCH GPG_ENCRYPT GPG_DECRYPT RESTORE_PARITY ARTIFACT_LIMIT ARTIFACT_UPLOAD".split())
 
 
+EXPORT_CLASSES = frozenset('UNKNOWN AUTH_DENIED API_ERROR DOWNLOAD_AUTH_DENIED DOWNLOAD_NOT_FOUND DOWNLOAD_RATE_LIMIT DOWNLOAD_SERVER_ERROR DOWNLOAD_HTTP_ERROR CLI_SYNTAX CONFIG_INVALID SPAWN_FAILED TIMEOUT OUTPUT_LIMIT INTERRUPTED'.split())
+
+
 class BackupError(Exception):
     """Internal detail is never rendered by the CLI; only validated fields are."""
-    def __init__(self, code, *, stage=None, http=None, cf_codes=()):
+    def __init__(self, code, *, stage=None, http=None, cf_codes=(), failure_class=None, exit_code=None):
         super().__init__(code)
         self.stage = stage if stage in STAGES else None
+        self.failure_class = failure_class if failure_class in EXPORT_CLASSES else 'UNKNOWN'
+        self.exit_code = exit_code if type(exit_code) is int and -255 <= exit_code <= 255 else None
         self.http = http if type(http) is int and 100 <= http <= 599 else None
         self.cf_codes = tuple(sorted({c for c in cf_codes if type(c) is int and 0 <= c <= 99999999}))[:20]
 
@@ -41,6 +46,16 @@ class BackupError(Exception):
 def safe_failure(error):
     stage = error.stage if isinstance(error, BackupError) and error.stage in STAGES else 'ENV_CONTEXT'
     result = 'FAILED stage=' + stage
+    if stage == 'WRANGLER_EXPORT':
+        kind = error.failure_class if error.failure_class in EXPORT_CLASSES else 'UNKNOWN'
+        result += ' class=' + kind
+        if type(error.exit_code) is int and -255 <= error.exit_code <= 255:
+            result += ' EXIT=' + str(error.exit_code)
+        if kind.startswith('DOWNLOAD_') and error.http is not None:
+            result += ' HTTP=' + str(error.http)
+        if kind in ('API_ERROR', 'AUTH_DENIED') and error.cf_codes:
+            result += ' CF=' + ','.join(map(str, error.cf_codes))
+        return result
     if isinstance(error, BackupError) and error.http is not None and stage in ('ENV_CONTEXT', 'D1_LIST', 'D1_DETAIL_EU'):
         result += ' HTTP=' + str(error.http)
         if error.cf_codes:

@@ -17,13 +17,16 @@ import tempfile
 from urllib.request import Request, urlopen
 import encrypted_d1 as core
 import backup_preflight
+import wrangler_export_diagnostics
 
 REPO = 'MueschKi/krypto-master-network'
 WORKFLOW = '.github/workflows/cloudflare-d1-backup.yml'
 ARTIFACT = 'kmn-encrypted-d1'
 
 
-def quiet(command, *, environment=None, timeout=300):
+def quiet(command, *, environment=None, timeout=300, export_binding=None):
+    if export_binding is not None:
+        return wrangler_export_diagnostics.run(command, environment=environment, binding=export_binding, timeout=timeout)
     # Stop npx AND its descendants before temp cleanup on interruption.
     # Output is discarded, never printed or attached as an artifact.
     with subprocess.Popen(command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
@@ -64,11 +67,17 @@ def export_sql(binding, scratch):
     source = Path(scratch)/'export.sql'
     environment = dict(os.environ)
     environment.pop('D1_BACKUP_PASSPHRASE', None)
+    environment.pop('FORCE_COLOR', None)
     environment['WRANGLER_SEND_METRICS'] = 'false'
-    environment['WRANGLER_LOG_PATH'] = str(Path(scratch)/'wrangler-private.log')
+    # Wrangler appends debug logs even at log level error. Discard them via a
+    # private .log symlink (a bare /dev/null would be interpreted as a directory).
+    log_path = Path(scratch)/'wrangler-discard.log'
+    log_path.symlink_to(os.devnull)
+    environment.update(WRANGLER_LOG_PATH=str(log_path), WRANGLER_LOG='error',
+                       WRANGLER_LOG_SANITIZE='true', NO_COLOR='1', CI='true')
     with core.at_stage('WRANGLER_EXPORT'):
         quiet(['npx', '--no-install', 'wrangler', 'd1', 'export', 'kmn', '--remote',
-               '--skip-confirmation', '--config', str(config), '--output', str(source)], environment=environment, timeout=900)
+               '--skip-confirmation', '--config', str(config), '--output', str(source)], environment=environment, timeout=900, export_binding=binding)
     with core.at_stage('EXPORT_EMPTY'):
         core.require(source.is_file() and source.stat().st_size > 0, 'EXPORT_EMPTY')
     os.chmod(source, 0o600)
