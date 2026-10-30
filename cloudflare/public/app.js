@@ -193,6 +193,7 @@ async function refresh() {
     );
     $("system-data").replaceChildren(
       el("p", "Version: " + s.version),
+      el("p", "Build: " + (s.build_id ?? "lokal / unveröffentlicht")),
       el(
         "p",
         "D1-Speicherschutz: " + (diagnostic?.storage?.state ?? "UNKNOWN"),

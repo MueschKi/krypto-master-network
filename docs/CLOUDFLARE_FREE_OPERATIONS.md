@@ -1,5 +1,7 @@
 # Cloudflare Free: Überwachung, Kerzenspeicher und Recovery
 
+**Issue #18:** Der bisherige manuelle Deploy-Pfad ist technisch gesperrt. Vor Migration 0003 und Worker-Veröffentlichung fehlen ein frischer, datenversionsgebundener Backup-/Recovery-Nachweis und getrennte Freigaben. Die neue [iPhone-Backup-Anleitung](D1_BACKUP_IPHONE.md) ist maßgeblich; ältere Deploy-Schritte unten sind keine ausführbare Freigabe.
+
 Stand: 30.10.2026, Umsetzung von Issue #14. Dieser PR ändert nur Quellcode.
 Merge, Remote-Migration, Veröffentlichung und spätere Cache-Löschung erfordern
 jeweils getrennte Besitzerfreigaben. Kein Tarifwechsel und keine neuen Ressourcen.

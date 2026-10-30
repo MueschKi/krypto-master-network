@@ -20,7 +20,7 @@ on:
         required: false
         default: ""
       deploy_confirmation:
-        description: "Nur fuer deploy: DEPLOY_READ_ONLY eingeben (remote D1-Migrationen und Worker-Deployment)"
+        description: "Deploy ist technisch gesperrt; keine Bestaetigung entsperrt Migration/Worker"
         type: string
         required: false
         default: ""
@@ -29,7 +29,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: cloudflare-phase-a-manual-deploy
+  group: cloudflare-kmn-maintenance
   cancel-in-progress: false
 
 jobs:
@@ -42,6 +42,13 @@ jobs:
       run:
         working-directory: cloudflare
     steps:
+      - name: Deployment blocked pending current-data recovery gate
+        if: inputs.operation == 'deploy'
+        working-directory: ${{ runner.temp }}
+        run: |
+          echo "Deploy gesperrt: Backup/Recovery allein bestaetigt keinen unveraenderten Live-Datenstand. Migration und Veroeffentlichung brauchen ein separat geprueftes Gate und getrennte Freigaben."
+          exit 1
+
       - name: main auschecken
         uses: actions/checkout@v4
         with:
@@ -50,7 +57,7 @@ jobs:
       - name: Python einrichten
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: "3.11"
 
       - name: Bestehende Python-Tests
         run: |
@@ -61,7 +68,7 @@ jobs:
       - name: Node einrichten
         uses: actions/setup-node@v4
         with:
-          node-version: '24'
+          node-version: "24"
           cache: npm
           cache-dependency-path: cloudflare/package-lock.json
 
@@ -83,17 +90,6 @@ jobs:
           fi
           echo "Free-Tarif vom Betreiber manuell bestaetigt; kein automatischer Abo- oder Billing-Nachweis."
 
-      - name: Remote-Deployment separat bestaetigen
-        if: inputs.operation == 'deploy'
-        env:
-          DEPLOY_CONFIRMATION: ${{ inputs.deploy_confirmation }}
-        run: |
-          if [[ "$DEPLOY_CONFIRMATION" != "DEPLOY_READ_ONLY" ]]; then
-            echo "Abbruch: Remote-D1-Migration und Worker-Deploy beduerfen einer gesonderten Freigabe."
-            exit 1
-          fi
-          echo "Read-only-Phase-A-Deployment manuell bestaetigt."
-
       - name: Cloudflare-Zugriff sicher diagnostizieren (nur lesend)
         if: inputs.operation == 'diagnose'
         env:
@@ -107,27 +103,3 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: python scripts/setup_d1_ci.py bootstrap
-
-      - name: Existierende D1-Datenbank fuer Deploy aufloesen
-        if: inputs.operation == 'deploy'
-        env:
-          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-        run: python scripts/setup_d1_ci.py resolve
-
-      - name: D1-Migrationen remote anwenden
-        if: inputs.operation == 'deploy'
-        env:
-          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-        run: npx wrangler d1 migrations apply kmn --remote --config wrangler.deploy.toml
-
-      - name: Phase A MTF-App deployen (ausschliesslich manuell)
-        if: inputs.operation == 'deploy'
-        env:
-          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-        run: |
-          npx wrangler deploy --config wrangler.deploy.toml
-          echo "Read-only MTF Phase A deployt. Keine Paper-/Echtgeld-Orders."
-          echo "UI bleibt bei fehlenden AUTH_USER/AUTH_PASSWORD Cloudflare-Secrets gesperrt."

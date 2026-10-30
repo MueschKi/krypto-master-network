@@ -1,0 +1,122 @@
+name: D1 - encrypted backup and offline recovery
+
+on:
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: "backup = genehmigter Export; recovery = nur lokale Restore-Probe"
+        type: choice
+        required: true
+        default: recovery
+        options: [recovery, backup]
+      confirmation:
+        description: "EXPORT_EXISTING_KMN oder OFFLINE_RECOVERY_ONLY"
+        type: string
+        required: true
+      maintenance_confirmation:
+        description: "Nur Backup: OWNER_CONFIRMED_MAINTENANCE (Pause bestehender Cron separat selbst freigegeben/ausgefuehrt)"
+        type: string
+        required: false
+      source_run_id:
+        description: "Nur Recovery: numerische Run-ID des erfolgreichen Backups, nicht Artifact-ID"
+        type: string
+        required: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cloudflare-kmn-maintenance
+  cancel-in-progress: false
+
+jobs:
+  backup:
+    if: github.repository == 'MueschKi/krypto-master-network' && github.ref == 'refs/heads/main' && inputs.operation == 'backup'
+    environment: cloudflare-backup
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Locked dependencies (no Actions cache)
+        working-directory: cloudflare
+        run: npm ci
+      - name: Export, encrypt and verify both local restores
+        working-directory: cloudflare
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+          KMN_D1_DATABASE_ID: ${{ vars.KMN_D1_DATABASE_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_BACKUP_API_TOKEN }}
+          D1_BACKUP_PASSPHRASE: ${{ secrets.D1_BACKUP_PASSPHRASE }}
+          BACKUP_CONFIRMATION: ${{ inputs.confirmation }}
+          MAINTENANCE_CONFIRMATION: ${{ inputs.maintenance_confirmation }}
+          XDG_CONFIG_HOME: ${{ runner.temp }}/kmn-wrangler-config
+        run: |
+          set -euo pipefail
+          umask 077
+          python scripts/d1_backup_ci.py backup --publish-dir "$RUNNER_TEMP/kmn-ciphertext"
+      - name: Upload only verified ciphertext (never plaintext)
+        uses: actions/upload-artifact@v4
+        with:
+          name: kmn-encrypted-d1
+          path: |
+            ${{ runner.temp }}/kmn-ciphertext/backup.tar.gz.gpg
+            ${{ runner.temp }}/kmn-ciphertext/ciphertext.sha256
+          if-no-files-found: error
+          retention-days: 7
+          compression-level: 0
+      - name: Cleanup also after export/upload failure
+        if: always()
+        shell: bash
+        run: |
+          python - <<'PY'
+          import os, pathlib, shutil
+          root = pathlib.Path(os.environ['RUNNER_TEMP'])
+          for p in root.glob('kmn-private-*'):
+              shutil.rmtree(p, ignore_errors=True)
+          for name in ('kmn-ciphertext', 'kmn-wrangler-config'):
+              shutil.rmtree(root/name, ignore_errors=True)
+          PY
+
+  recovery:
+    if: github.repository == 'MueschKi/krypto-master-network' && github.ref == 'refs/heads/main' && inputs.operation == 'recovery'
+    environment: cloudflare-backup
+    permissions:
+      contents: read
+      actions: read
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Download ciphertext and prove recovery without Cloudflare credentials
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+          KMN_D1_DATABASE_ID: ${{ vars.KMN_D1_DATABASE_ID }}
+          D1_BACKUP_PASSPHRASE: ${{ secrets.D1_BACKUP_PASSPHRASE }}
+          BACKUP_CONFIRMATION: ${{ inputs.confirmation }}
+          SOURCE_RUN_ID: ${{ inputs.source_run_id }}
+        run: |
+          set -euo pipefail
+          umask 077
+          python cloudflare/scripts/d1_backup_ci.py recovery --source-run-id "$SOURCE_RUN_ID"
+      - name: Cleanup after recovery failure
+        if: always()
+        run: |
+          python - <<'PY'
+          import os, pathlib, shutil
+          for p in pathlib.Path(os.environ['RUNNER_TEMP']).glob('kmn-private-*'):
+              shutil.rmtree(p, ignore_errors=True)
+          PY

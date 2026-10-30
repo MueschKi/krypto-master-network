@@ -120,12 +120,14 @@ class D1SetupSafetyTests(TestCase):
                     setup.main()
             self.assertFalse((Path(temp) / "wrangler.deploy.toml").exists())
 
-    def test_workflow_requires_explicit_free_and_deploy_confirmations(self):
+    def test_workflow_requires_free_for_bootstrap_and_blocks_deployment(self):
         workflow = (Path(__file__).resolve().parent /
                     ".github/workflows/cloudflare-manual-deploy.yml").read_text()
         self.assertIn("workflow_dispatch:", workflow)
         self.assertIn('FREE_CONFIRMATION" != "FREE"', workflow)
-        self.assertIn('DEPLOY_CONFIRMATION" != "DEPLOY_READ_ONLY"', workflow)
+        self.assertIn('Deployment blocked pending current-data recovery gate', workflow)
+        self.assertNotIn('wrangler d1 migrations apply', workflow)
+        self.assertNotIn('npx wrangler deploy --config', workflow)
         self.assertNotIn("\n  push:", workflow)
         self.assertNotIn("\n  schedule:", workflow)
 

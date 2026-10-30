@@ -40,3 +40,8 @@ cloudflare/tests/import.generated.json
 *.db
 *.db-*
 *.sha256.json
+
+# Backup plaintext is runner-temporary only; never stage local export experiments.
+cloudflare/backup-*.sql
+cloudflare/backup-*.tar*
+cloudflare/ciphertext.sha256

@@ -226,3 +226,12 @@ it("expired claim is recoverable", async () => {
   expect(job.owner).not.toBe("dead-worker");
   expect(job.status).toBe("OK");
 });
+it("exposes the non-secret Cloudflare build version without asserting live quotas", async () => {
+  const r = await handle(request("/api/status"), {
+    ...auth,
+    CF_VERSION_METADATA: { id: "12345678-1234-4234-8234-123456789abc" },
+  });
+  const body = (await r.json()) as any;
+  expect(body.build_id).toBe("12345678-1234-4234-8234-123456789abc");
+  expect(body.free_tier_verified).toBe(false);
+});

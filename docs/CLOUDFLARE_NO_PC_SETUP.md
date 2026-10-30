@@ -1,5 +1,7 @@
 # Cloudflare Free ohne eigenen PC: Einrichtung über GitHub Actions
 
+**Issue #18:** Der bisherige manuelle Deploy-Pfad ist technisch gesperrt. Vor Migration 0003 und Worker-Veröffentlichung fehlen ein frischer, datenversionsgebundener Backup-/Recovery-Nachweis und getrennte Freigaben. Die neue [iPhone-Backup-Anleitung](D1_BACKUP_IPHONE.md) ist maßgeblich; ältere Deploy-Schritte unten sind keine ausführbare Freigabe.
+
 **Stand:** Phase A · read-only Kraken-MTF-Beobachtung, KEIN automatisches Cloud-Paper-Trading und KEINE Echtgeld-Orderfunktion. Dieser PR deployed **nichts**. Erst eine später bewusst gestartete GitHub Action legt D1 an oder veröffentlicht den Worker.
 
 ## Was du selbst einmalig machen musst
