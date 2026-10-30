@@ -5,12 +5,13 @@ on:
   workflow_dispatch:
     inputs:
       operation:
-        description: "Zuerst validate, dann bootstrap, spaeter bewusst deploy"
+        description: "validate / diagnose (rein lesend), dann bootstrap, spaeter bewusst deploy"
         required: true
         type: choice
         default: validate
         options:
           - validate
+          - diagnose
           - bootstrap
           - deploy
       free_plan_confirmation:
@@ -92,6 +93,13 @@ jobs:
             exit 1
           fi
           echo "Read-only-Phase-A-Deployment manuell bestaetigt."
+
+      - name: Cloudflare-Zugriff sicher diagnostizieren (nur lesend)
+        if: inputs.operation == 'diagnose'
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: python scripts/diagnose_d1_ci.py
 
       - name: D1-Datenbank automatisch anlegen oder wiederverwenden
         if: inputs.operation == 'bootstrap'
