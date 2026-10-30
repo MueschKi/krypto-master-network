@@ -27,8 +27,14 @@ Das Cloudflare-Konto ist erstellt. Zur Verbindung Cloudflare ↔ GitHub wird ein
 - **Free-Tarif ist eine manuelle Betreiberbestätigung, kein API-Beleg.** Vor dem Workflow im Cloudflare-Dashboard im ausgewählten Account unter **Workers & Pages → Plans / Usage** prüfen, dass **Workers Free** gilt. Die Workflow-Aktion kann diesen Tarif nicht unabhängig beweisen. Kein Paid-Upgrade ausführen.
 - Für **bootstrap** oder **deploy** verlangt GitHub das zusätzliche Textfeld `free_plan_confirmation` mit dem exakten Wert **`FREE`**. Ohne ihn werden **keine** Ressourcen verändert.
 - Für **deploy** ist zusätzlich das Textfeld `deploy_confirmation` mit **`DEPLOY_READ_ONLY`** erforderlich. Das ist die ausdrückliche Bestätigung, dass remote D1-Migrationen ausgeführt und die reine Beobachtungs-App veröffentlicht werden dürfen. Ein Merge allein reicht nicht.
-- Der Bootstrap- und Deploy-Code prüft bei jedem Zugriff **`wrangler d1 info kmn --json`** auf nachgewiesene EU-Jurisdiktion **`eu`**. Fehlt die Detailangabe oder liegt die Datenbank außerhalb der EU, **bricht der Workflow ab**, ohne diese Datenbank für einen Deploy zu verwenden. Nicht nachträglich verschieben: D1-Jurisdiktionen sind nach der Erstellung unveränderlich.
+- Der Bootstrap- und Deploy-Code prüft bei jedem Zugriff die **Cloudflare-D1-Detail-API** (`GET /accounts/{account_id}/d1/database/{database_id}`) auf die nachgewiesene EU-Jurisdiktion **`eu`** sowie den exakt passenden Datenbanknamen und die UUID. Die nach einem `d1 create` ausgegebene Region `EEUR` ist **kein Ersatz** für diese Jurisdiktionsprüfung. Fehlt die Detailangabe oder liegt die Datenbank außerhalb der EU, **bricht der Workflow ab**, ohne diese Datenbank für einen Deploy zu verwenden. Nicht nachträglich verschieben: D1-Jurisdiktionen sind nach der Erstellung unveränderlich.
 - Die Free-D1-Größe beträgt **maximal 500 MB je Datenbank**, nicht 5 GB. Vor einem langfristigen Betrieb gilt der gesonderte [Speicher-/Retention- und Messplan](CLOUDFLARE_STORAGE_BUDGET.md). **Kein automatisches Löschen historischer Daten.**
+
+## D1 bereits am 30.10.2026 angelegt – kein zweites Mal erstellen
+
+Der erste `bootstrap`-Versuch im [GitHub-Lauf #41105792486](https://github.com/MueschKi/krypto-master-network/actions/runs/41105792486) hat die D1-Datenbank **`kmn` tatsächlich erstellt** (Region `EEUR`). Der Lauf scheiterte erst beim anschließenden `wrangler d1 info`-Check. **Bitte keine zweite Datenbank anlegen, bestehende `kmn` nicht löschen oder umbenennen.**
+
+Dieser Fix ersetzt ausschließlich die Detailprüfung durch die offizielle Cloudflare-REST-API und verifiziert die unveränderliche **`jurisdiction = eu`** anhand der bestehenden D1-UUID. `bootstrap` ist weiterhin idempotent: Es erkennt die bestehende Datenbank und führt **keinen** zweiten Create aus. `deploy` bleibt ausdrücklich gesperrt, bis ein gesonderter Benutzerauftrag vorliegt.
 
 ## Bei fehlgeschlagenem D1-Bootstrap: sichere Diagnose
 
