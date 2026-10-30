@@ -2,9 +2,9 @@
 
 **NUR PAPER TRADING – ECHTGELD TECHNISCH GESPERRT.**
 
-Aktualisierungszeit: 29.10.2026 13:46 UTC  
-Letzter verarbeiteter Börsentag: **2026-10-28**  
-Kontolauf: **bereits verarbeitet – keine Doppelbuchung**
+Aktualisierungszeit: 30.10.2026 10:55 UTC  
+Letzter verarbeiteter Börsentag: **2026-10-29**  
+Kontolauf: **reguläre Tagesverarbeitung**
 
 ## Master-Demokonto
 

@@ -2,18 +2,18 @@
 
 **KEIN ECHTGELD. Keine Gewinngarantie. Unterschiedliche Konto-Starttermine beachten.**
 
-Erstellt: 29.10.2026 13:46 UTC
+Erstellt: 30.10.2026 10:55 UTC
 
 ## Aktuelle Depotwerte
 
 | Strategie | Börsentag | Depotwert | Seit Konto-Start | Trades | Geschlossene (Gewinner) | Max. beob. Rückgang |
 |:--|:--|--:|--:|--:|--:|--:|
-| Master 7%-Stopp | 2026-10-28 | 1.000,00 € | +0.00 % | 0 | 0 (0) | 0.00 % |
-| Master ATR-Trailing 2,5x | 2026-10-28 | 1.000,00 € | +0.00 % | 0 | 0 (0) | 0.00 % |
+| Master 7%-Stopp | 2026-10-29 | 1.000,00 € | +0.00 % | 0 | 0 (0) | 0.00 % |
+| Master ATR-Trailing 2,5x | 2026-10-29 | 1.000,00 € | +0.00 % | 0 | 0 (0) | 0.00 % |
 
 ## Gemeinsamer Beobachtungszeitraum
 
-Gemeinsame Bewertungstage: **2** (2026-10-27 bis 2026-10-28).
+Gemeinsame Bewertungstage: **3** (2026-10-27 bis 2026-10-29).
 
 | Strategie | Veränderung zwischen erster und letzter gemeinsamer Bewertung |
 |:--|--:|
