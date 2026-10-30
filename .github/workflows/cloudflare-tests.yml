@@ -2,7 +2,7 @@ name: Phase A – Cloudflare read-only checks
 on:
   pull_request:
     branches: [main]
-    paths: ['cloudflare/**', 'mtf_*.py', 'net_timeframe_bot.py', 'test_cloud_phase_a.py', '.github/workflows/cloudflare-tests.yml']
+    paths: ['cloudflare/**', 'mtf_*.py', 'net_timeframe_bot.py', 'test_cloud_phase_a.py', 'test_cloud_storage.py', '.github/workflows/cloudflare-tests.yml']
   workflow_dispatch:
 permissions:
   contents: read

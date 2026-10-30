@@ -1,6 +1,6 @@
 # Cloudflare-Free-Speicherbudget (Phase A) – vor Langzeitbetrieb verpflichtend
 
-**Status:** Anforderung und Messplan, **kein Lösch- oder Migrationsauftrag**. Von dieser Datei werden keine D1-Daten verändert. Für Testbetrieb zunächst nur nichtprivate öffentliche Kraken-OHLC/MTF, keine Kontoimporte.
+**Status:** Speichergrenzen und ursprünglicher Messplan. Issue #14 ergänzt lokalen Code für Normalisierung und Warn-/Stop-Gates; Details, Belege und getrennte Freigaben stehen in [CLOUDFLARE_FREE_OPERATIONS.md](CLOUDFLARE_FREE_OPERATIONS.md). **Kein Remote-Lösch- oder Migrationsauftrag**. Von dieser Datei werden keine D1-Daten verändert. Für Testbetrieb zunächst nur nichtprivate öffentliche Kraken-OHLC/MTF, keine Kontoimporte.
 
 ## Harte Cloudflare-Limits (Stand 30.10.2026)
 
@@ -28,7 +28,7 @@ Phase A schreibt je erfolgreichem Fensterabschluss einen JSON-Rohkerzen-Batch in
    - Cloudflare Dashboard → D1 SQL database → `kmn` → Metrics.
    - Oder bewusst nur lesend: `npx wrangler d1 info kmn --json`.
    - Protokolliere Größe und Wachstum pro Tag, Anzahl Transaktionen, DB-Fehler und CPU-Ausreißer.
-3. **Warnwert 250 MB (50 %)**, **Stop/Neuentwurf spätestens 350 MB (70 %)**. Das sind konservative Projektgrenzen, *keine* automatisch implementierte Abschaltung. Ist der Worker bereits aktiv, muss der Betreiber Cron/Worker bewusst pausieren bzw. den Betrieb beenden. **Keine automatische Tarifumstellung**.
+3. **Warnwert 250 MB (50 %)**, **Stop/Neuentwurf spätestens 350 MB (70 %)**. Im neuen Code wird ab 250 MB gewarnt; ab 348 MB (2 MB Reserve vor 350 MB) oder unbekannter Größe stoppen neue Rohdaten-/Signalschreibvorgänge. Die noch unveröffentlichte Umsetzung ist im Betriebsleitfaden beschrieben. Ist der Worker bereits aktiv, muss der Betreiber Cron/Worker bewusst pausieren bzw. den Betrieb beenden. **Keine automatische Tarifumstellung**.
 4. Kein Deployment als dauerhafte Anwendung freigeben, bis eine separate Aufbewahrungsstrategie, sichere Export-/Recovery-Möglichkeit und D1-Größenüberwachung implementiert und getestet sind.
 
 ## Vorschlag für eine später **separat freizugebende** Aufbewahrungsstrategie
@@ -46,4 +46,4 @@ Phase A schreibt je erfolgreichem Fensterabschluss einen JSON-Rohkerzen-Batch in
 - nachgewiesene EU-D1-Jurisdiktion (`eu`), explizite Bestätigung des **Workers-Free-Tarifs** im Dashboard, dokumentierter manueller Start;
 - kein Einspielen persönlicher Paper-Konten in die öffentliche Worker-D1 bis zur separaten Authentifizierungsfreigabe.
 
-**Aufgaben nach dieser PR:** Für dauerhaften, kostenlosen Cloud-Betrieb ein separates Ticket zur Datenkompaktierung, Retention, Monitoring und Backups erstellen. Diese Dokumentation ersetzt noch keine technische Durchsetzung.
+**Umsetzung Issue #14:** Additive Normalisierung, Messung, Gates und Offline-Recovery sind vorbereitet. Reale Free-CPU-/Tagesquoten, Remote-Migration und spätere Retention bleiben gesonderte Abnahmen. Auch mit Normalisierung wachsen Audit-Journale dauerhaft weiter.

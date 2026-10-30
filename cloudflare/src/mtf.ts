@@ -191,6 +191,11 @@ export async function kraken(
       { wsname?: string; status?: string; quote?: string }
     >;
   };
+  if (
+    Array.isArray(markets.error) &&
+    markets.error.some((x) => /rate limit|throttl/i.test(String(x)))
+  )
+    throw Error("Kraken Rate limit");
   const market = markets.result && Object.values(markets.result);
   if (
     !Array.isArray(markets.error) ||
@@ -211,6 +216,11 @@ export async function kraken(
     error?: unknown[];
     result?: Record<string, unknown>;
   };
+  if (
+    Array.isArray(body.error) &&
+    body.error.some((x) => /rate limit|throttl/i.test(String(x)))
+  )
+    throw Error("Kraken Rate limit");
   if (!Array.isArray(body.error) || body.error.length || !body.result)
     throw Error("Kraken Fehlerantwort");
   const keys = Object.keys(body.result).filter((k) => k !== "last");
