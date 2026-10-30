@@ -36,7 +36,7 @@ def detail(**change):
 
 class SafeDiagnosticsTests(unittest.TestCase):
     def test_all_stages_render_only_allowlisted_fields(self):
-        self.assertEqual(len(core.STAGES),14)
+        self.assertEqual(len(core.STAGES),15)
         for stage in core.STAGES:
             with self.subTest(stage=stage):
                 with self.assertRaises(core.BackupError) as raised:
