@@ -4,13 +4,13 @@ on:
   workflow_dispatch:
     inputs:
       operation:
-        description: "diagnose = nur GET-Metadaten; backup = Export; recovery = lokale Restore-Probe"
+        description: "read-probe = ein SELECT; diagnose = GET; backup = Export; recovery = offline"
         type: choice
         required: true
         default: recovery
-        options: [recovery, backup, diagnose]
+        options: [recovery, backup, diagnose, read-probe]
       confirmation:
-        description: "DIAGNOSE_EXISTING_KMN, EXPORT_EXISTING_KMN oder OFFLINE_RECOVERY_ONLY"
+        description: "READ_ONLY_PROBE_KMN, DIAGNOSE_EXISTING_KMN, EXPORT_EXISTING_KMN oder OFFLINE_RECOVERY_ONLY"
         type: string
         required: true
       maintenance_confirmation:
@@ -30,6 +30,29 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  read-probe:
+    if: github.event_name == 'workflow_dispatch' && github.repository == 'MueschKi/krypto-master-network' && github.ref == 'refs/heads/main' && inputs.operation == 'read-probe' && inputs.confirmation == 'READ_ONLY_PROBE_KMN'
+    environment: cloudflare-backup
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: GET identity and exactly one fixed SELECT (no backup)
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+          KMN_D1_DATABASE_ID: ${{ vars.KMN_D1_DATABASE_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_BACKUP_API_TOKEN }}
+          BACKUP_CONFIRMATION: ${{ inputs.confirmation }}
+        run: |
+          set -euo pipefail
+          umask 077
+          python cloudflare/scripts/d1_backup_ci.py read-probe
+
   diagnose:
     if: github.event_name == 'workflow_dispatch' && github.repository == 'MueschKi/krypto-master-network' && github.ref == 'refs/heads/main' && inputs.operation == 'diagnose' && inputs.confirmation == 'DIAGNOSE_EXISTING_KMN'
     environment: cloudflare-backup
