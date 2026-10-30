@@ -30,8 +30,13 @@ function details(title, data) {
 }
 async function refresh() {
   try {
-    const [s, m, accounts, runs, history, gaps] = await Promise.all(
-      ["status", "markets", "accounts", "runs", "history", "gaps"].map(get),
+    const [s, m, accounts, runs, history, gaps, diagnostic] = await Promise.all(
+      [
+        ...["status", "markets", "accounts", "runs", "history", "gaps"].map(
+          get,
+        ),
+        get("diagnostics").catch(() => null),
+      ],
     );
     const mtfReady =
       !s.stale &&
@@ -188,6 +193,36 @@ async function refresh() {
     );
     $("system-data").replaceChildren(
       el("p", "Version: " + s.version),
+      el(
+        "p",
+        "D1-Speicherschutz: " + (diagnostic?.storage?.state ?? "UNKNOWN"),
+      ),
+      el(
+        "p",
+        "Datenbankgröße: " +
+          (Number.isFinite(diagnostic?.storage?.bytes)
+            ? (diagnostic.storage.bytes / 1000000).toFixed(2) + " MB"
+            : "unbekannt"),
+      ),
+      el(
+        "p",
+        "Speichertrend: " +
+          (Number.isFinite(diagnostic?.storage?.growth_bytes_per_day)
+            ? (diagnostic.storage.growth_bytes_per_day / 1000000).toFixed(2) +
+              " MB/Tag (Momentaufnahme)"
+            : "unbekannt"),
+      ),
+      el(
+        "p",
+        "Fehlende Fenster: " +
+          (diagnostic?.missing_windows ?? "unbekannt") +
+          " · BLOCKED/veraltet: " +
+          (diagnostic?.blocked_or_stale ?? "unbekannt"),
+      ),
+      el(
+        "p",
+        "Speicherschutz stoppt neue Daten bei unbekannter Größe oder ab 348 MB. Alte Analysen bleiben lesbar; keine automatische Löschung.",
+      ),
       el("p", "Verbindung: D1 erreichbar"),
       el(
         "p",

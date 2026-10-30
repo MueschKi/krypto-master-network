@@ -1,5 +1,7 @@
 import { analyse, cutoff, FRAMES, Frame, kraken, SYMBOLS } from "./mtf";
 import type { Env } from "./types";
+import { candleInsert } from "./candles";
+import { errorClass, instrument, storageProbe } from "./monitoring";
 // Journal expired windows since the first observed tick, including outage ranges.
 // The cursor comparison and inserts share one D1 transaction; concurrent observers
 // cannot double-count a range or move the cursor backwards.
@@ -45,11 +47,12 @@ async function journalGaps(e: Env, now: number) {
   );
   await e.DB.batch(statements);
 }
-export async function tick(
+async function runTick(
   e: Env,
   scheduled: number,
   fetcher: typeof fetch = fetch,
   now = Date.now(),
+  storageOwner: string,
 ) {
   const id = crypto.randomUUID(),
     start = Date.now();
@@ -139,38 +142,51 @@ export async function tick(
       result = analyse(raw, tf, now);
     } catch (err) {
       result = analyse(null, tf, now);
-      result.quality.reason = String(err);
-      result.reasons = [String(err)];
+      result.quality.reason = errorClass(err);
+      result.reasons = [errorClass(err)];
     }
     const status = result.quality.status === "OK" ? "OK" : "BLOCKED";
+    const latest = await storageProbe(e.DB);
+    if (latest.state === "STOP" || latest.state === "UNKNOWN")
+      throw Error("STORAGE_STOP");
+    const lease = await e.DB.prepare(
+      "SELECT owner FROM storage_guard WHERE id=1 AND owner=? AND lease_until>?",
+    )
+      .bind(storageOwner, Date.now())
+      .first();
+    if (!lease) throw Error("STORAGE_LEASE_EXPIRED");
     await e.DB.batch([
+      // id=2 violates the singleton CHECK and rolls back the whole batch if
+      // either lease was replaced between the preflight read and this commit.
       e.DB.prepare(
-        `INSERT INTO candle_batches SELECT ?,?,?,?,? WHERE EXISTS(SELECT 1 FROM jobs WHERE symbol=? AND timeframe=? AND candle_close=? AND owner=?) ON CONFLICT(symbol,timeframe,candle_close) DO UPDATE SET fetched=excluded.fetched,payload=excluded.payload`,
-      ).bind(
-        symbol,
-        tf,
-        close,
-        now,
-        JSON.stringify(raw),
-        symbol,
-        tf,
-        close,
-        id,
-      ),
-      e.DB.prepare(
-        `INSERT INTO analyses SELECT ?,?,?,?,?,? WHERE EXISTS(SELECT 1 FROM jobs WHERE symbol=? AND timeframe=? AND candle_close=? AND owner=?) ON CONFLICT(symbol,timeframe,candle_close) DO UPDATE SET calculated=excluded.calculated,run_id=excluded.run_id,payload=excluded.payload`,
-      ).bind(
-        symbol,
-        tf,
-        close,
-        now,
-        id,
-        JSON.stringify(result),
-        symbol,
-        tf,
-        close,
-        id,
-      ),
+        `INSERT INTO storage_guard(id) SELECT 2 WHERE NOT EXISTS(
+        SELECT 1 FROM storage_guard WHERE id=1 AND owner=? AND lease_until>?)
+        OR NOT EXISTS(SELECT 1 FROM jobs WHERE symbol=? AND timeframe=?
+          AND candle_close=? AND owner=? AND status='RUNNING')`,
+      ).bind(storageOwner, Date.now(), symbol, tf, close, id),
+      ...(status === "OK"
+        ? [candleInsert(e.DB, symbol, tf, raw, now, storageOwner, Date.now())]
+        : []),
+      ...(status === "OK"
+        ? [
+            e.DB.prepare(
+              `INSERT INTO analyses SELECT ?,?,?,?,?,? WHERE EXISTS(SELECT 1 FROM jobs WHERE symbol=? AND timeframe=? AND candle_close=? AND owner=?) AND EXISTS(SELECT 1 FROM storage_guard WHERE id=1 AND owner=? AND lease_until>?) ON CONFLICT(symbol,timeframe,candle_close) DO NOTHING`,
+            ).bind(
+              symbol,
+              tf,
+              close,
+              now,
+              id,
+              JSON.stringify(result),
+              symbol,
+              tf,
+              close,
+              id,
+              storageOwner,
+              Date.now(),
+            ),
+          ]
+        : []),
       e.DB.prepare(
         "UPDATE jobs SET status=?,lease_until=? WHERE symbol=? AND timeframe=? AND candle_close=? AND owner=?",
       ).bind(status, now + 60000, symbol, tf, close, id),
@@ -192,14 +208,86 @@ export async function tick(
         status,
         elapsed_ms: Date.now() - start,
         cpu_ms: null,
+        error_class: status === "OK" ? null : result.quality.reason,
       }),
     );
   } catch (err) {
     await e.DB.prepare(
       "UPDATE runs SET status='ERROR',finished=?,error=?,elapsed_ms=? WHERE id=?",
     )
-      .bind(Date.now(), String(err).slice(0, 400), Date.now() - start, id)
+      .bind(Date.now(), errorClass(err), Date.now() - start, id)
       .run();
-    console.error(JSON.stringify({ id, error: String(err) }));
+    console.error(JSON.stringify({ id, error: errorClass(err) }));
+  }
+}
+
+// One raw-data writer at a time across isolates. A crashed invocation expires;
+// the lease is checked again in the atomic publication transaction.
+export async function tick(
+  e: Env,
+  scheduled: number,
+  fetcher: typeof fetch = fetch,
+  now = Date.now(),
+) {
+  const tracked = instrument(e.DB),
+    db = tracked.db,
+    owner = crypto.randomUUID();
+  let acquired = false,
+    gate = "UNKNOWN";
+  const started = Date.now();
+  try {
+    const claim = await db
+      .prepare(
+        "UPDATE storage_guard SET owner=?,lease_until=? WHERE id=1 AND lease_until<=?",
+      )
+      .bind(owner, Date.now() + 60000, Date.now())
+      .run();
+    if (!claim.meta.changes) {
+      gate = "BUSY";
+      return;
+    }
+    acquired = true;
+    const probe = await storageProbe(db);
+    gate = probe.state;
+    if (gate === "UNKNOWN" || gate === "STOP") return;
+    await db
+      .prepare(
+        `UPDATE storage_guard SET previous_bytes=measured_bytes,previous_at=measured_at,
+      measured_bytes=?,measured_at=? WHERE id=1 AND owner=?`,
+      )
+      .bind(probe.bytes, now, owner)
+      .run();
+    await runTick({ ...e, DB: db }, scheduled, fetcher, now, owner);
+  } catch (err) {
+    console.error(
+      JSON.stringify({
+        event: "storage_guard",
+        error: errorClass(err),
+        state: gate,
+      }),
+    );
+  } finally {
+    if (acquired) {
+      try {
+        await db
+          .prepare(
+            "UPDATE storage_guard SET owner=NULL,lease_until=0 WHERE id=1 AND owner=?",
+          )
+          .bind(owner)
+          .run();
+      } catch {
+        /* Crash recovery via lease expiry; no unsafe fallback writes. */
+      }
+    }
+    console.log(
+      JSON.stringify({
+        event: "invocation",
+        storage_state: gate,
+        d1: tracked.costs,
+        cpu_ms: null,
+        elapsed_ms: Date.now() - started,
+        daily_quota_remaining: null,
+      }),
+    );
   }
 }

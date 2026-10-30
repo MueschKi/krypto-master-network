@@ -32,3 +32,11 @@ cloudflare/private-*.json
 cloudflare/wrangler.local.toml
 
 cloudflare/tests/import.generated.json
+
+# Local database backups must never be committed (may contain private data)
+*.sqlite
+*.sqlite-*
+*.sqlite3
+*.db
+*.db-*
+*.sha256.json

@@ -3,6 +3,7 @@ import { cutoff, FRAMES, Frame, SYMBOLS, summarize } from "./mtf";
 import type { Env } from "./types";
 import { authorized } from "./auth";
 import { tick } from "./scheduler";
+import { diagnostics, instrument } from "./monitoring";
 export { authorized, tick };
 export type { Env };
 export const VERSION = "2.0.0-phase-a";
@@ -20,7 +21,7 @@ function secure(r: Response) {
     out.headers.set(k, v);
   return out;
 }
-export async function handle(r: Request, e: Env) {
+async function serve(r: Request, e: Env) {
   if (!(await authorized(r, e)))
     return secure(
       new Response("Anmeldung erforderlich", {
@@ -36,12 +37,14 @@ export async function handle(r: Request, e: Env) {
   const path = new URL(r.url).pathname,
     now = Date.now();
   try {
+    if (path === "/api/diagnostics")
+      return secure(Response.json(await diagnostics(e, now)));
     if (path === "/api/status") {
       const last = await e.DB.prepare(
-        "SELECT * FROM runs ORDER BY scheduled DESC LIMIT 1",
+        "SELECT scheduled,started,finished,status,symbol,timeframe,candle_close,elapsed_ms FROM runs ORDER BY scheduled DESC LIMIT 1",
       ).first<{ scheduled: number }>();
       const success = await e.DB.prepare(
-        "SELECT * FROM runs WHERE status='OK' ORDER BY finished DESC LIMIT 1",
+        "SELECT scheduled,finished,status,symbol,timeframe,candle_close FROM runs WHERE status='OK' ORDER BY finished DESC LIMIT 1",
       ).first();
       return secure(
         Response.json({
@@ -150,3 +153,19 @@ export default {
     ctx.waitUntil(tick(e, event.scheduledTime));
   },
 };
+
+export async function handle(r: Request, e: Env) {
+  const tracked = instrument(e.DB),
+    started = Date.now();
+  const response = await serve(r, { ...e, DB: tracked.db });
+  console.log(
+    JSON.stringify({
+      event: "http",
+      status: response.status,
+      d1: tracked.costs,
+      cpu_ms: null,
+      elapsed_ms: Date.now() - started,
+    }),
+  );
+  return response;
+}

@@ -184,10 +184,17 @@ it("scheduled handler runs via waitUntil independently of browser", async () => 
 });
 it("persists raw candles and calculation atomically", async () => {
   await tick(e, now, valid, now);
-  const batch = await e.DB.prepare(
-    "SELECT payload FROM candle_batches",
-  ).first<any>();
-  expect(JSON.parse(batch.payload)).toHaveLength(300);
+  const bars = await e.DB.prepare(
+    "SELECT payload FROM raw_candles ORDER BY open_utc",
+  ).all<any>();
+  expect(bars.results).toHaveLength(300);
+  expect(
+    (await e.DB.prepare("SELECT COUNT(*) n FROM candle_batches").first<any>())
+      .n,
+  ).toBe(0);
+  expect(
+    (await e.DB.prepare("SELECT COUNT(*) n FROM analyses").first<any>()).n,
+  ).toBe(1);
 });
 it("authenticated static UI is served through the same guard", async () => {
   const r = await handle(request("/"), auth);
