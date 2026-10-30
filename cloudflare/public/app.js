@@ -30,23 +30,42 @@ function details(title, data) {
 }
 async function refresh() {
   try {
-    const [s, m, accounts, runs, history] = await Promise.all(
-      ["status", "markets", "accounts", "runs", "history"].map(get),
+    const [s, m, accounts, runs, history, gaps] = await Promise.all(
+      ["status", "markets", "accounts", "runs", "history", "gaps"].map(get),
     );
-    $("connection").textContent = s.stale
-      ? "BLOCKIERT · Heartbeat fehlt oder veraltet"
-      : "Verbunden · " + m.snapshot_utc;
-    $("connection").className = s.stale ? "blocked" : "ok";
+    const mtfReady =
+      !s.stale &&
+      m.assets.length === 4 &&
+      m.assets.every(
+        (a) =>
+          a.classification !== "BLOCKIERT" &&
+          Object.values(a.timeframes).length === 4 &&
+          Object.values(a.timeframes).every(
+            (f) => !f.stale && f.quality.status === "OK",
+          ),
+      );
+    $("connection").textContent =
+      (mtfReady ? "MTF aktuell" : "MTF BLOCKIERT / UNVOLLSTÄNDIG") +
+      " · " +
+      m.snapshot_utc;
+    $("connection").className = mtfReady ? "ok" : "blocked";
     $("status").replaceChildren(
       card(
-        "BOT-STATUS",
-        s.stale ? "BLOCKIERT" : "Heartbeat aktuell",
-        "Reine Beobachtung",
+        "TAKTSTATUS",
+        s.stale ? "Heartbeat veraltet" : "Heartbeat aktuell",
+        "Letzter Takt: " +
+          (s.heartbeat?.status ?? "Kein Lauf") +
+          " · keine vollständige MTF-Freigabe",
       ),
       card(
-        "LETZTER ERFOLG",
+        "MTF-DATENFREIGABE",
+        mtfReady ? "Aktuell" : "BLOCKIERT / UNVOLLSTÄNDIG",
+        "Alle 16 Fenster müssen gültig, aktuell und ohne Veto sein.",
+      ),
+      card(
+        "LETZTER EINZELJOB",
         time(s.last_success?.finished),
-        "Erfolgreiche Arbeitseinheit",
+        "Erfolgreiche Arbeitseinheit; kein Gesamterfolg.",
       ),
       card(
         "LETZTER TAKT",
@@ -93,7 +112,9 @@ async function refresh() {
         card(
           "KEIN IMPORT",
           "Nicht eingerichtet",
-          "Privaten Lese-Snapshot nach Anleitung importieren.",
+          s.accounts_access === "DISABLED_PENDING_AUTH_HARDENING"
+            ? "Öffentliche Kontolesestände gesperrt; Authentifizierung und PWA-Abnahme offen."
+            : "Privaten Lese-Snapshot lokal nach Anleitung importieren.",
         ),
       );
     for (const a of accounts) {
@@ -118,6 +139,20 @@ async function refresh() {
       head.append(el("th", x)),
     );
     table.append(head);
+    for (const g of gaps) {
+      const tr = el("tr");
+      [
+        time(g.observed),
+        "MISSED",
+        g.symbol + " " + g.timeframe,
+        g.missing_count +
+          " fehlende Abschlüsse im Bereich " +
+          time(g.first_close) +
+          " bis " +
+          time(g.last_close),
+      ].forEach((x) => tr.append(el("td", x)));
+      table.append(tr);
+    }
     runs.forEach((r, i) => {
       const tr = el("tr");
       [

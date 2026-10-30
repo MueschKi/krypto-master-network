@@ -1,3 +1,4 @@
+import { localAccountPreview, readAccounts } from "./accounts";
 import { cutoff, FRAMES, Frame, SYMBOLS, summarize } from "./mtf";
 import type { Env } from "./types";
 import { authorized } from "./auth";
@@ -51,6 +52,10 @@ export async function handle(r: Request, e: Env) {
           last_success: success,
           stale: !last || now - last.scheduled > 180000,
           free_tier_verified: false,
+          accounts_access: localAccountPreview(r, e)
+            ? "LOCAL_PREVIEW"
+            : "DISABLED_PENDING_AUTH_HARDENING",
+          mtf_release: "SEE_PER_WINDOW_QUALITY",
         }),
       );
     }
@@ -115,10 +120,14 @@ export async function handle(r: Request, e: Env) {
     }
     if (path === "/api/accounts")
       return secure(
+        Response.json(localAccountPreview(r, e) ? await readAccounts(e) : []),
+      );
+    if (path === "/api/gaps")
+      return secure(
         Response.json(
           (
             await e.DB.prepare(
-              "SELECT * FROM account_snapshots ORDER BY account",
+              "SELECT *, 'MISSED' AS status FROM coverage_gaps ORDER BY observed DESC LIMIT 100",
             ).all()
           ).results,
         ),

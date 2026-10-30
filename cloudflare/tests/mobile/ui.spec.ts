@@ -86,3 +86,39 @@ test("populated dashboard fits viewport and renders untrusted reasons as text", 
     fullPage: true,
   });
 });
+
+test("fresh heartbeat and old single-job success never imply complete MTF release", async ({
+  page,
+}) => {
+  await page.route("**/api/**", (route) => {
+    const p = new URL(route.request().url()).pathname;
+    return route.fulfill({
+      json: p.endsWith("status")
+        ? {
+            stale: false,
+            heartbeat: { status: "BLOCKED" },
+            last_success: { finished: 1793232000000 },
+          }
+        : p.endsWith("markets")
+          ? { assets: [], snapshot_utc: "fixture" }
+          : p.endsWith("gaps")
+            ? [
+                {
+                  symbol: "BTC/EUR",
+                  timeframe: "15m",
+                  missing_count: 1,
+                  first_close: 1793232000000,
+                  last_close: 1793232000000,
+                  observed: 1793232900000,
+                },
+              ]
+            : [],
+    });
+  });
+  await page.goto("/");
+  await expect(page.getByRole("status")).toContainText(
+    "MTF BLOCKIERT / UNVOLLSTÄNDIG",
+  );
+  await expect(page.locator("#status")).toContainText("kein Gesamterfolg");
+  await expect(page.locator("#runs")).toContainText("MISSED");
+});

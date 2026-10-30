@@ -30,3 +30,5 @@ cloudflare/tests/reference.generated.json
 cloudflare/private-*.sql
 cloudflare/private-*.json
 cloudflare/wrangler.local.toml
+
+cloudflare/tests/import.generated.json

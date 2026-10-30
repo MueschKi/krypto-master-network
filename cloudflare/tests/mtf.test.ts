@@ -9,7 +9,7 @@ import {
   summarize,
 } from "../src/mtf";
 import cases from "./reference.generated.json";
-describe("Python parity (80 deterministic cases)", () => {
+describe("Python parity (80 synthetic + 1 frozen real Kraken case)", () => {
   for (const c of cases)
     it(c.symbol + " " + c.timeframe + " " + c.name, () => {
       const out = analyse(c.raw, c.timeframe as Frame, c.now);
@@ -117,4 +117,23 @@ it("inactive or non-EUR market blocks before OHLC retrieval", async () => {
     }),
   ).rejects.toThrow("nicht online");
   expect(calls).toBe(1);
+});
+
+it("frozen real Kraken 721-row response is bounded to ccxt limit=720 and excludes running row", async () => {
+  const { default: body } = await import("./fixtures/kraken-btc-eur-15m.json");
+  const { default: meta } =
+    await import("./fixtures/kraken-btc-eur-15m.meta.json");
+  const parsed = await kraken("BTC/EUR", "15m", async (input) =>
+    String(input).includes("AssetPairs")
+      ? Response.json({
+          error: [],
+          result: {
+            PAIR: { status: "online", quote: "ZEUR", wsname: "XBT/EUR" },
+          },
+        })
+      : Response.json(body),
+  );
+  expect(parsed).toHaveLength(720);
+  expect(quality(parsed, "15m", meta.snapshot_ms)).toHaveLength(719);
+  expect(analyse(parsed, "15m", meta.snapshot_ms).quality.status).toBe("OK");
 });

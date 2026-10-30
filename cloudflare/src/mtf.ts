@@ -215,9 +215,10 @@ export async function kraken(
     throw Error("Kraken Fehlerantwort");
   const keys = Object.keys(body.result).filter((k) => k !== "last");
   const rows = body.result[keys[0]];
-  if (keys.length !== 1 || !Array.isArray(rows) || rows.length > 720)
+  if (keys.length !== 1 || !Array.isArray(rows) || rows.length > 721)
     throw Error("Kraken OHLC-Format");
-  return rows.map((r: unknown) => {
+  // Kraken can return 720 finalized bars PLUS the running bar. Match ccxt limit=720.
+  return rows.slice(-720).map((r: unknown) => {
     if (
       !Array.isArray(r) ||
       r.length !== 8 ||

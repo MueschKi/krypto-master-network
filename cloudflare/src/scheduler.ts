@@ -1,5 +1,50 @@
 import { analyse, cutoff, FRAMES, Frame, kraken, SYMBOLS } from "./mtf";
 import type { Env } from "./types";
+// Journal expired windows since the first observed tick, including outage ranges.
+// The cursor comparison and inserts share one D1 transaction; concurrent observers
+// cannot double-count a range or move the cursor backwards.
+async function journalGaps(e: Env, now: number) {
+  await e.DB.prepare("INSERT OR IGNORE INTO scheduler_state VALUES(1,?)")
+    .bind(now)
+    .run();
+  const previous = (await e.DB.prepare(
+    "SELECT observed FROM scheduler_state WHERE id=1",
+  ).first<{ observed: number }>())!.observed;
+  if (now <= previous) return;
+  const statements: D1PreparedStatement[] = [];
+  for (const tf of Object.keys(FRAMES) as Frame[]) {
+    const first = cutoff(tf, previous),
+      last = cutoff(tf, now) - FRAMES[tf];
+    if (last < first) continue;
+    for (const symbol of SYMBOLS) {
+      const count = (last - first) / FRAMES[tf] + 1;
+      statements.push(
+        e.DB.prepare(
+          `INSERT OR IGNORE INTO coverage_gaps SELECT ?,?,?,?,?-COUNT(*),? FROM jobs WHERE symbol=? AND timeframe=? AND candle_close BETWEEN ? AND ? AND status='OK' HAVING ?-COUNT(*)>0 AND (SELECT observed FROM scheduler_state WHERE id=1)=?`,
+        ).bind(
+          symbol,
+          tf,
+          first,
+          last,
+          count,
+          now,
+          symbol,
+          tf,
+          first,
+          last,
+          count,
+          previous,
+        ),
+      );
+    }
+  }
+  statements.push(
+    e.DB.prepare(
+      "UPDATE scheduler_state SET observed=? WHERE id=1 AND observed=?",
+    ).bind(now, previous),
+  );
+  await e.DB.batch(statements);
+}
 export async function tick(
   e: Env,
   scheduled: number,
@@ -14,6 +59,7 @@ export async function tick(
     .bind(id, scheduled, now, "RUNNING")
     .run();
   try {
+    await journalGaps(e, now);
     if (scheduled > now + 60000 || now - scheduled > 300000)
       throw Error("VERSPAETET: Takt nicht nachgerechnet");
     const jobs = await e.DB.prepare("SELECT * FROM jobs WHERE candle_close>=?")
@@ -24,26 +70,41 @@ export async function tick(
         candle_close: number;
         lease_until: number;
         status: string;
+        attempts: number;
       }>();
-    const units = Object.keys(FRAMES)
-      .reverse()
-      .flatMap((tf) =>
-        SYMBOLS.map((symbol) => ({
-          symbol,
-          tf: tf as Frame,
-          close: cutoff(tf as Frame, now),
-        })),
-      );
-    const unit = units.find(
-      (u) =>
-        !jobs.results.some(
+    const units = Object.keys(FRAMES).flatMap((tf) =>
+      SYMBOLS.map((symbol) => ({
+        symbol,
+        tf: tf as Frame,
+        close: cutoff(tf as Frame, now),
+      })),
+    );
+    const candidates = units
+      .map((u) => ({
+        ...u,
+        job: jobs.results.find(
           (j) =>
             j.symbol === u.symbol &&
             j.timeframe === u.tf &&
-            j.candle_close === u.close &&
-            (j.status === "OK" || j.lease_until > now),
+            j.candle_close === u.close,
         ),
+      }))
+      .filter(
+        (u) =>
+          !u.job ||
+          (u.job.status !== "OK" &&
+            u.job.lease_until <= now &&
+            u.job.attempts < 2),
+      );
+    // Earliest deadline first; first attempts win ties. At most two attempts per
+    // combination/window keep permanently failing 15m markets from starving 1h/4h/1d.
+    candidates.sort(
+      (a, b) =>
+        a.close + FRAMES[a.tf] - (b.close + FRAMES[b.tf]) ||
+        (a.job?.attempts ?? 0) - (b.job?.attempts ?? 0) ||
+        (a.job?.lease_until ?? 0) - (b.job?.lease_until ?? 0),
     );
+    const unit = candidates[0];
     if (!unit) {
       await e.DB.prepare(
         "UPDATE runs SET status='IDLE',finished=?,elapsed_ms=? WHERE id=?",
@@ -54,7 +115,7 @@ export async function tick(
     }
     const { symbol, tf, close } = unit;
     const claim = await e.DB.prepare(
-      `INSERT INTO jobs VALUES(?,?,?,?,?,'RUNNING') ON CONFLICT(symbol,timeframe,candle_close) DO UPDATE SET owner=excluded.owner,lease_until=excluded.lease_until,status='RUNNING' WHERE jobs.status!='OK' AND jobs.lease_until<=?`,
+      `INSERT INTO jobs(symbol,timeframe,candle_close,owner,lease_until,status,attempts) VALUES(?,?,?,?,?,'RUNNING',1) ON CONFLICT(symbol,timeframe,candle_close) DO UPDATE SET owner=excluded.owner,lease_until=excluded.lease_until,status='RUNNING',attempts=jobs.attempts+1 WHERE jobs.status!='OK' AND jobs.lease_until<=? AND jobs.attempts<2`,
     )
       .bind(symbol, tf, close, id, now + 300000, now)
       .run();
@@ -112,7 +173,7 @@ export async function tick(
       ),
       e.DB.prepare(
         "UPDATE jobs SET status=?,lease_until=? WHERE symbol=? AND timeframe=? AND candle_close=? AND owner=?",
-      ).bind(status, now + 1800000, symbol, tf, close, id),
+      ).bind(status, now + 60000, symbol, tf, close, id),
       e.DB.prepare(
         "UPDATE runs SET status=?,finished=?,error=?,elapsed_ms=? WHERE id=?",
       ).bind(

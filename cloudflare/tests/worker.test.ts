@@ -103,6 +103,10 @@ it("late events are logged, not replayed", async () => {
   ).toBe(0);
 });
 it("network failure persisted, cooldown then successful retry", async () => {
+  for (let i = 0; i < 16; i++) await tick(e, now, valid, now);
+  await e.DB.prepare(
+    "DELETE FROM jobs WHERE symbol='BTC/EUR' AND timeframe='15m'",
+  ).run();
   await tick(
     e,
     now,
@@ -111,15 +115,23 @@ it("network failure persisted, cooldown then successful retry", async () => {
     },
     now,
   );
-  const row = await e.DB.prepare("SELECT * FROM jobs").first<any>();
-  expect(row.status).toBe("BLOCKED");
-  await e.DB.prepare("UPDATE jobs SET lease_until=0").run();
+  expect(
+    (
+      await e.DB.prepare(
+        "SELECT status FROM jobs WHERE symbol='BTC/EUR' AND timeframe='15m'",
+      ).first<any>()
+    ).status,
+  ).toBe("BLOCKED");
+  await e.DB.prepare(
+    "UPDATE jobs SET lease_until=0 WHERE status='BLOCKED'",
+  ).run();
   await tick(e, now, valid, now);
   expect(
-    (await e.DB.prepare("SELECT COUNT(*) n FROM analyses").first<any>()).n,
-  ).toBe(1);
-  expect(
-    (await e.DB.prepare("SELECT status FROM jobs").first<any>()).status,
+    (
+      await e.DB.prepare(
+        "SELECT status FROM jobs WHERE symbol='BTC/EUR' AND timeframe='15m'",
+      ).first<any>()
+    ).status,
   ).toBe("OK");
 });
 it("stale market never gets a positive classification", async () => {
@@ -184,7 +196,7 @@ it("authenticated static UI is served through the same guard", async () => {
   expect(r.headers.get("Cache-Control")).toBe("no-store");
 });
 it("database failure returns 503 without data", async () => {
-  const r = await handle(request("/api/accounts"), {
+  const r = await handle(request("/api/status"), {
     ...auth,
     DB: {
       prepare() {
@@ -196,13 +208,14 @@ it("database failure returns 503 without data", async () => {
   expect(await r.text()).toContain("gesperrt");
 });
 it("expired claim is recoverable", async () => {
+  for (let i = 0; i < 16; i++) await tick(e, now, valid, now);
   await e.DB.prepare(
-    "INSERT INTO jobs VALUES('BTC/EUR','1d',?,'dead-worker',0,'RUNNING')",
-  )
-    .bind(now)
-    .run();
+    "UPDATE jobs SET owner='dead-worker',status='RUNNING',lease_until=0 WHERE symbol='BTC/EUR' AND timeframe='15m'",
+  ).run();
   await tick(e, now, valid, now);
-  const job = await e.DB.prepare("SELECT * FROM jobs").first<any>();
+  const job = await e.DB.prepare(
+    "SELECT * FROM jobs WHERE symbol='BTC/EUR' AND timeframe='15m'",
+  ).first<any>();
   expect(job.owner).not.toBe("dead-worker");
   expect(job.status).toBe("OK");
 });

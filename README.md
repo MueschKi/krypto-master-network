@@ -2,7 +2,7 @@
 
 **Neu: isolierter Cloudflare-Phase-A-Prototyp** in [`cloudflare/`](cloudflare/): TypeScript Worker, UTC-Cron, D1, geschütztes dunkles Dashboard und mobile PWA. Lokal testbar, **nicht deployed; Cloudflare-Free-CPU-Budget noch nicht praktisch nachgewiesen**. Bestehende Python-Handelsmodule, Kontodateien, Berichtspfade und Paper-Workflows bleiben erhalten.
 
-Installation, Anmeldung, Betrieb, iPhone-Nutzung, optionale reine Kontolesestände und offene Abnahmen: [Phase-A-Anleitung](docs/PHASE_A.md). Die folgende Dokumentation beschreibt weiterhin den bestehenden Python-Betrieb. [Repository-Prüfung und erhaltene Strukturen](docs/REPOSITORY_AUDIT_PHASE_A.md).
+Installation, Anmeldung, Betrieb, iPhone-Nutzung, optionale lokale Kontolesestände und offene Abnahmen: [Phase-A-Anleitung](docs/PHASE_A.md). Die folgende Dokumentation beschreibt weiterhin den bestehenden Python-Betrieb. [Repository-Prüfung und erhaltene Strukturen](docs/REPOSITORY_AUDIT_PHASE_A.md).
 
 
 **Forschungs- und Paper-Trading-System für BTC/EUR, ETH/EUR, SOL/EUR und NEAR/EUR. Nur virtuelle Konten; keine echten Orders, keine Gewinngarantie und kein nachgewiesener Handelsvorteil.**
