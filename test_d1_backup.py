@@ -112,6 +112,43 @@ class EncryptedBackupTests(unittest.TestCase):
             core.import_sql(source,root/'schema.sqlite')
             with self.assertRaises(core.BackupError):core.summary(root/'schema.sqlite')
 
+    def test_without_optional_extension_api_is_supported_but_sql_sandbox_kept(self):
+        # Simulate Codespaces Python linked against SQLite without
+        # SQLITE_ENABLE_LOAD_EXTENSION: there is no enable_load_extension API.
+        real_connect = sqlite3.connect
+
+        class ConnectionWithoutExtensionAPI:
+            def __init__(self, *args, **kwargs):
+                self.real = real_connect(*args, **kwargs)
+
+            def __getattr__(self, key):
+                if key == 'enable_load_extension':
+                    raise AttributeError(key)
+                return getattr(self.real, key)
+
+            def __enter__(self):
+                self.real.__enter__()
+                return self
+
+            def __exit__(self, *args):
+                return self.real.__exit__(*args)
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            source = fixture(root)
+            with patch.object(core.sqlite3, 'connect',
+                              side_effect=ConnectionWithoutExtensionAPI):
+                core.import_sql(source, root/'restored.sqlite')
+            # The import succeeded without weakening schema/data parity checks.
+            self.assertGreater(core.summary(root/'restored.sqlite')['tables']['runs']['rows'], 0)
+            blocked = root/'forbidden.sql'
+            blocked.write_text("ATTACH DATABASE '/tmp/unwanted-kmn-test.sqlite' AS other;")
+            with patch.object(core.sqlite3, 'connect',
+                              side_effect=ConnectionWithoutExtensionAPI):
+                with self.assertRaises(core.BackupError):
+                    core.import_sql(blocked, root/'blocked.sqlite')
+            self.assertFalse((root/'blocked.sqlite').exists())
+
     def test_both_pre_and_post_0003_schema_versions_supported(self):
         with tempfile.TemporaryDirectory() as tmp:
             root=Path(tmp);sql=fixture(root,3);core.import_sql(sql,root/'three.sqlite')
