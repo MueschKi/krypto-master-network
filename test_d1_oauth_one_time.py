@@ -85,7 +85,11 @@ class OAuthOnceTests(unittest.TestCase):
             root = Path(tmp)
             scratch = root / "scratch"
             scratch.mkdir()
+            package = scratch / "node_modules/wrangler/package.json"
+            package.parent.mkdir(parents=True)
+            package.write_text('{"version":"4.156.0"}')
             with contextlib.ExitStack() as stack:
+                stack.enter_context(patch.object(once, "CLOUDFLARE_DIR", scratch))
                 stack.enter_context(patch.dict(os.environ, {"CODESPACES":"true"}))
                 stack.enter_context(patch.object(once.sys, "stdin", FakeTTY()))
                 output = stack.enter_context(contextlib.redirect_stdout(FakeTTY()))
@@ -110,7 +114,11 @@ class OAuthOnceTests(unittest.TestCase):
             root = Path(tmp)
             scratch = root / "scratch"
             scratch.mkdir()
+            package = scratch / "node_modules/wrangler/package.json"
+            package.parent.mkdir(parents=True)
+            package.write_text('{"version":"4.156.0"}')
             with contextlib.ExitStack() as stack:
+                stack.enter_context(patch.object(once, "CLOUDFLARE_DIR", scratch))
                 stack.enter_context(patch.dict(os.environ, {"CODESPACES":"true"}))
                 stack.enter_context(patch.object(once.sys, "stdin", FakeTTY()))
                 output = stack.enter_context(contextlib.redirect_stdout(FakeTTY()))
