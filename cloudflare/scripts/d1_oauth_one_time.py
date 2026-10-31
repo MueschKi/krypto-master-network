@@ -191,9 +191,17 @@ def perform(scratch: Path, env):
              '"\n[[d1_databases]]\nbinding = "DB"\ndatabase_name = "kmn"\n'
              'database_id = "' + DATABASE + '"\n').encode("ascii"))
         source = scratch / "export.sql"
+        # The Codespace task starts in the repository root, while npm ci
+        # installs Wrangler exclusively below cloudflare/node_modules.
+        # Invoke the exact installed local executable directly: never let
+        # npx resolve a different Wrangler or offer to fetch one.
+        wrangler = CLOUDFLARE_DIR / "node_modules" / ".bin" / "wrangler"
+        ensure(wrangler.is_file() and wrangler.resolve().is_relative_to(
+            (CLOUDFLARE_DIR / "node_modules").resolve()),
+            "LOCAL_WRANGLER_MISSING")
         try:
             export_diag.run(
-                ["npx", "--no-install", "wrangler", "d1", "export", "kmn",
+                [str(wrangler), "d1", "export", "kmn",
                  "--remote", "--skip-confirmation", "--config", str(config),
                  "--output", str(source)],
                 environment=env, binding=binding, timeout=900)

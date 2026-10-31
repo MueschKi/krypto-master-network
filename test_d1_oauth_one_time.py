@@ -88,6 +88,9 @@ class OAuthOnceTests(unittest.TestCase):
             package = scratch / "node_modules/wrangler/package.json"
             package.parent.mkdir(parents=True)
             package.write_text('{"version":"4.156.0"}')
+            binary = scratch / "node_modules/.bin/wrangler"
+            binary.parent.mkdir(parents=True)
+            binary.write_text("#!/bin/sh\\nexit 0\\n")
             with contextlib.ExitStack() as stack:
                 stack.enter_context(patch.object(once, "CLOUDFLARE_DIR", scratch))
                 stack.enter_context(patch.dict(os.environ, {"CODESPACES":"true"}))
@@ -117,6 +120,9 @@ class OAuthOnceTests(unittest.TestCase):
             package = scratch / "node_modules/wrangler/package.json"
             package.parent.mkdir(parents=True)
             package.write_text('{"version":"4.156.0"}')
+            binary = scratch / "node_modules/.bin/wrangler"
+            binary.parent.mkdir(parents=True)
+            binary.write_text("#!/bin/sh\\nexit 0\\n")
             with contextlib.ExitStack() as stack:
                 stack.enter_context(patch.object(once, "CLOUDFLARE_DIR", scratch))
                 stack.enter_context(patch.dict(os.environ, {"CODESPACES":"true"}))
@@ -132,7 +138,10 @@ class OAuthOnceTests(unittest.TestCase):
                 consent = stack.enter_context(patch.object(once, "consent"))
                 stack.enter_context(patch.object(once, "key_from_operator", return_value="S"*48))
                 def write_fake_native_export(argv, **kwargs):
-                    self.assertEqual(argv[3:6], ["d1", "export", "kmn"])
+                    self.assertEqual(argv[1:4], ["d1", "export", "kmn"])
+                    self.assertEqual(Path(argv[0]).resolve(),
+                                     scratch/"node_modules/.bin/wrangler")
+                    self.assertNotIn("npx", argv)
                     self.assertIn("--remote", argv)
                     self.assertNotIn("CLOUDFLARE_API_TOKEN", kwargs["environment"])
                     prepared.synthetic_sql(scratch)
