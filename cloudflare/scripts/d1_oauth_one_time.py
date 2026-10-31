@@ -173,6 +173,8 @@ def perform(scratch: Path, env):
     consent("I_ACCEPT_ONE_TIME_D1_WRITE", "Nur für diesen einmaligen OAuth-Grant:")
 
     login_started = False
+    completed = False
+    logout_ok = True
     try:
         # The private Codespace terminal must show the device URL/code to its owner.
         login_started = True
@@ -206,10 +208,7 @@ def perform(scratch: Path, env):
         origin = {"repository": "MueschKi/krypto-master-network",
                   "run_id": "oauth-once-" + uuid.uuid4().hex, "commit": commit}
         prepared.verified_package(source, scratch, binding, origin, secret, OUTPUT)
-        print("VERIFIED: verschlüsseltes Backup + zweimal unabhängige SQL/SQLite-Recovery.")
-        print("Nur die Dateien in .kmn-oauth-backup-private privat herunterladen.")
-        print("Dateien an zwei sicheren Orten aufbewahren, Passphrase getrennt sichern.")
-        return True
+        completed = True
     finally:
         if login_started:
             # Best effort revocation, not merely deletion of local credentials.
@@ -217,10 +216,17 @@ def perform(scratch: Path, env):
                 command(["npx", "--no-install", "wrangler", "logout"], env,
                         capture=True, timeout=30)
                 print("Wrangler OAuth-Logout ausgeführt.")
-            except (Refused, Exception):
+            except Exception:
+                logout_ok = False
                 print("WARNUNG: OAuth-Logout nicht bestätigt!", file=sys.stderr)
             print("OAuth-Zugriff zusätzlich im Cloudflare-Dashboard kontrollieren/widerrufen:")
             print("https://dash.cloudflare.com/profile/authorizations")
+    if completed and not logout_ok:
+        raise Refused("OAUTH_REVOKE_UNCONFIRMED")
+    print("VERIFIED: verschlüsseltes Backup + zweimal unabhängige SQL/SQLite-Recovery.")
+    print("Nur die Dateien in .kmn-oauth-backup-private privat herunterladen.")
+    print("Dateien an zwei sicheren Orten aufbewahren, Passphrase getrennt sichern.")
+    return True
 
 
 def main():
