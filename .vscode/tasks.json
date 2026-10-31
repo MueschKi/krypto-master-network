@@ -50,6 +50,28 @@
         "clear": true,
         "echo": false
       }
+    },
+    {
+      "label": "D1: 3 Einmal-Backup (OAuth, manuelle Freigabe)",
+      "type": "process",
+      "command": "python3",
+      "args": [
+        "${workspaceFolder}/cloudflare/scripts/d1_oauth_one_time.py",
+        "--run"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "echo": false,
+        "focus": true,
+        "clear": true
+      },
+      "runOptions": {
+        "reevaluateOnRerun": true
+      }
     }
   ]
 }
