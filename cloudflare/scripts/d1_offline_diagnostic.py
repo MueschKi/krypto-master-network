@@ -8,6 +8,7 @@ from __future__ import annotations
 import os
 from pathlib import Path
 import shutil
+import sqlite3
 import sys
 import tempfile
 
@@ -33,6 +34,75 @@ def status(stage, code):
     print("FAILED OFFLINE_" + stage + " " + code)
     return 1
 
+
+
+def explain_synthetic_sql_import(source: Path, scratch: Path):
+    """Replay the import's local SQLite operations, never dump SQL or exception text.
+
+    This function receives only synthetic_sql() output from this diagnostic task.
+    Stages mirror core.import_sql(), not Cloudflare or any external database.
+    """
+    current = "OPEN"
+    db = None
+    try:
+        destination = scratch / "diagnostic-import.sqlite"
+        # Same exclusive-create SQLite destination behavior as production import.
+        fd = os.open(destination, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+        os.close(fd)
+        db = sqlite3.connect(destination)
+        current = "DISABLE_EXTENSION"
+        db.enable_load_extension(False)
+        current = "PAGE_LIMIT"
+        db.execute("PRAGMA max_page_count=366210")
+        current = "SQL_LIMIT"
+        db.setlimit(sqlite3.SQLITE_LIMIT_SQL_LENGTH, 8_000_000)
+
+        def authorize(action, first, second, *_):
+            if action in (sqlite3.SQLITE_ATTACH, sqlite3.SQLITE_DETACH,
+                          sqlite3.SQLITE_CREATE_VTABLE):
+                return sqlite3.SQLITE_DENY
+            if (action == sqlite3.SQLITE_PRAGMA
+                    and (first or "").lower() not in ("foreign_keys", "defer_foreign_keys")):
+                return sqlite3.SQLITE_DENY
+            if (action == sqlite3.SQLITE_FUNCTION
+                    and str(second).lower() in ("load_extension", "readfile", "writefile")):
+                return sqlite3.SQLITE_DENY
+            return sqlite3.SQLITE_OK
+
+        current = "SET_AUTHORIZER"
+        db.set_authorizer(authorize)
+        current = "SCRIPT_EXEC"
+        db.executescript(source.read_text(encoding="utf-8"))
+        db.set_authorizer(None)
+        current = "INTEGRITY_CHECK"
+        integrity = db.execute("PRAGMA integrity_check").fetchall()
+        if integrity != [("ok",)]:
+            return "FAILED OFFLINE_SQL_IMPORT INTEGRITY_CHECK_NOT_OK"
+        current = "FOREIGN_KEY_CHECK"
+        foreign = db.execute("PRAGMA foreign_key_check").fetchall()
+        if foreign:
+            return "FAILED OFFLINE_SQL_IMPORT FOREIGN_KEYS_INVALID"
+        return "FAILED OFFLINE_SQL_IMPORT CORE_IMPORT_DIFFERENCE"
+    except Exception as exc:
+        # SQLite error names are published by SQLite, not copied from exceptions
+        # or SQL. Never print str(exc), tracebacks or synthetic row payloads.
+        allowed = {
+            "SQLITE_AUTH", "SQLITE_ERROR", "SQLITE_READONLY", "SQLITE_CANTOPEN",
+            "SQLITE_NOMEM", "SQLITE_IOERR", "SQLITE_CORRUPT", "SQLITE_NOTADB",
+            "SQLITE_FULL", "SQLITE_BUSY", "SQLITE_LOCKED", "SQLITE_CONSTRAINT",
+            "SQLITE_MISUSE",
+        }
+        sqlite_code = getattr(exc, "sqlite_errorname", None)
+        suffix = sqlite_code if sqlite_code in allowed else type(exc).__name__ if type(exc).__name__ in (
+            "AttributeError", "PermissionError", "FileNotFoundError", "UnicodeDecodeError") else "UNKNOWN"
+        return "FAILED OFFLINE_SQL_IMPORT STEP=" + current + " CODE=" + suffix
+    finally:
+        if db is not None:
+            try:
+                db.set_authorizer(None)
+                db.close()
+            except Exception:
+                pass
 
 def diagnose():
     if sys.version_info < (3, 11):
@@ -61,6 +131,12 @@ def diagnose():
             os.chmod(scratch, 0o700)
             source = preparation.synthetic_sql(scratch)
             print("OK SYNTHETIC_SQL_GENERATED")
+            try:
+                core.import_sql(source, scratch / "preflight-import.sqlite")
+            except core.BackupError:
+                print(explain_synthetic_sql_import(source, scratch))
+                return 1
+            print("OK SYNTHETIC_SQL_IMPORT")
             binding = core.identity("a"*32, "12345678-1234-4234-8234-123456789abc")
             origin = {"repository": "synthetic/offline", "run_id": "synthetic",
                       "commit": "b"*40}

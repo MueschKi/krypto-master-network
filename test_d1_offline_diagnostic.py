@@ -29,6 +29,23 @@ class OfflineDiagnosticTests(unittest.TestCase):
         self.assertIn("FAILED OFFLINE_GPG_ENCRYPT UNCLASSIFIED", output.getvalue())
         self.assertNotIn("PRIVATE_SECRET_CANARY", output.getvalue())
 
+    def test_synthetic_sqlite_stages_are_safe_and_do_not_log_sql(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            safe = d.preparation.synthetic_sql(root)
+            self.assertEqual(
+                d.explain_synthetic_sql_import(safe, root),
+                "FAILED OFFLINE_SQL_IMPORT CORE_IMPORT_DIFFERENCE")
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            source = root / "synthetic.sql"
+            source.write_text("PRAGMA writable_schema=ON; -- PRIVATE_CANARY")
+            output = d.explain_synthetic_sql_import(source, root)
+            self.assertIn("STEP=SCRIPT_EXEC", output)
+            self.assertIn("CODE=SQLITE_AUTH", output)
+            self.assertNotIn("PRIVATE_CANARY", output)
+
     def test_absent_gpg_is_diagnostic_not_crash(self):
         def which(name):
             return None if name == "gpg" else "/usr/bin/synthetic"
