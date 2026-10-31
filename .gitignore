@@ -45,3 +45,6 @@ cloudflare/tests/import.generated.json
 cloudflare/backup-*.sql
 cloudflare/backup-*.tar*
 cloudflare/ciphertext.sha256
+
+# Sensitive encrypted backup output; never commit or push to GitHub.
+.kmn-oauth-backup-private/
