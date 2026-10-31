@@ -72,6 +72,24 @@
       "runOptions": {
         "reevaluateOnRerun": true
       }
+    },
+    {
+      "label": "D1: 4 Fehlerdiagnose ohne Terminal-Eingabe",
+      "type": "process",
+      "command": "python3",
+      "args": [
+        "${workspaceFolder}/cloudflare/scripts/d1_offline_diagnostic.py"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "clear": true,
+        "echo": false,
+        "focus": true
+      }
     }
   ]
 }

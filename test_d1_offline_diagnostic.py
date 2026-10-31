@@ -1,0 +1,44 @@
+"""Synthetic offline-only diagnostic UI regression tests."""
+from contextlib import redirect_stdout
+import io
+from pathlib import Path
+import sys
+import unittest
+from unittest.mock import patch
+
+sys.path.insert(0, str(Path(__file__).parent / "cloudflare/scripts"))
+import d1_offline_diagnostic as d
+import encrypted_d1 as core
+
+
+class OfflineDiagnosticTests(unittest.TestCase):
+    def test_missing_node_exits_without_cloudflare(self):
+        with patch.object(d.shutil, "which", return_value=None), redirect_stdout(io.StringIO()) as output:
+            self.assertEqual(d.diagnose(), 1)
+        self.assertIn("FAILED OFFLINE_WRANGLER NODE_MISSING", output.getvalue())
+
+    def test_synthetic_stage_is_bounded_and_no_raw_errors(self):
+        fake_error = core.BackupError("PRIVATE_SECRET_CANARY", stage="GPG_ENCRYPT")
+        with patch.object(d.shutil, "which", return_value="/usr/bin/fake"), \
+             patch.object(d.preparation, "contract"), \
+             patch.object(d.preparation, "synthetic_sql", side_effect=fake_error), \
+             patch.object(d.preparation, "ROOT", Path("/tmp/fake-kmn")), \
+             patch.object(d.Path, "is_file", return_value=True), \
+             redirect_stdout(io.StringIO()) as output:
+            self.assertEqual(d.diagnose(), 1)
+        self.assertIn("FAILED OFFLINE_GPG_ENCRYPT UNCLASSIFIED", output.getvalue())
+        self.assertNotIn("PRIVATE_SECRET_CANARY", output.getvalue())
+
+    def test_absent_gpg_is_diagnostic_not_crash(self):
+        def which(name):
+            return None if name == "gpg" else "/usr/bin/synthetic"
+        with patch.object(d.shutil, "which", side_effect=which), \
+             patch.object(d.preparation, "contract"), \
+             patch.object(d.Path, "is_file", return_value=True), \
+             redirect_stdout(io.StringIO()) as output:
+            self.assertEqual(d.diagnose(), 1)
+        self.assertIn("FAILED OFFLINE_GPG GPG_MISSING", output.getvalue())
+
+
+if __name__ == "__main__":
+    unittest.main()
