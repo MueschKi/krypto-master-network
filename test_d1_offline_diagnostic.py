@@ -46,6 +46,35 @@ class OfflineDiagnosticTests(unittest.TestCase):
             self.assertIn("CODE=SQLITE_AUTH", output)
             self.assertNotIn("PRIVATE_CANARY", output)
 
+    def test_diagnostic_handles_sqlite_build_without_extension_api(self):
+        import sqlite3
+        import tempfile
+        real_connect = sqlite3.connect
+
+        class MissingExtensionAPI:
+            def __init__(self, *args, **kwargs):
+                self.db = real_connect(*args, **kwargs)
+
+            def __getattr__(self, name):
+                if name == 'enable_load_extension':
+                    raise AttributeError(name)
+                return getattr(self.db, name)
+
+            def __enter__(self):
+                self.db.__enter__()
+                return self
+
+            def __exit__(self, *args):
+                return self.db.__exit__(*args)
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            source = d.preparation.synthetic_sql(root)
+            with patch.object(d.sqlite3, 'connect', side_effect=MissingExtensionAPI):
+                self.assertEqual(
+                    d.explain_synthetic_sql_import(source, root),
+                    'FAILED OFFLINE_SQL_IMPORT CORE_IMPORT_DIFFERENCE')
+
     def test_absent_gpg_is_diagnostic_not_crash(self):
         def which(name):
             return None if name == "gpg" else "/usr/bin/synthetic"
