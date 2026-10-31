@@ -12,6 +12,7 @@ on:
         "test_d1_backup.py",
         "test_d1_oauth_prepare.py",
         "test_d1_oauth_one_time.py",
+        "test_d1_offline_diagnostic.py",
         ".vscode/tasks.json",
         ".gitignore",
         "test_backup_diagnostics.py",
