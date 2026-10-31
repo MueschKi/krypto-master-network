@@ -51,7 +51,10 @@ def explain_synthetic_sql_import(source: Path, scratch: Path):
         os.close(fd)
         db = sqlite3.connect(destination)
         current = "DISABLE_EXTENSION"
-        db.enable_load_extension(False)
+        # Mirror encrypted_d1.import_sql on builds without the extension API.
+        disable_extension = getattr(db, "enable_load_extension", None)
+        if disable_extension is not None:
+            disable_extension(False)
         current = "PAGE_LIMIT"
         db.execute("PRAGMA max_page_count=366210")
         current = "SQL_LIMIT"

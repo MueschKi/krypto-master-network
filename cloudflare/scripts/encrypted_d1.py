@@ -123,7 +123,13 @@ def import_sql(source, destination):
     os.close(fd)
     try:
         with sqlite3.connect(destination) as db:
-            db.enable_load_extension(False)
+            # Some supported Python/SQLite builds omit the Python API for
+            # loadable extensions entirely. In those builds there is nothing
+            # to disable through this API. Keep the SQL authorizer denylist
+            # for load_extension/readfile/writefile in either case.
+            disable_extension = getattr(db, 'enable_load_extension', None)
+            if disable_extension is not None:
+                disable_extension(False)
             db.execute('PRAGMA max_page_count=366210')  # <= 1.5 GB at 4096 bytes/page
             db.setlimit(sqlite3.SQLITE_LIMIT_SQL_LENGTH, 8_000_000)
             def authorize(action, first, second, *_):
