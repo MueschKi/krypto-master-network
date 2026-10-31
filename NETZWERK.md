@@ -2,7 +2,7 @@
 
 **Dieser Bericht enthält nur Analysen. Virtuelle Master-Orders stehen separat in `TRADING_STATUS.md`. Echtgeldhandel ist gesperrt.**
 
-Erstellt (UTC): 2026-10-31T10:28:13+00:00  
+Erstellt (UTC): 2026-10-31T13:08:21+00:00  
 Datenquelle: Nur abgeschlossene Kraken-Tageskerzen (optional separater Live-Orderbuch-Snapshot)  
 Die Master-Einstufungen sind heuristische Beobachtungssignale, keine statistischen Wahrscheinlichkeiten.
 

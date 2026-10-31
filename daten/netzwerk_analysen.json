@@ -1,6 +1,6 @@
 {
   "network_version": "1.2",
-  "created_utc": "2026-10-31T10:28:13+00:00",
+  "created_utc": "2026-10-31T13:08:21+00:00",
   "basis": "Nur abgeschlossene Kraken-Tageskerzen (optional separater Live-Orderbuch-Snapshot)",
   "mode": "RESEARCH_ONLY_NO_TRADES",
   "assets": [
