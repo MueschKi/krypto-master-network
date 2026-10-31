@@ -1,0 +1,55 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "D1: 0 Gepinnte Werkzeuge installieren (npm-Download)",
+      "type": "process",
+      "command": "npm",
+      "args": [
+        "ci",
+        "--no-audit",
+        "--no-fund",
+        "--cache",
+        "/tmp/kmn-npm-cache"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/cloudflare"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "echo": false
+      }
+    },
+    {
+      "label": "D1: 1 Offline-Vorbereitung (OAuth gesperrt)",
+      "type": "process",
+      "command": "python3",
+      "args": [
+        "${workspaceFolder}/cloudflare/scripts/d1_oauth_prepare.py",
+        "prepare"
+      ],
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "clear": true,
+        "echo": false
+      }
+    },
+    {
+      "label": "D1: 2 Synthetische AES-256-Recovery-Probe",
+      "type": "process",
+      "command": "python3",
+      "args": [
+        "${workspaceFolder}/cloudflare/scripts/d1_oauth_prepare.py",
+        "rehearse"
+      ],
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "clear": true,
+        "echo": false
+      }
+    }
+  ]
+}

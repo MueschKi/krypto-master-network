@@ -190,8 +190,10 @@ def _gpg(source, destination, secret, scratch, decrypt=False):
     require(isinstance(secret, str) and len(secret) >= 32 and '\n' not in secret and '\r' not in secret, 'KEY_MISSING_OR_INVALID')
     require(shutil.which('gpg') is not None, 'GPG_MISSING')
     # Never put the passphrase in argv, output, a key file, or the child environment.
-    environment = dict(os.environ)
-    environment.pop('D1_BACKUP_PASSPHRASE', None)
+    # GPG and its agent need no Cloudflare/GitHub/OAuth credentials or Node hooks.
+    # Explicit --homedir below also avoids inherited user keyring configuration.
+    environment = {k: v for k, v in os.environ.items()
+                   if k in ('PATH', 'SystemRoot', 'LANG', 'LC_ALL', 'LC_CTYPE')}
     home = Path(scratch)/('gpg-decrypt' if decrypt else 'gpg-encrypt')
     home.mkdir(mode=0o700, exist_ok=True)
     fd = os.open(destination, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)

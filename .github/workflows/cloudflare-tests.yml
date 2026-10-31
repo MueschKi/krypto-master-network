@@ -10,6 +10,8 @@ on:
         "test_cloud_phase_a.py",
         "test_cloud_storage.py",
         "test_d1_backup.py",
+        "test_d1_oauth_prepare.py",
+        ".vscode/tasks.json",
         "test_backup_diagnostics.py",
         "test_wrangler_export_diagnostics.py",
         "test_d1_read_probe.py",
@@ -42,6 +44,9 @@ jobs:
         working-directory: cloudflare
       - run: npm run test:wrangler-export-contract
         working-directory: cloudflare
+      - run: npm run test:wrangler-oauth-contract
+        working-directory: cloudflare
+      - run: python cloudflare/scripts/d1_oauth_prepare.py rehearse
       - run: npm run check && npm test
         working-directory: cloudflare
       - run: npx playwright install --with-deps chromium webkit

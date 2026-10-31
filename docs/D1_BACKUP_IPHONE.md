@@ -1,3 +1,5 @@
+> **Persönlicher OAuth-Weg / Issue #28:** [aktuelle Vorbereitung und Scope-Sperre](D1_OAUTH_BACKUP_IPHONE.md). Kein OAuth-Backup erstellt; bestehender CI-Token bleibt unverändert.
+
 # D1-Backup und Offline-Recovery ausschließlich am iPhone
 
 Stand: Issue #18, 30.10.2026. PR #17 ist in main, die produktive Datenbank und
