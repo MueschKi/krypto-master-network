@@ -1,7 +1,7 @@
 {
   "schema_version": "1.5",
   "mode": "analyse",
-  "snapshot_utc": "2026-11-01T15:26:43.502000+00:00",
+  "snapshot_utc": "2026-11-01T20:48:16.458000+00:00",
   "source": "Kraken public spot EUR",
   "classification": "BLOCKIERT",
   "methodological_limits": "Reine Beobachtung, keine Orders und keine Übergabe an Paper-Engines. Keine Prognosewahrscheinlichkeiten. Kraken liefert maximal ca. 720 Kerzen: 15m ca. 7,5 Tage, 1h ca. 30 Tage, 4h ca. 120 Tage, 1d ca. 720 Tage; die laufende Kerze wird entfernt. EMA startet am ersten vorhandenen Schlusskurs; RSI/ATR verwenden rekursive Wilder-Glättung ab erstem Wert. Mindestens 250 abgeschlossene Kerzen, begrenzter Warm-up besonders für EMA200. Alle Zeiten UTC; Fenster enden unterschiedlich. Kein Resampling oder Auffüllen. Fehlende zuletzt erwartete Kerzen blockieren auch bei Börsenverzögerungen. Überlappende Zeitfenster sind keine unabhängigen Beweise. Keine historischen Intraday-Daten außerhalb des Kraken-Limits und kein Backtest.",
@@ -61,34 +61,34 @@
             "reason": "Lückenlos, plausibel, aktuell und vollständig abgeschlossen",
             "closed_count": 719,
             "excluded_unclosed": 1,
-            "latest_open_utc": "2026-11-01T08:00:00+00:00",
-            "latest_close_utc": "2026-11-01T12:00:00+00:00"
+            "latest_open_utc": "2026-11-01T16:00:00+00:00",
+            "latest_close_utc": "2026-11-01T20:00:00+00:00"
           },
           "agents": {
             "trend": {
               "signal": "NEGATIV",
               "indicators": {
-                "ema20": 70038.79815995725,
-                "ema50": 70997.37319600512,
-                "ema200": 72056.07883349915
+                "ema20": 69986.38896994233,
+                "ema50": 70901.59109711953,
+                "ema200": 72010.10767325916
               },
               "reason": "POSITIV: Schluss > EMA20 > EMA50 > EMA200; NEGATIV: umgekehrt; sonst NEUTRAL."
             },
             "momentum": {
               "signal": "NEUTRAL",
               "indicators": {
-                "rsi14": 43.75012972620815,
-                "macd": -569.3407303114946,
-                "macd_signal": -657.9045339202618,
-                "macd_histogram": 88.56380360876722
+                "rsi14": 42.98159191769911,
+                "macd": -483.14616154744,
+                "macd_signal": -600.7051381441955,
+                "macd_histogram": 117.55897659675554
               },
               "reason": "POSITIV: RSI > 50 und MACD-Histogramm > 0; NEGATIV: beide darunter; sonst NEUTRAL."
             },
             "volatility": {
               "signal": "NEUTRAL",
               "indicators": {
-                "atr14": 663.6593869650455,
-                "atr14_fraction": 0.009511638919201953
+                "atr14": 630.6935530463908,
+                "atr14_fraction": 0.009049752668841825
               },
               "reason": "ATR14 / Schluss > 10 % blockiert (heuristisches Volatilitätslimit); sonst richtungsneutral."
             }
@@ -100,92 +100,92 @@
           "internal_conflict": false
         },
         "1h": {
+          "classification": "NEGATIV",
+          "quality": {
+            "status": "OK",
+            "reason": "Lückenlos, plausibel, aktuell und vollständig abgeschlossen",
+            "closed_count": 719,
+            "excluded_unclosed": 1,
+            "latest_open_utc": "2026-11-01T19:00:00+00:00",
+            "latest_close_utc": "2026-11-01T20:00:00+00:00"
+          },
+          "agents": {
+            "trend": {
+              "signal": "NEGATIV",
+              "indicators": {
+                "ema20": 69737.52841256988,
+                "ema50": 69745.23074024406,
+                "ema200": 70894.97041837823
+              },
+              "reason": "POSITIV: Schluss > EMA20 > EMA50 > EMA200; NEGATIV: umgekehrt; sonst NEUTRAL."
+            },
+            "momentum": {
+              "signal": "NEGATIV",
+              "indicators": {
+                "rsi14": 49.53194656673708,
+                "macd": 75.25445652428607,
+                "macd_signal": 93.2740508188631,
+                "macd_histogram": -18.019594294577033
+              },
+              "reason": "POSITIV: RSI > 50 und MACD-Histogramm > 0; NEGATIV: beide darunter; sonst NEUTRAL."
+            },
+            "volatility": {
+              "signal": "NEUTRAL",
+              "indicators": {
+                "atr14": 188.47601993470963,
+                "atr14_fraction": 0.0027044217531289137
+              },
+              "reason": "ATR14 / Schluss > 10 % blockiert (heuristisches Volatilitätslimit); sonst richtungsneutral."
+            }
+          },
+          "reasons": [
+            "Lückenlos, plausibel, aktuell und vollständig abgeschlossen",
+            "Trend=NEGATIV, Momentum=NEGATIV, Volatilität=NEUTRAL. Trend und Momentum müssen übereinstimmen; Volatilitätsveto hat Vorrang."
+          ],
+          "internal_conflict": false
+        },
+        "15m": {
           "classification": "NEUTRAL",
           "quality": {
             "status": "OK",
             "reason": "Lückenlos, plausibel, aktuell und vollständig abgeschlossen",
             "closed_count": 719,
             "excluded_unclosed": 1,
-            "latest_open_utc": "2026-11-01T14:00:00+00:00",
-            "latest_close_utc": "2026-11-01T15:00:00+00:00"
+            "latest_open_utc": "2026-11-01T20:30:00+00:00",
+            "latest_close_utc": "2026-11-01T20:45:00+00:00"
           },
           "agents": {
             "trend": {
               "signal": "NEUTRAL",
               "indicators": {
-                "ema20": 69696.80263983995,
-                "ema50": 69731.80146518986,
-                "ema200": 70951.01550273443
+                "ema20": 69777.90824874997,
+                "ema50": 69777.93381796399,
+                "ema200": 69740.53641489171
               },
               "reason": "POSITIV: Schluss > EMA20 > EMA50 > EMA200; NEGATIV: umgekehrt; sonst NEUTRAL."
             },
             "momentum": {
-              "signal": "POSITIV",
+              "signal": "NEUTRAL",
               "indicators": {
-                "rsi14": 58.13113215019767,
-                "macd": 105.18153802730376,
-                "macd_signal": 95.53420667782507,
-                "macd_histogram": 9.64733134947869
+                "rsi14": 50.2701255150401,
+                "macd": -28.93541992912651,
+                "macd_signal": -21.268989544570506,
+                "macd_histogram": -7.666430384556005
               },
               "reason": "POSITIV: RSI > 50 und MACD-Histogramm > 0; NEGATIV: beide darunter; sonst NEUTRAL."
             },
             "volatility": {
               "signal": "NEUTRAL",
               "indicators": {
-                "atr14": 193.210119084835,
-                "atr14_fraction": 0.0027654027742011595
+                "atr14": 90.3449019933885,
+                "atr14_fraction": 0.0012945250321448416
               },
               "reason": "ATR14 / Schluss > 10 % blockiert (heuristisches Volatilitätslimit); sonst richtungsneutral."
             }
           },
           "reasons": [
             "Lückenlos, plausibel, aktuell und vollständig abgeschlossen",
-            "Trend=NEUTRAL, Momentum=POSITIV, Volatilität=NEUTRAL. Trend und Momentum müssen übereinstimmen; Volatilitätsveto hat Vorrang."
-          ],
-          "internal_conflict": false
-        },
-        "15m": {
-          "classification": "POSITIV",
-          "quality": {
-            "status": "OK",
-            "reason": "Lückenlos, plausibel, aktuell und vollständig abgeschlossen",
-            "closed_count": 719,
-            "excluded_unclosed": 1,
-            "latest_open_utc": "2026-11-01T15:00:00+00:00",
-            "latest_close_utc": "2026-11-01T15:15:00+00:00"
-          },
-          "agents": {
-            "trend": {
-              "signal": "POSITIV",
-              "indicators": {
-                "ema20": 69815.44937655258,
-                "ema50": 69751.94018699351,
-                "ema200": 69724.31800532925
-              },
-              "reason": "POSITIV: Schluss > EMA20 > EMA50 > EMA200; NEGATIV: umgekehrt; sonst NEUTRAL."
-            },
-            "momentum": {
-              "signal": "POSITIV",
-              "indicators": {
-                "rsi14": 57.506559249088895,
-                "macd": 23.279410571733024,
-                "macd_signal": 14.412405817377914,
-                "macd_histogram": 8.86700475435511
-              },
-              "reason": "POSITIV: RSI > 50 und MACD-Histogramm > 0; NEGATIV: beide darunter; sonst NEUTRAL."
-            },
-            "volatility": {
-              "signal": "NEUTRAL",
-              "indicators": {
-                "atr14": 83.78988956794436,
-                "atr14_fraction": 0.001199007616591007
-              },
-              "reason": "ATR14 / Schluss > 10 % blockiert (heuristisches Volatilitätslimit); sonst richtungsneutral."
-            }
-          },
-          "reasons": [
-            "Lückenlos, plausibel, aktuell und vollständig abgeschlossen",
-            "Trend=POSITIV, Momentum=POSITIV, Volatilität=NEUTRAL. Trend und Momentum müssen übereinstimmen; Volatilitätsveto hat Vorrang."
+            "Trend=NEUTRAL, Momentum=NEUTRAL, Volatilität=NEUTRAL. Trend und Momentum müssen übereinstimmen; Volatilitätsveto hat Vorrang."
           ],
           "internal_conflict": false
         }
@@ -195,12 +195,12 @@
         "signals": {
           "1d": "NEUTRAL",
           "4h": "NEUTRAL",
-          "1h": "NEUTRAL",
-          "15m": "POSITIV"
+          "1h": "NEGATIV",
+          "15m": "NEUTRAL"
         },
         "conflict": false,
         "reasons": [
-          "Positive Zeitfenster: ['15m']; negative: []; blockiert: [].",
+          "Positive Zeitfenster: []; negative: ['1h']; blockiert: [].",
           "Kein positiver/negativer Kreuzwiderspruch.",
           "Gleichgewichtete Einstimmigkeit aller vier Fenster für POSITIV/NEGATIV; sonst NEUTRAL. Jede Sperre blockiert die Gesamtauswertung. Keine Wahrscheinlichkeit."
         ]
@@ -261,34 +261,34 @@
             "reason": "Lückenlos, plausibel, aktuell und vollständig abgeschlossen",
             "closed_count": 719,
             "excluded_unclosed": 1,
-            "latest_open_utc": "2026-11-01T08:00:00+00:00",
-            "latest_close_utc": "2026-11-01T12:00:00+00:00"
+            "latest_open_utc": "2026-11-01T16:00:00+00:00",
+            "latest_close_utc": "2026-11-01T20:00:00+00:00"
           },
           "agents": {
             "trend": {
               "signal": "NEGATIV",
               "indicators": {
-                "ema20": 2032.8155119421458,
-                "ema50": 2065.091736127301,
-                "ema200": 2153.791524558595
+                "ema20": 2031.7147388007133,
+                "ema50": 2062.149426544264,
+                "ema200": 2151.2576306435576
               },
               "reason": "POSITIV: Schluss > EMA20 > EMA50 > EMA200; NEGATIV: umgekehrt; sonst NEUTRAL."
             },
             "momentum": {
               "signal": "NEUTRAL",
               "indicators": {
-                "rsi14": 46.28965707821171,
-                "macd": -14.637440573303365,
-                "macd_signal": -19.46819837260669,
-                "macd_histogram": 4.830757799303324
+                "rsi14": 43.50638926277417,
+                "macd": -12.342727704146228,
+                "macd_signal": -17.03988216664513,
+                "macd_histogram": 4.697154462498901
               },
               "reason": "POSITIV: RSI > 50 und MACD-Histogramm > 0; NEGATIV: beide darunter; sonst NEUTRAL."
             },
             "volatility": {
               "signal": "NEUTRAL",
               "indicators": {
-                "atr14": 24.28678295454913,
-                "atr14_fraction": 0.01195386297973093
+                "atr14": 22.999368976116344,
+                "atr14_fraction": 0.011362033452777769
               },
               "reason": "ATR14 / Schluss > 10 % blockiert (heuristisches Volatilitätslimit); sonst richtungsneutral."
             }
@@ -306,34 +306,79 @@
             "reason": "Lückenlos, plausibel, aktuell und vollständig abgeschlossen",
             "closed_count": 719,
             "excluded_unclosed": 1,
-            "latest_open_utc": "2026-11-01T14:00:00+00:00",
-            "latest_close_utc": "2026-11-01T15:00:00+00:00"
+            "latest_open_utc": "2026-11-01T19:00:00+00:00",
+            "latest_close_utc": "2026-11-01T20:00:00+00:00"
           },
           "agents": {
             "trend": {
               "signal": "NEUTRAL",
               "indicators": {
-                "ema20": 2027.5149185786095,
-                "ema50": 2025.44389998646,
-                "ema200": 2063.534427608465
+                "ema20": 2027.6726268125049,
+                "ema50": 2025.9264310224785,
+                "ema200": 2061.797997567565
               },
               "reason": "POSITIV: Schluss > EMA20 > EMA50 > EMA200; NEGATIV: umgekehrt; sonst NEUTRAL."
             },
             "momentum": {
-              "signal": "NEUTRAL",
+              "signal": "NEGATIV",
               "indicators": {
-                "rsi14": 58.56881495150449,
-                "macd": 3.9626101862450014,
-                "macd_signal": 4.391912017367021,
-                "macd_histogram": -0.4293018311220198
+                "rsi14": 47.405117099814376,
+                "macd": 2.061827135765725,
+                "macd_signal": 3.338903032837568,
+                "macd_histogram": -1.277075897071843
               },
               "reason": "POSITIV: RSI > 50 und MACD-Histogramm > 0; NEGATIV: beide darunter; sonst NEUTRAL."
             },
             "volatility": {
               "signal": "NEUTRAL",
               "indicators": {
-                "atr14": 7.415231682725048,
-                "atr14_fraction": 0.003646769492382129
+                "atr14": 6.828064807769887,
+                "atr14_fraction": 0.003373166491836346
+              },
+              "reason": "ATR14 / Schluss > 10 % blockiert (heuristisches Volatilitätslimit); sonst richtungsneutral."
+            }
+          },
+          "reasons": [
+            "Lückenlos, plausibel, aktuell und vollständig abgeschlossen",
+            "Trend=NEUTRAL, Momentum=NEGATIV, Volatilität=NEUTRAL. Trend und Momentum müssen übereinstimmen; Volatilitätsveto hat Vorrang."
+          ],
+          "internal_conflict": false
+        },
+        "15m": {
+          "classification": "NEUTRAL",
+          "quality": {
+            "status": "OK",
+            "reason": "Lückenlos, plausibel, aktuell und vollständig abgeschlossen",
+            "closed_count": 719,
+            "excluded_unclosed": 1,
+            "latest_open_utc": "2026-11-01T20:30:00+00:00",
+            "latest_close_utc": "2026-11-01T20:45:00+00:00"
+          },
+          "agents": {
+            "trend": {
+              "signal": "NEUTRAL",
+              "indicators": {
+                "ema20": 2027.5781249139745,
+                "ema50": 2028.6770004780421,
+                "ema200": 2025.926978362772
+              },
+              "reason": "POSITIV: Schluss > EMA20 > EMA50 > EMA200; NEGATIV: umgekehrt; sonst NEUTRAL."
+            },
+            "momentum": {
+              "signal": "NEUTRAL",
+              "indicators": {
+                "rsi14": 50.45468020177179,
+                "macd": -1.4634419055332728,
+                "macd_signal": -1.272875761766654,
+                "macd_histogram": -0.19056614376661885
+              },
+              "reason": "POSITIV: RSI > 50 und MACD-Histogramm > 0; NEGATIV: beide darunter; sonst NEUTRAL."
+            },
+            "volatility": {
+              "signal": "NEUTRAL",
+              "indicators": {
+                "atr14": 3.1458154115097705,
+                "atr14_fraction": 0.0015509310132964743
               },
               "reason": "ATR14 / Schluss > 10 % blockiert (heuristisches Volatilitätslimit); sonst richtungsneutral."
             }
@@ -341,51 +386,6 @@
           "reasons": [
             "Lückenlos, plausibel, aktuell und vollständig abgeschlossen",
             "Trend=NEUTRAL, Momentum=NEUTRAL, Volatilität=NEUTRAL. Trend und Momentum müssen übereinstimmen; Volatilitätsveto hat Vorrang."
-          ],
-          "internal_conflict": false
-        },
-        "15m": {
-          "classification": "POSITIV",
-          "quality": {
-            "status": "OK",
-            "reason": "Lückenlos, plausibel, aktuell und vollständig abgeschlossen",
-            "closed_count": 719,
-            "excluded_unclosed": 1,
-            "latest_open_utc": "2026-11-01T15:00:00+00:00",
-            "latest_close_utc": "2026-11-01T15:15:00+00:00"
-          },
-          "agents": {
-            "trend": {
-              "signal": "POSITIV",
-              "indicators": {
-                "ema20": 2030.7442493841206,
-                "ema50": 2029.5272132536595,
-                "ema200": 2025.302261347713
-              },
-              "reason": "POSITIV: Schluss > EMA20 > EMA50 > EMA200; NEGATIV: umgekehrt; sonst NEUTRAL."
-            },
-            "momentum": {
-              "signal": "POSITIV",
-              "indicators": {
-                "rsi14": 58.18671869561523,
-                "macd": 0.39148564447714307,
-                "macd_signal": -0.25221779209396405,
-                "macd_histogram": 0.6437034365711072
-              },
-              "reason": "POSITIV: RSI > 50 und MACD-Histogramm > 0; NEGATIV: beide darunter; sonst NEUTRAL."
-            },
-            "volatility": {
-              "signal": "NEUTRAL",
-              "indicators": {
-                "atr14": 3.1656323372294173,
-                "atr14_fraction": 0.0015563657329826681
-              },
-              "reason": "ATR14 / Schluss > 10 % blockiert (heuristisches Volatilitätslimit); sonst richtungsneutral."
-            }
-          },
-          "reasons": [
-            "Lückenlos, plausibel, aktuell und vollständig abgeschlossen",
-            "Trend=POSITIV, Momentum=POSITIV, Volatilität=NEUTRAL. Trend und Momentum müssen übereinstimmen; Volatilitätsveto hat Vorrang."
           ],
           "internal_conflict": false
         }
@@ -396,11 +396,11 @@
           "1d": "NEUTRAL",
           "4h": "NEUTRAL",
           "1h": "NEUTRAL",
-          "15m": "POSITIV"
+          "15m": "NEUTRAL"
         },
         "conflict": false,
         "reasons": [
-          "Positive Zeitfenster: ['15m']; negative: []; blockiert: [].",
+          "Positive Zeitfenster: []; negative: []; blockiert: [].",
           "Kein positiver/negativer Kreuzwiderspruch.",
           "Gleichgewichtete Einstimmigkeit aller vier Fenster für POSITIV/NEGATIV; sonst NEUTRAL. Jede Sperre blockiert die Gesamtauswertung. Keine Wahrscheinlichkeit."
         ]
@@ -461,34 +461,34 @@
             "reason": "Lückenlos, plausibel, aktuell und vollständig abgeschlossen",
             "closed_count": 719,
             "excluded_unclosed": 1,
-            "latest_open_utc": "2026-11-01T08:00:00+00:00",
-            "latest_close_utc": "2026-11-01T12:00:00+00:00"
+            "latest_open_utc": "2026-11-01T16:00:00+00:00",
+            "latest_close_utc": "2026-11-01T20:00:00+00:00"
           },
           "agents": {
             "trend": {
               "signal": "NEGATIV",
               "indicators": {
-                "ema20": 86.67912170767855,
-                "ema50": 88.71547719513072,
-                "ema200": 93.10393026052864
+                "ema20": 86.28608375617223,
+                "ema50": 88.39310293944939,
+                "ema200": 92.93322237605004
               },
               "reason": "POSITIV: Schluss > EMA20 > EMA50 > EMA200; NEGATIV: umgekehrt; sonst NEUTRAL."
             },
             "momentum": {
               "signal": "NEUTRAL",
               "indicators": {
-                "rsi14": 38.23283389623747,
-                "macd": -1.2108685514549933,
-                "macd_signal": -1.258379575631842,
-                "macd_histogram": 0.047511024176848826
+                "rsi14": 33.49189969167877,
+                "macd": -1.2471390084470642,
+                "macd_signal": -1.2480086448500725,
+                "macd_histogram": 0.0008696364030083004
               },
               "reason": "POSITIV: RSI > 50 und MACD-Histogramm > 0; NEGATIV: beide darunter; sonst NEUTRAL."
             },
             "volatility": {
               "signal": "NEUTRAL",
               "indicators": {
-                "atr14": 1.2782843887691042,
-                "atr14_fraction": 0.014985748989086802
+                "atr14": 1.2415819474590744,
+                "atr14_fraction": 0.014749132186494112
               },
               "reason": "ATR14 / Schluss > 10 % blockiert (heuristisches Volatilitätslimit); sonst richtungsneutral."
             }
@@ -506,34 +506,34 @@
             "reason": "Lückenlos, plausibel, aktuell und vollständig abgeschlossen",
             "closed_count": 719,
             "excluded_unclosed": 1,
-            "latest_open_utc": "2026-11-01T14:00:00+00:00",
-            "latest_close_utc": "2026-11-01T15:00:00+00:00"
+            "latest_open_utc": "2026-11-01T19:00:00+00:00",
+            "latest_close_utc": "2026-11-01T20:00:00+00:00"
           },
           "agents": {
             "trend": {
               "signal": "NEGATIV",
               "indicators": {
-                "ema20": 85.43419139153933,
-                "ema50": 85.93522270483967,
-                "ema200": 88.62114425793692
+                "ema20": 85.09941627555222,
+                "ema50": 85.694186470601,
+                "ema200": 88.42479918520537
               },
               "reason": "POSITIV: Schluss > EMA20 > EMA50 > EMA200; NEGATIV: umgekehrt; sonst NEUTRAL."
             },
             "momentum": {
               "signal": "NEGATIV",
               "indicators": {
-                "rsi14": 40.86461164139149,
-                "macd": -0.196828167829878,
-                "macd_signal": -0.14688637676015226,
-                "macd_histogram": -0.04994179106972574
+                "rsi14": 28.799609378617603,
+                "macd": -0.3307218700625896,
+                "macd_signal": -0.2338540277997539,
+                "macd_histogram": -0.09686784226283568
               },
               "reason": "POSITIV: RSI > 50 und MACD-Histogramm > 0; NEGATIV: beide darunter; sonst NEUTRAL."
             },
             "volatility": {
               "signal": "NEUTRAL",
               "indicators": {
-                "atr14": 0.44279543148274064,
-                "atr14_fraction": 0.005205683417384677
+                "atr14": 0.42801402343800427,
+                "atr14_fraction": 0.005084509663079166
               },
               "reason": "ATR14 / Schluss > 10 % blockiert (heuristisches Volatilitätslimit); sonst richtungsneutral."
             }
@@ -545,47 +545,47 @@
           "internal_conflict": false
         },
         "15m": {
-          "classification": "NEUTRAL",
+          "classification": "NEGATIV",
           "quality": {
             "status": "OK",
             "reason": "Lückenlos, plausibel, aktuell und vollständig abgeschlossen",
             "closed_count": 719,
             "excluded_unclosed": 1,
-            "latest_open_utc": "2026-11-01T15:00:00+00:00",
-            "latest_close_utc": "2026-11-01T15:15:00+00:00"
+            "latest_open_utc": "2026-11-01T20:30:00+00:00",
+            "latest_close_utc": "2026-11-01T20:45:00+00:00"
           },
           "agents": {
             "trend": {
               "signal": "NEGATIV",
               "indicators": {
-                "ema20": 85.15220990126086,
-                "ema50": 85.32688064525567,
-                "ema200": 85.93986553045332
+                "ema20": 84.54555699447954,
+                "ema50": 84.87835230369144,
+                "ema200": 85.6761843209514
               },
               "reason": "POSITIV: Schluss > EMA20 > EMA50 > EMA200; NEGATIV: umgekehrt; sonst NEUTRAL."
             },
             "momentum": {
-              "signal": "NEUTRAL",
+              "signal": "NEGATIV",
               "indicators": {
-                "rsi14": 46.449027786559476,
-                "macd": -0.0996242212570877,
-                "macd_signal": -0.1203646281351961,
-                "macd_histogram": 0.02074040687810841
+                "rsi14": 43.619308710826054,
+                "macd": -0.21556699347272001,
+                "macd_signal": -0.20587291210711,
+                "macd_histogram": -0.009694081365610008
               },
               "reason": "POSITIV: RSI > 50 und MACD-Histogramm > 0; NEGATIV: beide darunter; sonst NEUTRAL."
             },
             "volatility": {
               "signal": "NEUTRAL",
               "indicators": {
-                "atr14": 0.2111662687943162,
-                "atr14_fraction": 0.0024813897625654076
+                "atr14": 0.22831743174725846,
+                "atr14_fraction": 0.0027032610910165578
               },
               "reason": "ATR14 / Schluss > 10 % blockiert (heuristisches Volatilitätslimit); sonst richtungsneutral."
             }
           },
           "reasons": [
             "Lückenlos, plausibel, aktuell und vollständig abgeschlossen",
-            "Trend=NEGATIV, Momentum=NEUTRAL, Volatilität=NEUTRAL. Trend und Momentum müssen übereinstimmen; Volatilitätsveto hat Vorrang."
+            "Trend=NEGATIV, Momentum=NEGATIV, Volatilität=NEUTRAL. Trend und Momentum müssen übereinstimmen; Volatilitätsveto hat Vorrang."
           ],
           "internal_conflict": false
         }
@@ -596,11 +596,11 @@
           "1d": "NEUTRAL",
           "4h": "NEUTRAL",
           "1h": "NEGATIV",
-          "15m": "NEUTRAL"
+          "15m": "NEGATIV"
         },
         "conflict": false,
         "reasons": [
-          "Positive Zeitfenster: []; negative: ['1h']; blockiert: [].",
+          "Positive Zeitfenster: []; negative: ['1h', '15m']; blockiert: [].",
           "Kein positiver/negativer Kreuzwiderspruch.",
           "Gleichgewichtete Einstimmigkeit aller vier Fenster für POSITIV/NEGATIV; sonst NEUTRAL. Jede Sperre blockiert die Gesamtauswertung. Keine Wahrscheinlichkeit."
         ]
@@ -661,34 +661,34 @@
             "reason": "Lückenlos, plausibel, aktuell und vollständig abgeschlossen",
             "closed_count": 719,
             "excluded_unclosed": 1,
-            "latest_open_utc": "2026-11-01T08:00:00+00:00",
-            "latest_close_utc": "2026-11-01T12:00:00+00:00"
+            "latest_open_utc": "2026-11-01T16:00:00+00:00",
+            "latest_close_utc": "2026-11-01T20:00:00+00:00"
           },
           "agents": {
             "trend": {
               "signal": "NEGATIV",
               "indicators": {
-                "ema20": 3.9361055750435145,
-                "ema50": 4.029403297614914,
-                "ema200": 4.070869964236598
+                "ema20": 3.920485969593444,
+                "ema50": 4.015675323942091,
+                "ema200": 4.066496632491294
               },
               "reason": "POSITIV: Schluss > EMA20 > EMA50 > EMA200; NEGATIV: umgekehrt; sonst NEUTRAL."
             },
             "momentum": {
               "signal": "NEUTRAL",
               "indicators": {
-                "rsi14": 47.68637344505127,
-                "macd": -0.029177814890166243,
-                "macd_signal": -0.04462412655373816,
-                "macd_histogram": 0.015446311663571917
+                "rsi14": 42.07203617597031,
+                "macd": -0.035684515666158934,
+                "macd_signal": -0.040565273798008075,
+                "macd_histogram": 0.004880758131849142
               },
               "reason": "POSITIV: RSI > 50 und MACD-Histogramm > 0; NEGATIV: beide darunter; sonst NEUTRAL."
             },
             "volatility": {
               "signal": "NEUTRAL",
               "indicators": {
-                "atr14": 0.12144619349365489,
-                "atr14_fraction": 0.03098117180960584
+                "atr14": 0.11560819745116165,
+                "atr14_fraction": 0.030244132753737517
               },
               "reason": "ATR14 / Schluss > 10 % blockiert (heuristisches Volatilitätslimit); sonst richtungsneutral."
             }
@@ -700,47 +700,47 @@
           "internal_conflict": false
         },
         "1h": {
-          "classification": "NEUTRAL",
+          "classification": "NEGATIV",
           "quality": {
             "status": "OK",
             "reason": "Lückenlos, plausibel, aktuell und vollständig abgeschlossen",
             "closed_count": 719,
             "excluded_unclosed": 1,
-            "latest_open_utc": "2026-11-01T14:00:00+00:00",
-            "latest_close_utc": "2026-11-01T15:00:00+00:00"
+            "latest_open_utc": "2026-11-01T19:00:00+00:00",
+            "latest_close_utc": "2026-11-01T20:00:00+00:00"
           },
           "agents": {
             "trend": {
-              "signal": "NEUTRAL",
+              "signal": "NEGATIV",
               "indicators": {
-                "ema20": 3.935545241105397,
-                "ema50": 3.9299178754478006,
-                "ema200": 4.028002002266496
+                "ema20": 3.900249649544865,
+                "ema50": 3.9150483668299865,
+                "ema200": 4.019171183993555
               },
               "reason": "POSITIV: Schluss > EMA20 > EMA50 > EMA200; NEGATIV: umgekehrt; sonst NEUTRAL."
             },
             "momentum": {
               "signal": "NEGATIV",
               "indicators": {
-                "rsi14": 47.3278943695054,
-                "macd": -0.00277172642161716,
-                "macd_signal": 0.0032482831644502514,
-                "macd_histogram": -0.006020009586067411
+                "rsi14": 32.22642131969273,
+                "macd": -0.024564200393000668,
+                "macd_signal": -0.010595055612019687,
+                "macd_histogram": -0.01396914478098098
               },
               "reason": "POSITIV: RSI > 50 und MACD-Histogramm > 0; NEGATIV: beide darunter; sonst NEUTRAL."
             },
             "volatility": {
               "signal": "NEUTRAL",
               "indicators": {
-                "atr14": 0.03877447104978454,
-                "atr14_fraction": 0.00988514239637592
+                "atr14": 0.03688259259439454,
+                "atr14_fraction": 0.009648814282379212
               },
               "reason": "ATR14 / Schluss > 10 % blockiert (heuristisches Volatilitätslimit); sonst richtungsneutral."
             }
           },
           "reasons": [
             "Lückenlos, plausibel, aktuell und vollständig abgeschlossen",
-            "Trend=NEUTRAL, Momentum=NEGATIV, Volatilität=NEUTRAL. Trend und Momentum müssen übereinstimmen; Volatilitätsveto hat Vorrang."
+            "Trend=NEGATIV, Momentum=NEGATIV, Volatilität=NEUTRAL. Trend und Momentum müssen übereinstimmen; Volatilitätsveto hat Vorrang."
           ],
           "internal_conflict": false
         },
@@ -751,41 +751,41 @@
             "reason": "Lückenlos, plausibel, aktuell und vollständig abgeschlossen",
             "closed_count": 719,
             "excluded_unclosed": 1,
-            "latest_open_utc": "2026-11-01T15:00:00+00:00",
-            "latest_close_utc": "2026-11-01T15:15:00+00:00"
+            "latest_open_utc": "2026-11-01T20:30:00+00:00",
+            "latest_close_utc": "2026-11-01T20:45:00+00:00"
           },
           "agents": {
             "trend": {
-              "signal": "NEUTRAL",
+              "signal": "NEGATIV",
               "indicators": {
-                "ema20": 3.924848391403242,
-                "ema50": 3.9323240305386493,
-                "ema200": 3.9292970305697974
+                "ema20": 3.84231411002892,
+                "ema50": 3.878499639315489,
+                "ema200": 3.9126258470330937
               },
               "reason": "POSITIV: Schluss > EMA20 > EMA50 > EMA200; NEGATIV: umgekehrt; sonst NEUTRAL."
             },
             "momentum": {
-              "signal": "NEGATIV",
+              "signal": "NEUTRAL",
               "indicators": {
-                "rsi14": 45.16155770507179,
-                "macd": -0.002415241425255843,
-                "macd_signal": -0.002163806849631138,
-                "macd_histogram": -0.00025143457562470505
+                "rsi14": 40.742874207453504,
+                "macd": -0.023471357361176448,
+                "macd_signal": -0.023953113168096323,
+                "macd_histogram": 0.00048175580691987505
               },
               "reason": "POSITIV: RSI > 50 und MACD-Histogramm > 0; NEGATIV: beide darunter; sonst NEUTRAL."
             },
             "volatility": {
               "signal": "NEUTRAL",
               "indicators": {
-                "atr14": 0.012878280454237181,
-                "atr14_fraction": 0.0032887153538745067
+                "atr14": 0.015375044783733749,
+                "atr14_fraction": 0.004014791305549861
               },
               "reason": "ATR14 / Schluss > 10 % blockiert (heuristisches Volatilitätslimit); sonst richtungsneutral."
             }
           },
           "reasons": [
             "Lückenlos, plausibel, aktuell und vollständig abgeschlossen",
-            "Trend=NEUTRAL, Momentum=NEGATIV, Volatilität=NEUTRAL. Trend und Momentum müssen übereinstimmen; Volatilitätsveto hat Vorrang."
+            "Trend=NEGATIV, Momentum=NEUTRAL, Volatilität=NEUTRAL. Trend und Momentum müssen übereinstimmen; Volatilitätsveto hat Vorrang."
           ],
           "internal_conflict": false
         }
@@ -795,12 +795,12 @@
         "signals": {
           "1d": "BLOCKIERT",
           "4h": "NEUTRAL",
-          "1h": "NEUTRAL",
+          "1h": "NEGATIV",
           "15m": "NEUTRAL"
         },
         "conflict": false,
         "reasons": [
-          "Positive Zeitfenster: []; negative: []; blockiert: ['1d'].",
+          "Positive Zeitfenster: []; negative: ['1h']; blockiert: ['1d'].",
           "Kein positiver/negativer Kreuzwiderspruch.",
           "Gleichgewichtete Einstimmigkeit aller vier Fenster für POSITIV/NEGATIV; sonst NEUTRAL. Jede Sperre blockiert die Gesamtauswertung. Keine Wahrscheinlichkeit."
         ]
