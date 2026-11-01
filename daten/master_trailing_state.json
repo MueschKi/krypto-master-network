@@ -5,7 +5,7 @@
   "cash_eur": 1000.0,
   "positions": {},
   "trades": [],
-  "last_processed_day": "2026-10-30",
+  "last_processed_day": "2026-10-31",
   "highest_equity_eur": 1000.0,
   "last_equity_eur": 1000.0,
   "halt_new_buys": false,
@@ -27,6 +27,11 @@
     },
     {
       "day": "2026-10-30",
+      "equity_eur": 1000.0,
+      "cash_eur": 1000.0
+    },
+    {
+      "day": "2026-10-31",
       "equity_eur": 1000.0,
       "cash_eur": 1000.0
     }
@@ -55,24 +60,24 @@
   ],
   "quote_snapshot": {
     "BTC/EUR": {
-      "bid": 69411.2,
-      "ask": 69411.4,
-      "observed_utc": "2026-10-31T10:28:14+00:00"
+      "bid": 69815.0,
+      "ask": 69821.9,
+      "observed_utc": "2026-11-01T11:22:10+00:00"
     },
     "ETH/EUR": {
-      "bid": 2013.49,
-      "ask": 2013.57,
-      "observed_utc": "2026-10-31T10:28:16+00:00"
+      "bid": 2032.34,
+      "ask": 2032.35,
+      "observed_utc": "2026-11-01T11:22:11+00:00"
     },
     "SOL/EUR": {
-      "bid": 85.8,
-      "ask": 85.81,
-      "observed_utc": "2026-10-31T10:28:17+00:00"
+      "bid": 85.34,
+      "ask": 85.35,
+      "observed_utc": "2026-11-01T11:22:12+00:00"
     },
     "NEAR/EUR": {
-      "bid": 3.872,
-      "ask": 3.8733,
-      "observed_utc": "2026-10-31T10:28:18+00:00"
+      "bid": 3.9265,
+      "ask": 3.9307,
+      "observed_utc": "2026-11-01T11:22:13+00:00"
     }
   },
   "exit_policy": "atr_trailing_2_5_close"
