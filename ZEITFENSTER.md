@@ -1,22 +1,22 @@
 # Krypto Master Network v1.5 – Zeitfenster
 
 Modus: **analyse** · Quelle: Kraken public spot EUR
-Snapshot: 2026-11-01T06:45:18.830000+00:00 · Datenfreigabe: **BLOCKIERT**
+Snapshot: 2026-11-01T15:26:43.502000+00:00 · Datenfreigabe: **BLOCKIERT**
 
 Nur Beobachtung. Keine Handelssignale für die bestehenden Konten.
 
 ## BTC/EUR – NEUTRAL
 
-Positive Zeitfenster: []; negative: []; blockiert: [].
+Positive Zeitfenster: ['15m']; negative: []; blockiert: [].
 Kein positiver/negativer Kreuzwiderspruch.
 Gleichgewichtete Einstimmigkeit aller vier Fenster für POSITIV/NEGATIV; sonst NEUTRAL. Jede Sperre blockiert die Gesamtauswertung. Keine Wahrscheinlichkeit.
 
 | Fenster | Einstufung | Datenqualität | Letzter Kerzenschluss UTC |
 |---|---|---|---|
 | 1d | NEUTRAL | OK | 2026-11-01T00:00:00+00:00 |
-| 4h | NEUTRAL | OK | 2026-11-01T04:00:00+00:00 |
-| 1h | NEUTRAL | OK | 2026-11-01T06:00:00+00:00 |
-| 15m | NEUTRAL | OK | 2026-11-01T06:45:00+00:00 |
+| 4h | NEUTRAL | OK | 2026-11-01T12:00:00+00:00 |
+| 1h | NEUTRAL | OK | 2026-11-01T15:00:00+00:00 |
+| 15m | POSITIV | OK | 2026-11-01T15:15:00+00:00 |
 
 ### 1d
 
@@ -29,42 +29,42 @@ Trend=NEUTRAL, Momentum=NEGATIV, Volatilität=NEUTRAL. Trend und Momentum müsse
 
 ### 4h
 
-Kerzenstart: 2026-11-01T00:00:00+00:00; Schluss: 2026-11-01T04:00:00+00:00.
+Kerzenstart: 2026-11-01T08:00:00+00:00; Schluss: 2026-11-01T12:00:00+00:00.
 Datenqualität: Lückenlos, plausibel, aktuell und vollständig abgeschlossen; 719 abgeschlossene, 1 nicht abgeschlossene ausgeschlossen.
 Trend=NEGATIV, Momentum=NEUTRAL, Volatilität=NEUTRAL. Trend und Momentum müssen übereinstimmen; Volatilitätsveto hat Vorrang.
-- trend: **NEGATIV** – ema20=70098.1, ema50=71099.5, ema200=72101.7. POSITIV: Schluss > EMA20 > EMA50 > EMA200; NEGATIV: umgekehrt; sonst NEUTRAL.
-- momentum: **NEUTRAL** – rsi14=41.7925, macd=-678.261, macd_signal=-694.719, macd_histogram=16.4574. POSITIV: RSI > 50 und MACD-Histogramm > 0; NEGATIV: beide darunter; sonst NEUTRAL.
-- volatility: **NEUTRAL** – atr14=721.096, atr14_fraction=0.0103599. ATR14 / Schluss > 10 % blockiert (heuristisches Volatilitätslimit); sonst richtungsneutral.
+- trend: **NEGATIV** – ema20=70038.8, ema50=70997.4, ema200=72056.1. POSITIV: Schluss > EMA20 > EMA50 > EMA200; NEGATIV: umgekehrt; sonst NEUTRAL.
+- momentum: **NEUTRAL** – rsi14=43.7501, macd=-569.341, macd_signal=-657.905, macd_histogram=88.5638. POSITIV: RSI > 50 und MACD-Histogramm > 0; NEGATIV: beide darunter; sonst NEUTRAL.
+- volatility: **NEUTRAL** – atr14=663.659, atr14_fraction=0.00951164. ATR14 / Schluss > 10 % blockiert (heuristisches Volatilitätslimit); sonst richtungsneutral.
 
 ### 1h
 
-Kerzenstart: 2026-11-01T05:00:00+00:00; Schluss: 2026-11-01T06:00:00+00:00.
+Kerzenstart: 2026-11-01T14:00:00+00:00; Schluss: 2026-11-01T15:00:00+00:00.
 Datenqualität: Lückenlos, plausibel, aktuell und vollständig abgeschlossen; 719 abgeschlossene, 1 nicht abgeschlossene ausgeschlossen.
 Trend=NEUTRAL, Momentum=POSITIV, Volatilität=NEUTRAL. Trend und Momentum müssen übereinstimmen; Volatilitätsveto hat Vorrang.
-- trend: **NEUTRAL** – ema20=69494.9, ema50=69685.6, ema200=71056.3. POSITIV: Schluss > EMA20 > EMA50 > EMA200; NEGATIV: umgekehrt; sonst NEUTRAL.
-- momentum: **POSITIV** – rsi14=59.2544, macd=55.7072, macd_signal=22.1524, macd_histogram=33.5548. POSITIV: RSI > 50 und MACD-Histogramm > 0; NEGATIV: beide darunter; sonst NEUTRAL.
-- volatility: **NEUTRAL** – atr14=188.66, atr14_fraction=0.00270674. ATR14 / Schluss > 10 % blockiert (heuristisches Volatilitätslimit); sonst richtungsneutral.
+- trend: **NEUTRAL** – ema20=69696.8, ema50=69731.8, ema200=70951. POSITIV: Schluss > EMA20 > EMA50 > EMA200; NEGATIV: umgekehrt; sonst NEUTRAL.
+- momentum: **POSITIV** – rsi14=58.1311, macd=105.182, macd_signal=95.5342, macd_histogram=9.64733. POSITIV: RSI > 50 und MACD-Histogramm > 0; NEGATIV: beide darunter; sonst NEUTRAL.
+- volatility: **NEUTRAL** – atr14=193.21, atr14_fraction=0.0027654. ATR14 / Schluss > 10 % blockiert (heuristisches Volatilitätslimit); sonst richtungsneutral.
 
 ### 15m
 
-Kerzenstart: 2026-11-01T06:30:00+00:00; Schluss: 2026-11-01T06:45:00+00:00.
+Kerzenstart: 2026-11-01T15:00:00+00:00; Schluss: 2026-11-01T15:15:00+00:00.
 Datenqualität: Lückenlos, plausibel, aktuell und vollständig abgeschlossen; 719 abgeschlossene, 1 nicht abgeschlossene ausgeschlossen.
-Trend=NEUTRAL, Momentum=POSITIV, Volatilität=NEUTRAL. Trend und Momentum müssen übereinstimmen; Volatilitätsveto hat Vorrang.
-- trend: **NEUTRAL** – ema20=69643.4, ema50=69554.7, ema200=69684.7. POSITIV: Schluss > EMA20 > EMA50 > EMA200; NEGATIV: umgekehrt; sonst NEUTRAL.
-- momentum: **POSITIV** – rsi14=60.1464, macd=62.7127, macd_signal=51.9601, macd_histogram=10.7526. POSITIV: RSI > 50 und MACD-Histogramm > 0; NEGATIV: beide darunter; sonst NEUTRAL.
-- volatility: **NEUTRAL** – atr14=67.3219, atr14_fraction=0.00096546. ATR14 / Schluss > 10 % blockiert (heuristisches Volatilitätslimit); sonst richtungsneutral.
+Trend=POSITIV, Momentum=POSITIV, Volatilität=NEUTRAL. Trend und Momentum müssen übereinstimmen; Volatilitätsveto hat Vorrang.
+- trend: **POSITIV** – ema20=69815.4, ema50=69751.9, ema200=69724.3. POSITIV: Schluss > EMA20 > EMA50 > EMA200; NEGATIV: umgekehrt; sonst NEUTRAL.
+- momentum: **POSITIV** – rsi14=57.5066, macd=23.2794, macd_signal=14.4124, macd_histogram=8.867. POSITIV: RSI > 50 und MACD-Histogramm > 0; NEGATIV: beide darunter; sonst NEUTRAL.
+- volatility: **NEUTRAL** – atr14=83.7899, atr14_fraction=0.00119901. ATR14 / Schluss > 10 % blockiert (heuristisches Volatilitätslimit); sonst richtungsneutral.
 ## ETH/EUR – NEUTRAL
 
-Positive Zeitfenster: []; negative: []; blockiert: [].
+Positive Zeitfenster: ['15m']; negative: []; blockiert: [].
 Kein positiver/negativer Kreuzwiderspruch.
 Gleichgewichtete Einstimmigkeit aller vier Fenster für POSITIV/NEGATIV; sonst NEUTRAL. Jede Sperre blockiert die Gesamtauswertung. Keine Wahrscheinlichkeit.
 
 | Fenster | Einstufung | Datenqualität | Letzter Kerzenschluss UTC |
 |---|---|---|---|
 | 1d | NEUTRAL | OK | 2026-11-01T00:00:00+00:00 |
-| 4h | NEUTRAL | OK | 2026-11-01T04:00:00+00:00 |
-| 1h | NEUTRAL | OK | 2026-11-01T06:00:00+00:00 |
-| 15m | NEUTRAL | OK | 2026-11-01T06:45:00+00:00 |
+| 4h | NEUTRAL | OK | 2026-11-01T12:00:00+00:00 |
+| 1h | NEUTRAL | OK | 2026-11-01T15:00:00+00:00 |
+| 15m | POSITIV | OK | 2026-11-01T15:15:00+00:00 |
 
 ### 1d
 
@@ -77,42 +77,42 @@ Trend=NEUTRAL, Momentum=NEGATIV, Volatilität=NEUTRAL. Trend und Momentum müsse
 
 ### 4h
 
-Kerzenstart: 2026-11-01T00:00:00+00:00; Schluss: 2026-11-01T04:00:00+00:00.
+Kerzenstart: 2026-11-01T08:00:00+00:00; Schluss: 2026-11-01T12:00:00+00:00.
 Datenqualität: Lückenlos, plausibel, aktuell und vollständig abgeschlossen; 719 abgeschlossene, 1 nicht abgeschlossene ausgeschlossen.
 Trend=NEGATIV, Momentum=NEUTRAL, Volatilität=NEUTRAL. Trend und Momentum müssen übereinstimmen; Volatilitätsveto hat Vorrang.
-- trend: **NEGATIV** – ema20=2032.98, ema50=2067.84, ema200=2156.23. POSITIV: Schluss > EMA20 > EMA50 > EMA200; NEGATIV: umgekehrt; sonst NEUTRAL.
-- momentum: **NEUTRAL** – rsi14=45.8259, macd=-18.6737, macd_signal=-21.7239, macd_histogram=3.05027. POSITIV: RSI > 50 und MACD-Histogramm > 0; NEGATIV: beide darunter; sonst NEUTRAL.
-- volatility: **NEUTRAL** – atr14=26.7979, atr14_fraction=0.0131974. ATR14 / Schluss > 10 % blockiert (heuristisches Volatilitätslimit); sonst richtungsneutral.
+- trend: **NEGATIV** – ema20=2032.82, ema50=2065.09, ema200=2153.79. POSITIV: Schluss > EMA20 > EMA50 > EMA200; NEGATIV: umgekehrt; sonst NEUTRAL.
+- momentum: **NEUTRAL** – rsi14=46.2897, macd=-14.6374, macd_signal=-19.4682, macd_histogram=4.83076. POSITIV: RSI > 50 und MACD-Histogramm > 0; NEGATIV: beide darunter; sonst NEUTRAL.
+- volatility: **NEUTRAL** – atr14=24.2868, atr14_fraction=0.0119539. ATR14 / Schluss > 10 % blockiert (heuristisches Volatilitätslimit); sonst richtungsneutral.
 
 ### 1h
 
-Kerzenstart: 2026-11-01T05:00:00+00:00; Schluss: 2026-11-01T06:00:00+00:00.
+Kerzenstart: 2026-11-01T14:00:00+00:00; Schluss: 2026-11-01T15:00:00+00:00.
 Datenqualität: Lückenlos, plausibel, aktuell und vollständig abgeschlossen; 719 abgeschlossene, 1 nicht abgeschlossene ausgeschlossen.
-Trend=NEUTRAL, Momentum=POSITIV, Volatilität=NEUTRAL. Trend und Momentum müssen übereinstimmen; Volatilitätsveto hat Vorrang.
-- trend: **NEUTRAL** – ema20=2021.73, ema50=2022.74, ema200=2066.56. POSITIV: Schluss > EMA20 > EMA50 > EMA200; NEGATIV: umgekehrt; sonst NEUTRAL.
-- momentum: **POSITIV** – rsi14=63.2214, macd=4.73887, macd_signal=3.40991, macd_histogram=1.32896. POSITIV: RSI > 50 und MACD-Histogramm > 0; NEGATIV: beide darunter; sonst NEUTRAL.
-- volatility: **NEUTRAL** – atr14=7.56065, atr14_fraction=0.00372198. ATR14 / Schluss > 10 % blockiert (heuristisches Volatilitätslimit); sonst richtungsneutral.
+Trend=NEUTRAL, Momentum=NEUTRAL, Volatilität=NEUTRAL. Trend und Momentum müssen übereinstimmen; Volatilitätsveto hat Vorrang.
+- trend: **NEUTRAL** – ema20=2027.51, ema50=2025.44, ema200=2063.53. POSITIV: Schluss > EMA20 > EMA50 > EMA200; NEGATIV: umgekehrt; sonst NEUTRAL.
+- momentum: **NEUTRAL** – rsi14=58.5688, macd=3.96261, macd_signal=4.39191, macd_histogram=-0.429302. POSITIV: RSI > 50 und MACD-Histogramm > 0; NEGATIV: beide darunter; sonst NEUTRAL.
+- volatility: **NEUTRAL** – atr14=7.41523, atr14_fraction=0.00364677. ATR14 / Schluss > 10 % blockiert (heuristisches Volatilitätslimit); sonst richtungsneutral.
 
 ### 15m
 
-Kerzenstart: 2026-11-01T06:30:00+00:00; Schluss: 2026-11-01T06:45:00+00:00.
+Kerzenstart: 2026-11-01T15:00:00+00:00; Schluss: 2026-11-01T15:15:00+00:00.
 Datenqualität: Lückenlos, plausibel, aktuell und vollständig abgeschlossen; 719 abgeschlossene, 1 nicht abgeschlossene ausgeschlossen.
-Trend=POSITIV, Momentum=NEUTRAL, Volatilität=NEUTRAL. Trend und Momentum müssen übereinstimmen; Volatilitätsveto hat Vorrang.
-- trend: **POSITIV** – ema20=2029.56, ema50=2025.36, ema200=2022.89. POSITIV: Schluss > EMA20 > EMA50 > EMA200; NEGATIV: umgekehrt; sonst NEUTRAL.
-- momentum: **NEUTRAL** – rsi14=53.468, macd=1.97547, macd_signal=2.19831, macd_histogram=-0.222836. POSITIV: RSI > 50 und MACD-Histogramm > 0; NEGATIV: beide darunter; sonst NEUTRAL.
-- volatility: **NEUTRAL** – atr14=3.07029, atr14_fraction=0.00151222. ATR14 / Schluss > 10 % blockiert (heuristisches Volatilitätslimit); sonst richtungsneutral.
+Trend=POSITIV, Momentum=POSITIV, Volatilität=NEUTRAL. Trend und Momentum müssen übereinstimmen; Volatilitätsveto hat Vorrang.
+- trend: **POSITIV** – ema20=2030.74, ema50=2029.53, ema200=2025.3. POSITIV: Schluss > EMA20 > EMA50 > EMA200; NEGATIV: umgekehrt; sonst NEUTRAL.
+- momentum: **POSITIV** – rsi14=58.1867, macd=0.391486, macd_signal=-0.252218, macd_histogram=0.643703. POSITIV: RSI > 50 und MACD-Histogramm > 0; NEGATIV: beide darunter; sonst NEUTRAL.
+- volatility: **NEUTRAL** – atr14=3.16563, atr14_fraction=0.00155637. ATR14 / Schluss > 10 % blockiert (heuristisches Volatilitätslimit); sonst richtungsneutral.
 ## SOL/EUR – NEUTRAL
 
-Positive Zeitfenster: []; negative: ['4h']; blockiert: [].
+Positive Zeitfenster: []; negative: ['1h']; blockiert: [].
 Kein positiver/negativer Kreuzwiderspruch.
 Gleichgewichtete Einstimmigkeit aller vier Fenster für POSITIV/NEGATIV; sonst NEUTRAL. Jede Sperre blockiert die Gesamtauswertung. Keine Wahrscheinlichkeit.
 
 | Fenster | Einstufung | Datenqualität | Letzter Kerzenschluss UTC |
 |---|---|---|---|
 | 1d | NEUTRAL | OK | 2026-11-01T00:00:00+00:00 |
-| 4h | NEGATIV | OK | 2026-11-01T04:00:00+00:00 |
-| 1h | NEUTRAL | OK | 2026-11-01T06:00:00+00:00 |
-| 15m | NEUTRAL | OK | 2026-11-01T06:45:00+00:00 |
+| 4h | NEUTRAL | OK | 2026-11-01T12:00:00+00:00 |
+| 1h | NEGATIV | OK | 2026-11-01T15:00:00+00:00 |
+| 15m | NEUTRAL | OK | 2026-11-01T15:15:00+00:00 |
 
 ### 1d
 
@@ -125,30 +125,30 @@ Trend=NEUTRAL, Momentum=NEGATIV, Volatilität=NEUTRAL. Trend und Momentum müsse
 
 ### 4h
 
-Kerzenstart: 2026-11-01T00:00:00+00:00; Schluss: 2026-11-01T04:00:00+00:00.
+Kerzenstart: 2026-11-01T08:00:00+00:00; Schluss: 2026-11-01T12:00:00+00:00.
 Datenqualität: Lückenlos, plausibel, aktuell und vollständig abgeschlossen; 719 abgeschlossene, 1 nicht abgeschlossene ausgeschlossen.
-Trend=NEGATIV, Momentum=NEGATIV, Volatilität=NEUTRAL. Trend und Momentum müssen übereinstimmen; Volatilitätsveto hat Vorrang.
-- trend: **NEGATIV** – ema20=86.9605, ema50=88.9906, ema200=93.2592. POSITIV: Schluss > EMA20 > EMA50 > EMA200; NEGATIV: umgekehrt; sonst NEUTRAL.
-- momentum: **NEGATIV** – rsi14=39.3696, macd=-1.28296, macd_signal=-1.27778, macd_histogram=-0.00518491. POSITIV: RSI > 50 und MACD-Histogramm > 0; NEGATIV: beide darunter; sonst NEUTRAL.
-- volatility: **NEUTRAL** – atr14=1.38807, atr14_fraction=0.0162233. ATR14 / Schluss > 10 % blockiert (heuristisches Volatilitätslimit); sonst richtungsneutral.
+Trend=NEGATIV, Momentum=NEUTRAL, Volatilität=NEUTRAL. Trend und Momentum müssen übereinstimmen; Volatilitätsveto hat Vorrang.
+- trend: **NEGATIV** – ema20=86.6791, ema50=88.7155, ema200=93.1039. POSITIV: Schluss > EMA20 > EMA50 > EMA200; NEGATIV: umgekehrt; sonst NEUTRAL.
+- momentum: **NEUTRAL** – rsi14=38.2328, macd=-1.21087, macd_signal=-1.25838, macd_histogram=0.047511. POSITIV: RSI > 50 und MACD-Histogramm > 0; NEGATIV: beide darunter; sonst NEUTRAL.
+- volatility: **NEUTRAL** – atr14=1.27828, atr14_fraction=0.0149857. ATR14 / Schluss > 10 % blockiert (heuristisches Volatilitätslimit); sonst richtungsneutral.
 
 ### 1h
 
-Kerzenstart: 2026-11-01T05:00:00+00:00; Schluss: 2026-11-01T06:00:00+00:00.
+Kerzenstart: 2026-11-01T14:00:00+00:00; Schluss: 2026-11-01T15:00:00+00:00.
 Datenqualität: Lückenlos, plausibel, aktuell und vollständig abgeschlossen; 719 abgeschlossene, 1 nicht abgeschlossene ausgeschlossen.
-Trend=NEGATIV, Momentum=NEUTRAL, Volatilität=NEUTRAL. Trend und Momentum müssen übereinstimmen; Volatilitätsveto hat Vorrang.
-- trend: **NEGATIV** – ema20=85.6704, ema50=86.205, ema200=88.932. POSITIV: Schluss > EMA20 > EMA50 > EMA200; NEGATIV: umgekehrt; sonst NEUTRAL.
-- momentum: **NEUTRAL** – rsi14=48.0072, macd=-0.125151, macd_signal=-0.130528, macd_histogram=0.00537722. POSITIV: RSI > 50 und MACD-Histogramm > 0; NEGATIV: beide darunter; sonst NEUTRAL.
-- volatility: **NEUTRAL** – atr14=0.439647, atr14_fraction=0.00513366. ATR14 / Schluss > 10 % blockiert (heuristisches Volatilitätslimit); sonst richtungsneutral.
+Trend=NEGATIV, Momentum=NEGATIV, Volatilität=NEUTRAL. Trend und Momentum müssen übereinstimmen; Volatilitätsveto hat Vorrang.
+- trend: **NEGATIV** – ema20=85.4342, ema50=85.9352, ema200=88.6211. POSITIV: Schluss > EMA20 > EMA50 > EMA200; NEGATIV: umgekehrt; sonst NEUTRAL.
+- momentum: **NEGATIV** – rsi14=40.8646, macd=-0.196828, macd_signal=-0.146886, macd_histogram=-0.0499418. POSITIV: RSI > 50 und MACD-Histogramm > 0; NEGATIV: beide darunter; sonst NEUTRAL.
+- volatility: **NEUTRAL** – atr14=0.442795, atr14_fraction=0.00520568. ATR14 / Schluss > 10 % blockiert (heuristisches Volatilitätslimit); sonst richtungsneutral.
 
 ### 15m
 
-Kerzenstart: 2026-11-01T06:30:00+00:00; Schluss: 2026-11-01T06:45:00+00:00.
+Kerzenstart: 2026-11-01T15:00:00+00:00; Schluss: 2026-11-01T15:15:00+00:00.
 Datenqualität: Lückenlos, plausibel, aktuell und vollständig abgeschlossen; 719 abgeschlossene, 1 nicht abgeschlossene ausgeschlossen.
 Trend=NEGATIV, Momentum=NEUTRAL, Volatilität=NEUTRAL. Trend und Momentum müssen übereinstimmen; Volatilitätsveto hat Vorrang.
-- trend: **NEGATIV** – ema20=85.5658, ema50=85.6233, ema200=86.2051. POSITIV: Schluss > EMA20 > EMA50 > EMA200; NEGATIV: umgekehrt; sonst NEUTRAL.
-- momentum: **NEUTRAL** – rsi14=47.4487, macd=-0.00649088, macd_signal=-0.0236456, macd_histogram=0.0171548. POSITIV: RSI > 50 und MACD-Histogramm > 0; NEGATIV: beide darunter; sonst NEUTRAL.
-- volatility: **NEUTRAL** – atr14=0.166223, atr14_fraction=0.00194412. ATR14 / Schluss > 10 % blockiert (heuristisches Volatilitätslimit); sonst richtungsneutral.
+- trend: **NEGATIV** – ema20=85.1522, ema50=85.3269, ema200=85.9399. POSITIV: Schluss > EMA20 > EMA50 > EMA200; NEGATIV: umgekehrt; sonst NEUTRAL.
+- momentum: **NEUTRAL** – rsi14=46.449, macd=-0.0996242, macd_signal=-0.120365, macd_histogram=0.0207404. POSITIV: RSI > 50 und MACD-Histogramm > 0; NEGATIV: beide darunter; sonst NEUTRAL.
+- volatility: **NEUTRAL** – atr14=0.211166, atr14_fraction=0.00248139. ATR14 / Schluss > 10 % blockiert (heuristisches Volatilitätslimit); sonst richtungsneutral.
 ## NEAR/EUR – BLOCKIERT
 
 Positive Zeitfenster: []; negative: []; blockiert: ['1d'].
@@ -158,9 +158,9 @@ Gleichgewichtete Einstimmigkeit aller vier Fenster für POSITIV/NEGATIV; sonst N
 | Fenster | Einstufung | Datenqualität | Letzter Kerzenschluss UTC |
 |---|---|---|---|
 | 1d | BLOCKIERT | OK | 2026-11-01T00:00:00+00:00 |
-| 4h | NEUTRAL | OK | 2026-11-01T04:00:00+00:00 |
-| 1h | NEUTRAL | OK | 2026-11-01T06:00:00+00:00 |
-| 15m | NEUTRAL | OK | 2026-11-01T06:45:00+00:00 |
+| 4h | NEUTRAL | OK | 2026-11-01T12:00:00+00:00 |
+| 1h | NEUTRAL | OK | 2026-11-01T15:00:00+00:00 |
+| 15m | NEUTRAL | OK | 2026-11-01T15:15:00+00:00 |
 
 ### 1d
 
@@ -173,30 +173,30 @@ Trend=NEUTRAL, Momentum=NEGATIV, Volatilität=BLOCKIERT. Trend und Momentum müs
 
 ### 4h
 
-Kerzenstart: 2026-11-01T00:00:00+00:00; Schluss: 2026-11-01T04:00:00+00:00.
+Kerzenstart: 2026-11-01T08:00:00+00:00; Schluss: 2026-11-01T12:00:00+00:00.
 Datenqualität: Lückenlos, plausibel, aktuell und vollständig abgeschlossen; 719 abgeschlossene, 1 nicht abgeschlossene ausgeschlossen.
-Trend=NEUTRAL, Momentum=NEUTRAL, Volatilität=NEUTRAL. Trend und Momentum müssen übereinstimmen; Volatilitätsveto hat Vorrang.
-- trend: **NEUTRAL** – ema20=3.94079, ema50=4.03895, ema200=4.074. POSITIV: Schluss > EMA20 > EMA50 > EMA200; NEGATIV: umgekehrt; sonst NEUTRAL.
-- momentum: **NEUTRAL** – rsi14=49.4994, macd=-0.0322166, macd_signal=-0.0528106, macd_histogram=0.020594. POSITIV: RSI > 50 und MACD-Histogramm > 0; NEGATIV: beide darunter; sonst NEUTRAL.
-- volatility: **NEUTRAL** – atr14=0.130896, atr14_fraction=0.0331088. ATR14 / Schluss > 10 % blockiert (heuristisches Volatilitätslimit); sonst richtungsneutral.
+Trend=NEGATIV, Momentum=NEUTRAL, Volatilität=NEUTRAL. Trend und Momentum müssen übereinstimmen; Volatilitätsveto hat Vorrang.
+- trend: **NEGATIV** – ema20=3.93611, ema50=4.0294, ema200=4.07087. POSITIV: Schluss > EMA20 > EMA50 > EMA200; NEGATIV: umgekehrt; sonst NEUTRAL.
+- momentum: **NEUTRAL** – rsi14=47.6864, macd=-0.0291778, macd_signal=-0.0446241, macd_histogram=0.0154463. POSITIV: RSI > 50 und MACD-Histogramm > 0; NEGATIV: beide darunter; sonst NEUTRAL.
+- volatility: **NEUTRAL** – atr14=0.121446, atr14_fraction=0.0309812. ATR14 / Schluss > 10 % blockiert (heuristisches Volatilitätslimit); sonst richtungsneutral.
 
 ### 1h
 
-Kerzenstart: 2026-11-01T05:00:00+00:00; Schluss: 2026-11-01T06:00:00+00:00.
+Kerzenstart: 2026-11-01T14:00:00+00:00; Schluss: 2026-11-01T15:00:00+00:00.
 Datenqualität: Lückenlos, plausibel, aktuell und vollständig abgeschlossen; 719 abgeschlossene, 1 nicht abgeschlossene ausgeschlossen.
 Trend=NEUTRAL, Momentum=NEGATIV, Volatilität=NEUTRAL. Trend und Momentum müssen übereinstimmen; Volatilitätsveto hat Vorrang.
-- trend: **NEUTRAL** – ema20=3.95184, ema50=3.93226, ema200=4.03785. POSITIV: Schluss > EMA20 > EMA50 > EMA200; NEGATIV: umgekehrt; sonst NEUTRAL.
-- momentum: **NEGATIV** – rsi14=47.1871, macd=0.0135763, macd_signal=0.0231329, macd_histogram=-0.00955667. POSITIV: RSI > 50 und MACD-Histogramm > 0; NEGATIV: beide darunter; sonst NEUTRAL.
-- volatility: **NEUTRAL** – atr14=0.0480251, atr14_fraction=0.0122363. ATR14 / Schluss > 10 % blockiert (heuristisches Volatilitätslimit); sonst richtungsneutral.
+- trend: **NEUTRAL** – ema20=3.93555, ema50=3.92992, ema200=4.028. POSITIV: Schluss > EMA20 > EMA50 > EMA200; NEGATIV: umgekehrt; sonst NEUTRAL.
+- momentum: **NEGATIV** – rsi14=47.3279, macd=-0.00277173, macd_signal=0.00324828, macd_histogram=-0.00602001. POSITIV: RSI > 50 und MACD-Histogramm > 0; NEGATIV: beide darunter; sonst NEUTRAL.
+- volatility: **NEUTRAL** – atr14=0.0387745, atr14_fraction=0.00988514. ATR14 / Schluss > 10 % blockiert (heuristisches Volatilitätslimit); sonst richtungsneutral.
 
 ### 15m
 
-Kerzenstart: 2026-11-01T06:30:00+00:00; Schluss: 2026-11-01T06:45:00+00:00.
+Kerzenstart: 2026-11-01T15:00:00+00:00; Schluss: 2026-11-01T15:15:00+00:00.
 Datenqualität: Lückenlos, plausibel, aktuell und vollständig abgeschlossen; 719 abgeschlossene, 1 nicht abgeschlossene ausgeschlossen.
 Trend=NEUTRAL, Momentum=NEGATIV, Volatilität=NEUTRAL. Trend und Momentum müssen übereinstimmen; Volatilitätsveto hat Vorrang.
-- trend: **NEUTRAL** – ema20=3.94411, ema50=3.95628, ema200=3.93166. POSITIV: Schluss > EMA20 > EMA50 > EMA200; NEGATIV: umgekehrt; sonst NEUTRAL.
-- momentum: **NEGATIV** – rsi14=39.1702, macd=-0.0132655, macd_signal=-0.011573, macd_histogram=-0.0016925. POSITIV: RSI > 50 und MACD-Histogramm > 0; NEGATIV: beide darunter; sonst NEUTRAL.
-- volatility: **NEUTRAL** – atr14=0.0175582, atr14_fraction=0.00448633. ATR14 / Schluss > 10 % blockiert (heuristisches Volatilitätslimit); sonst richtungsneutral.
+- trend: **NEUTRAL** – ema20=3.92485, ema50=3.93232, ema200=3.9293. POSITIV: Schluss > EMA20 > EMA50 > EMA200; NEGATIV: umgekehrt; sonst NEUTRAL.
+- momentum: **NEGATIV** – rsi14=45.1616, macd=-0.00241524, macd_signal=-0.00216381, macd_histogram=-0.000251435. POSITIV: RSI > 50 und MACD-Histogramm > 0; NEGATIV: beide darunter; sonst NEUTRAL.
+- volatility: **NEUTRAL** – atr14=0.0128783, atr14_fraction=0.00328872. ATR14 / Schluss > 10 % blockiert (heuristisches Volatilitätslimit); sonst richtungsneutral.
 
 ## Methodische Grenzen
 
